@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -xe
+
+bucket=$1
+[[ -z $bucket ]] && echo 'bucket not provided' >&2 && exit 1
+
+timestamp=$(date +%Y-%m-%dT%H%M)
+bucket_folder=$(date +%Y-%m)
+
+/usr/bin/docker exec kv_app_1 sqlite3 /data/sqlite/keithvaluation.db ".backup /data/sqlite/keithvaluation.db.bak"
+backup_file=$(/usr/bin/docker volume inspect -f "{{.Mountpoint}}" kv_database)/sqlite/keithvaluation.db.bak
+
+/usr/local/bin/aws s3 cp $backup_file s3://${bucket}/${bucket_folder}/${timestamp}.db
+rm $backup_file

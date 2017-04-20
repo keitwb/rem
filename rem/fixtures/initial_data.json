@@ -1,0 +1,34 @@
+[
+    {
+        "fields": {
+            "name": "Pender",
+            "state": "NC"
+        },
+        "model": "keithvaluation.county",
+        "pk": 1
+    },
+    {
+        "fields": {
+            "name": "Cumberland",
+            "state": "NC"
+        },
+        "model": "keithvaluation.county",
+        "pk": 2
+    },
+    {
+        "fields": {
+            "name": "Bladen",
+            "state": "NC"
+        },
+        "model": "keithvaluation.county",
+        "pk": 3
+    },
+    {
+        "fields": {
+            "name": "Robeson",
+            "state": "NC"
+        },
+        "model": "keithvaluation.county",
+        "pk": 4
+    }
+]

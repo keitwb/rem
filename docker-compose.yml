@@ -1,0 +1,30 @@
+version: '2'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    volumes:
+      - "database:/data"
+      - "media:/media"
+
+  nginx_http: &nginx
+    build:
+      context: &nginx_context docker/nginx
+      args:
+        PROTOCOL: http
+    depends_on:
+      - app
+    volumes_from:
+      - app
+
+  nginx_https:
+    <<: *nginx
+    build:
+      context: *nginx_context
+      args:
+        PROTOCOL: https
+
+volumes:
+  database: {}
+  media: {}

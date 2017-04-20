@@ -1,0 +1,16 @@
+---
+galaxy_info:
+  author: Quoin, Inc.
+  description: Installs Docker and docker-compose for Debian Jessie
+  company: Quoin, Inc.
+  license: MIT
+  min_ansible_version: 2.0
+  platforms:
+  - name: Debian
+    versions:
+    - jessie
+  galaxy_tags:
+    - docker
+    - installer
+    - debian
+dependencies: []

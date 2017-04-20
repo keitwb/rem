@@ -1,0 +1,23 @@
+---
+- name: Install AWS CLI tool
+  pip: name=awscli version=1.9.17 state=present
+
+- name: Install DB Backup Script
+  copy: src=backup-db dest=/usr/local/bin/backup-db mode=0755
+- name: Install Media Backup Script
+  copy: src=backup-media dest=/usr/local/bin/backup-media mode=0755
+
+- cron:
+    name: Nightly DB Backup
+    hour: 0
+    minute: 10
+    job: "/usr/local/bin/backup-db {{ database_backup_bucket }} >> /var/log/db-backup.log"
+    state: present
+  when: database_backup_bucket | default(False)
+- cron:
+    name: Nightly Media Backup
+    hour: 0
+    minute: 15
+    job: "/usr/local/bin/backup-media {{ media_backup_bucket }} >> /var/log/media-backup.log"
+    state: present
+  when: media_backup_bucket | default(False)

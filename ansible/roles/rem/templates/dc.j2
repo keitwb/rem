@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export COMPOSE_PROJECT_NAME=rem
+export DC_OVERRIDE_FILE=/etc/docker-compose.rem.yml
+
+exec /srv/rem/dc $@

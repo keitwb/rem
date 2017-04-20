@@ -1,0 +1,29 @@
+Hunting leases can be for multiple tracts
+
+Property types:
+  - Office buildings
+  - Vacant Land
+  - Hunting Land
+  - Industrial buildings
+
+- Upload documents with type (e.g. insurance, building plans, maintenance
+  related)
+
+- Property:
+ - Name
+ - Desc.
+ - County
+ - Owners (including percentage owned)
+ - Address
+ - PIN number(s)
+ - Supporting docs
+ - Contacts
+
+- Insurance policy
+ - Can span multiple properties
+
+- Leases:
+ - Term (start, end date)
+ - Tenants (possible multiple per lease)
+ - Property (multiple parcels possible)
+ - Supporting docs

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+SCRIPTDIR=$( cd $(dirname $0) ; pwd -P )
+
+exec docker-compose -p rem -f $SCRIPTDIR/docker-compose.yml -f $SCRIPTDIR/docker-compose.dev.yml $@
