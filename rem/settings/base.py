@@ -44,7 +44,6 @@ TEMPLATES = [{
     'OPTIONS': {
         'debug': DEBUG,
         'context_processors': (
-            'django.core.context_processors.media',
             'django.contrib.auth.context_processors.auth',
             'django.contrib.messages.context_processors.messages',
         ),
@@ -56,7 +55,7 @@ TEMPLATES = [{
 
 ROOT_URLCONF = 'rem.urls'
 
-WSGI_APPLICATION = 'keithvaluation.wsgi.application'
+WSGI_APPLICATION = 'rem.wsgi.application'
 
 
 # Database

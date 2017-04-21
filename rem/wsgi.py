@@ -1,5 +1,5 @@
 """
-WSGI config for keithvaluation project.
+WSGI config for rem project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

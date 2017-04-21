@@ -45,14 +45,28 @@ class Note(models.Model):
         return self.note
 
 
+class Contact(models.Model):
+    name = models.CharField(max_length=512, help_text="Full name of person or company")
+    phone = lf_models.PhoneNumberField(max_length=128, null=True, blank=True)
+    address = models.CharField(max_length=512, null=True, blank=True)
+    city = models.CharField(max_length=128, null=True, blank=True)
+    state = lf_models.USStateField(null=True, blank=True)
+    zipcode = lf_models.USZipCodeField(null=True, blank=True)
+
+    notes = GenericRelation(Note)
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
 class Property(models.Model):
     class Meta:
         verbose_name_plural = "properties"
 
     name = models.CharField(max_length=256,
                                      help_text="A short name for the property")
-    description = models.TextField(
-        help_text="A longer description of the property.")
+    description = models.TextField(help_text="A longer description of the property.")
 
     address = models.CharField(null=True, blank=True, max_length=1024)
     city = models.CharField(null=True, blank=True, max_length=128)
@@ -66,9 +80,8 @@ class Property(models.Model):
         'Residential',
     ])
 
-    prop_type = models.CharField(max_length=32, choices=PROP_TYPE_CHOICES)
+    prop_type = models.CharField("Property Type", max_length=32, choices=PROP_TYPE_CHOICES)
 
-    other_owners = models.ManyToManyField('Contact', related_name="properties")
     percent_owned = models.DecimalField(max_digits=6, decimal_places=3,
                                         help_text="The percentage that we own together")
 
@@ -87,6 +100,7 @@ class Property(models.Model):
 
     documents = GenericRelation(Document)
     notes = GenericRelation(Note)
+    contacts = GenericRelation(Contact)
 
     @property
     def leased(self):
@@ -99,17 +113,6 @@ class Property(models.Model):
     @property
     def latest_lease(self):
         return self.leases.all().order_by('-lease_end_date').first()
-
-
-class Contact(models.Model):
-    name = models.CharField(max_length=512, help_text="Full name of person or company")
-    phone = lf_models.PhoneNumberField(max_length=128, null=True, blank=True)
-    address = models.CharField(max_length=512, null=True, blank=True)
-    city = models.CharField(max_length=128, null=True, blank=True)
-    state = lf_models.USStateField(null=True, blank=True)
-    zipcode = lf_models.USZipCodeField(null=True, blank=True)
-
-    notes = GenericRelation(Note)
 
 
 class Lease(models.Model):
