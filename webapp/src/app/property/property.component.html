@@ -1,0 +1,8 @@
+<form [formGroup]="propForm" (ngSubmit)="onSubmit()" novalidate>
+  <div>
+    <h2 *ngIf="!editing">{{ prop.name }}</h2>
+    <input *ngIf="editing" formControlName="name">
+    <button *ngIf="editing" type="submit">Save</button>
+    <p *ngIf="editing">Cancel</p>
+  </div>
+</form>

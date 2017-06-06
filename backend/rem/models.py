@@ -23,6 +23,7 @@ class Document(models.Model):
     file = models.FileField(help_text="The document itself (e.g. a Word doc, PDF, etc.)")
     description = models.TextField(null=True, blank=True)
     created_date = models.DateField(auto_now_add=True)
+    modified_date = models.DateField(auto_now=True)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -51,7 +52,7 @@ class Contact(models.Model):
     address = models.CharField(max_length=512, null=True, blank=True)
     city = models.CharField(max_length=128, null=True, blank=True)
     state = lf_models.USStateField(null=True, blank=True)
-    zipcode = lf_models.USZipCodeField(null=True, blank=True)
+    zipcode = models.CharField(max_length=5, null=True, blank=True)
 
     notes = GenericRelation(Note)
 
@@ -118,21 +119,34 @@ class Property(models.Model):
 class Lease(models.Model):
     description = models.TextField()
     properties = models.ManyToManyField('Property', related_name='leases')
-    lessee = models.ForeignKey('Contact', help_text="Who the property is leased to")
     start_date = models.DateField(help_text="The start date of the lease")
     end_date = models.DateField(help_text="The end date of the lease")
-    monthly_rate = models.IntegerField(help_text="The dollar amount of the rent per month")
+    rate = models.IntegerField(help_text="The dollar amount of the rent per rate period")
 
-    documents = GenericRelation(Document)
+    RATE_PERIOD_CHOICES = ((x, x) for x in [
+        'Monthly',
+        'Quarterly',
+        'Yearly',
+    ])
+
+    rate_period = models.CharField('Rate Period', max_length=32, default='Monthly',
+                                   choices=RATE_PERIOD_CHOICES)
+
+    lessees = GenericRelation('Contact', help_text="Who the property is leased to")
+    documents = GenericRelation(Document, help_text="Documents such as the lease")
     notes = GenericRelation(Note)
 
 
 class LeaseOption(models.Model):
     lease = models.ForeignKey('Lease', related_name='options')
-    montly_rate = models.IntegerField(null=True, blank=True,
+    rate = models.IntegerField(null=True, blank=True,
                                help_text="The amount in dollars of the rent during the option period")
     start_date = models.DateField()
     end_date = models.DateField()
+
+    @property
+    def rate_period(self):
+        return self.lease.rate_period
 
     notes = GenericRelation(Note)
 

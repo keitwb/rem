@@ -23,3 +23,11 @@ services:
     volumes:
       - "./dev-ssl:/etc/letsencrypt/live/rem.dev"
 
+  static:
+    environment:
+      HOSTNAME: rem-static.dev
+    ports:
+      - "127.0.15.2:443:443"
+    volumes:
+      - "./dev-ssl:/etc/letsencrypt/live/rem.dev"
+

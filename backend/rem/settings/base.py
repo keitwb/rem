@@ -14,16 +14,11 @@ ALLOWED_HOSTS = [SERVER_HOSTNAME]
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.sites',
-    'django.contrib.sitemaps',
-    'django.contrib.staticfiles',
     'django_extensions',
-    'grappelli',
-    'django.contrib.admin',
+    'rest_framework',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'rem'
 )
 
@@ -39,19 +34,11 @@ MIDDLEWARE_CLASSES = (
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-TEMPLATES = [{
-    'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'OPTIONS': {
-        'debug': DEBUG,
-        'context_processors': (
-            'django.contrib.auth.context_processors.auth',
-            'django.contrib.messages.context_processors.messages',
-        ),
-        'loaders': [
-            'django.template.loaders.app_directories.Loader',
-        ],
-    },
-}]
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ]
+}
 
 ROOT_URLCONF = 'rem.urls'
 
