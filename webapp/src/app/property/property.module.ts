@@ -10,7 +10,7 @@ import { PropertyListComponent } from './property-list.component';
 import { PropertyService } from './property-service';
 
 const routes: Routes = [
-  { path: 'property/:id',   component: PropertyComponent },
+  { path: 'properties/:id', component: PropertyComponent },
   { path: 'properties',     component: PropertyListComponent },
   //{ path: 'properties/new', component: PropertyCreateComponent },
   { path: '', redirectTo: '/properties', pathMatch: 'full' },

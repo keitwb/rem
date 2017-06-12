@@ -1,33 +1,19 @@
 version: '2'
 services:
-  app: &app
-    command: "tail -f /dev/null"
-    volumes:
-     - ".:/app"
-    environment: &env
-      DJANGO_DEBUG: 'y'
-      SITE_HOSTNAME: &app_host 'rem.dev'
-      DJANGO_STATIC_HOSTNAME: 'rem.dev'
-      DJANGO_STATIC_PATH: '/static/'
-  nginx_http:
+  restheart:
+    ports:
+      - "127.0.15.1:8080:8080"
+    environment:
+      MONGO_USERNAME: admin
+      MONGO_PASSWORD: password
+
+  nginx:
+    environment:
+      NGINX_HOSTNAME: rem.dev
+      NO_LETSENCRYPT: "true"
     ports:
       - "127.0.15.1:80:80"
-    environment: &nginx_env
-      APP_HOSTNAME: *app_host
-
-  nginx_https:
-    environment:
-      <<: *nginx_env
-    ports:
       - "127.0.15.1:443:443"
     volumes:
       - "./dev-ssl:/etc/letsencrypt/live/rem.dev"
-
-  static:
-    environment:
-      HOSTNAME: rem-static.dev
-    ports:
-      - "127.0.15.2:443:443"
-    volumes:
-      - "./dev-ssl:/etc/letsencrypt/live/rem.dev"
-
+      - "./webapp/tmp:/build"

@@ -1,0 +1,81 @@
+user www-data;
+worker_processes auto;
+
+error_log /dev/stderr warn;
+
+include /etc/nginx/modules/*.conf;
+
+events {
+  worker_connections 1024;
+}
+
+http {
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+
+  tcp_nodelay on;
+
+  gzip on;
+  gzip_vary on;
+  gzip_static on;
+
+  ssl_session_cache shared:SSL:2m;
+
+  access_log /dev/stdout;
+  error_log /dev/stderr warn;
+
+  resolver 8.8.8.8;
+
+  # HTTPS server
+  server {
+    listen 443 ssl;
+    server_name {{ .Env.NGINX_HOSTNAME }};
+
+    gzip on;
+
+    # Fallback certs to satisfy nginx startup
+    ssl_certificate /etc/letsencrypt/live/{{ .Env.NGINX_HOSTNAME }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ .Env.NGINX_HOSTNAME }}/privkey.pem;
+
+    location / {
+        root /build/dist;
+        try_files $uri /index.html;
+    }
+
+    location /static {
+        alias /build/dist;
+        expires max;
+    }
+
+    location /db/ {
+        proxy_pass_header Server;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Scheme $scheme;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_connect_timeout 10;
+        proxy_read_timeout 120;
+        proxy_pass http://restheart:8080/;
+    }
+
+  }
+
+  # HTTP server
+  server {
+    listen 80;
+
+    access_log /dev/stdout;
+    error_log /dev/stderr;
+
+    # Endpoint used for performing domain verification with Let's Encrypt.
+    location /.well-known/acme-challenge/ {
+      root /var/www;
+    }
+
+    # Redirect to HTTPS for everything else
+    location / {
+      rewrite ^(.*)$ https://$host:443$1 redirect;
+    }
+  }
+}

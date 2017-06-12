@@ -1,30 +1,41 @@
 version: '2'
 services:
-  app:
-    build:
-      context: .
-      dockerfile: backend/docker/app/Dockerfile
-    volumes:
-      - "database:/data"
-      - "media:/media"
-
-  nginx_http: &nginx
-    build:
-      context: &nginx_context docker/nginx
-      args:
-        PROTOCOL: http
+  restheart:
+    build: docker/restheart
     depends_on:
-      - app
-    volumes_from:
-      - app
+      - mongodb
+    networks:
+      - db
+      - frontend
 
-  nginx_https:
-    <<: *nginx
-    build:
-      context: *nginx_context
-      args:
-        PROTOCOL: https
+  mongodb:
+    image: mongo:3.4
+    command: "mongod --replSet rs0"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - db
+
+  mongodb-setup:
+    build: docker/mongodb-setup
+    depends_on:
+      - mongodb
+    networks:
+      - db
+    restart: on-failure
+
+  # Acts as a reverse proxy and does auth for RESTheart
+  # Also serves static content
+  nginx:
+    build: docker/nginx
+    depends_on:
+      - restheart
+    networks:
+      - frontend
 
 volumes:
-  database: {}
-  media: {}
+  mongodata: {}
+
+networks:
+  db: {}
+  frontend: {}

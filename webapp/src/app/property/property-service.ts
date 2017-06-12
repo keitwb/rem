@@ -12,4 +12,8 @@ export class PropertyService {
   getProperties(): Observable<Property[]> {
     return of([<Property>{id: 1, name: 'River Tract'}]);
   }
+
+  getProperty(id: String): Observable<Property> {
+    return of(<Property>{id: 1, name: 'River Tract'});
+  }
 }
