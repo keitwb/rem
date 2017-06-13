@@ -1,50 +1,61 @@
 export interface County {
-  name:  String;
-  state: String;
+  kind: "county";
+  id:    number;
+  name:  string;
+  state: string;
 }
 
 export interface Lease {
-  description: String;
+  kind: "lease";
+  id:          number;
+  description: string;
   properties:  Property[];
   startDate:   Date;
   endDate:     Date;
-  rate:        String;
-  ratePeriod:  String;
+  rate:        string;
+  ratePeriod:  string;
   lessees:     Contact[];
   documents:   Document[];
   notes:       Note[];
 }
 
 export interface Property {
-  id:           Number;
-  name:         String;
-  description?: String;
+  kind: "property";
+  id:           number;
+  name:         string;
+  description?: string;
   leases?:      Lease[];
   county?:      County;
-  acreage?:     Number;
-  propType?:    String;
+  acreage?:     number;
+  propType?:    string;
 }
 
 export interface Document {
-  title:   String;
-  url:     String;
-  description: String;
-  createdDate: Date;
+  kind: "document";
+  id:           number;
+  title:        string;
+  url:          string;
+  description:  string;
+  createdDate:  Date;
   modifiedDate: Date;
 }
 
 export interface Note {
-  note:         String;
+  kind: "note";
+  id:           number;
+  note:         string;
   createdDate:  Date;
   modifiedDate: Date;
 }
 
 export interface Contact {
-  name:      String;
-  phone?:    String;
-  address?:  String;
-  city?:     String;
-  state?:    String;
-  zipcode?:  String;
+  kind: "contact";
+  id:        number;
+  name:      string;
+  phone?:    string;
+  address?:  string;
+  city?:     string;
+  state?:    string;
+  zipcode?:  string;
   notes?:    Note[];
 }
