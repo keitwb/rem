@@ -1,4 +1,4 @@
-FROM softinstigate/restheart:3.0.3
+FROM softinstigate/restheart:3.1.1
 
 ENTRYPOINT ["/bin/bash", "/opt/entrypoint.sh"]
 

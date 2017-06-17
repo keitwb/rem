@@ -1,38 +1,54 @@
-export interface County {
-  kind: "county";
-  id:    number;
-  name:  string;
-  state: string;
+
+export interface Note {
+  kind: "note";
+  id:           string;
+  note:         string;
+  createdDate:  Date;
+  modifiedDate: Date;
 }
 
 export interface Lease {
   kind: "lease";
-  id:          number;
-  description: string;
-  properties:  Property[];
-  startDate:   Date;
-  endDate:     Date;
-  rate:        string;
-  ratePeriod:  string;
-  lessees:     Contact[];
-  documents:   Document[];
-  notes:       Note[];
+  id:           string;
+  description:  string;
+  properties:   Property[];
+  startDate:    Date;
+  endDate:      Date;
+  rate:         string;
+  ratePeriod:   string;
+  lessees:      Contact[];
+  documents:    Document[];
+  notes:        Note[];
+  createdDate:  Date;
+  modifiedDate: Date;
 }
 
 export interface Property {
   kind: "property";
-  id:           number;
-  name:         string;
-  description?: string;
-  leases?:      Lease[];
-  county?:      County;
-  acreage?:     number;
-  propType?:    string;
+  id:                 string;
+  name:               string;
+  description?:       string;
+  leases?:            Lease[];
+  county?:            string;
+  state?:             string;
+  acreage?:           number;
+  propType?:          string;
+  percentOwned?:      number;
+  pinNumbers?:        string[];
+  latitude?:          string;
+  longitude?:         string;
+  boundaryPoints?:    number[];
+  desiredRent?:       number;
+  desiredSalesPrice?: number;
+  tryingToSell?:      boolean;
+  notes:              Note[];
+  createdDate:        Date;
+  modifiedDate:       Date;
 }
 
 export interface Document {
   kind: "document";
-  id:           number;
+  id:           string;
   title:        string;
   url:          string;
   description:  string;
@@ -40,19 +56,11 @@ export interface Document {
   modifiedDate: Date;
 }
 
-export interface Note {
-  kind: "note";
-  id:           number;
-  note:         string;
-  createdDate:  Date;
-  modifiedDate: Date;
-}
-
 export interface Contact {
   kind: "contact";
-  id:        number;
+  id:        string;
   name:      string;
-  phone?:    string;
+  phones?:   string[];
   address?:  string;
   city?:     string;
   state?:    string;

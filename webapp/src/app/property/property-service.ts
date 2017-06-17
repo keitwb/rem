@@ -1,3 +1,4 @@
+import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import { Injectable } from '@angular/core';
@@ -12,17 +13,13 @@ import { Property, County, Lease, Document, Note, Contact } from './models';
 type Model = Property | County | Lease | Document | Note | Contact;
 type CacheEntry = {etag: string, previous: Model};
 
-@Injectable()
-export class PropertyService {
-
+class MongoVersioningClient {
   cache: { [index:string]: { [index:string]: CacheEntry } };
   httpOptions: RequestOptions;
 
-  constructor (private http: Http) {
-    this.cache = {
-      property: {},
-      county: {},
-    };
+  constructor(private http: Http, private kindToPath: {[index:string]: string}) {
+    // Init empty cache
+    this.cache = _.mapValues(kindToPath, _ => <{ [index: string]: CacheEntry }>{});
 
     const headers = new Headers({ 'Content-Type': 'application/json' });
     this.httpOptions = new RequestOptions({headers});
@@ -37,10 +34,10 @@ export class PropertyService {
   }
 
   private base_path(kind: string): string {
-    switch (kind) {
-      case "property": return "/properties";
-      case "county": return "/counties";
+    if (!(kind in this.kindToPath)) {
+      throw `Model kind $kind not in client map: $this.kindToPath`;
     }
+    return this.kindToPath[kind];
   }
 
   private extractSingleFromResponse(kind: string, res: Response): Model {
@@ -66,24 +63,24 @@ export class PropertyService {
     return _.map(data._embedded, _.partial(this.processSingle, kind));
   }
 
-  private updateCacheForUpdate(model: Model, res: Response) {
-    this.cache[model.kind][model.id] = {
+  private updateCacheForUpdate(model: Model, res: Response): Model {
+    let id: string;
+    if (res.status == 201) {
+      id = res.headers.get("Location");
+      model.id = id;
+    }
+    else {
+      id = model.id;
+    }
+
+    if (!id) throw `Model ID not found: $model; $res`;
+
+    this.cache[model.kind][id] = {
       etag: res.headers.get('ETag'),
       previous: model,
     };
-  }
 
-  // `kind` should be one of the `kind` attributes of a Model.  It is a hack
-  // needed in order to get the type of the model since TS erases all types
-  // upon translation to JS.
-  private get_list(kind: string): Observable<Model[]> {
-    return this.http.get(this.base_path(kind)).
-      map(_.partial(this.extractListFromResponse, kind));
-  }
-
-  private get_one(id: string, kind: string): Observable<Model> {
-    return this.http.get(`${this.base_path(kind)}/${id}`).
-      map(_.partial(this.extractSingleFromResponse, kind));
+    return model;
   }
 
   private raiseTextError(res: Response): never {
@@ -104,31 +101,62 @@ export class PropertyService {
     return this.http.patch(path, JSON.stringify(body), this.httpOptions).catch(this.raiseTextError);
   }
 
-  create(obj: Model): Observable<string> {
+  // `kind` should be one of the `kind` attributes of a Model.  It is a hack
+  // needed in order to get the type of the model since TS erases all types
+  // upon translation to JS.
+  get_list(kind: string, params: {page: number, count: number, sort_by: string}): Observable<Model[]> {
+    const url = `${this.base_path(kind)}?page=${params.page}&pagesize=${params.count}&sort_by=${params.sort_by}`;
+
+    return this.http.get(url).map(_.partial(this.extractListFromResponse, kind));
+  }
+
+  get_one(id: string, kind: string): Observable<Model> {
+    return this.http.get(`${this.base_path(kind)}/${id}`).
+      map(_.partial(this.extractSingleFromResponse, kind));
+  }
+
+  create<T extends Model>(obj: T): Observable<T> {
     const path = `${this.base_path(obj.kind)}/${obj.id}`;
     const bodyObj = {
                       "current": obj,
                       "prev": [],
                     };
 
-    return this.post(path, bodyObj).do(_.partial(this.updateCacheForUpdate, obj));
+    return this.post(path, bodyObj).map(_.partial(this.updateCacheForUpdate, obj));
   }
 
-  update(obj: Model): Observable<string> {
+  update<T extends Model>(obj: T): Observable<T> {
     const path = `${this.base_path(obj.kind)}/${obj.id}?etag=${this.getEtag(obj)}`;
     const bodyObj = {
                    "$set": {"current": obj },
                    "$push": {"prev": this.getPrevious(obj)}
                  };
 
-    return this.patch(path, bodyObj).do(_.partial(this.updateCacheForUpdate, obj));
+    return this.patch(path, bodyObj).map(_.partial(this.updateCacheForUpdate, obj));
+  }
+}
+
+@Injectable()
+export class PropertyService {
+  kindToPath = {
+    property: "/properties",
+    county: "/counties",
+  }
+  client: MongoVersioningClient
+
+  constructor(private http: Http) {
+    this.client = new MongoVersioningClient(http, this.kindToPath);
   }
 
-  getProperties(): Observable<Property[]> {
-    return this.get_list((<Property>{}).kind);
+  getProperties({page = 1, count = 10, sort_by = 'name'} = {}): Observable<Property[]> {
+    return this.client.get_list((<Property>{}).kind, {page, count, sort_by});
   }
 
   getProperty(id: string): Observable<Property> {
-    return this.get_one(id, (<Property>{}).kind);
+    return this.client.get_one(id, (<Property>{}).kind);
+  }
+
+  create<T extends Model>(obj: T): Observable<T> {
+    return this.client.create(obj);
   }
 }
