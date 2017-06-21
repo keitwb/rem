@@ -1,20 +1,205 @@
-if (rs.status()["ok"] == 0) {
-  rs.initiate();
+// All commands are idempotent or guarded so that this script can be run
+// multiple times over the same database.
+
+function setRelations(coll, rels) {
+  var metaColl = "_properties";
+  var propDocId = metaColl + "." + coll;
+
+  // RESTHeart metadata colletion
+  rem.createCollection(metaColl);
+
+  // Drop relations
+  rem.getCollection(metaColl).updateOne(
+    { _id: propDocId },
+    { $unset: { rels: "" }});
+
+  // Add back relations
+  rem.getCollection(metaColl).updateOne(
+    { _id: propDocId },
+    { $set: { name: coll },
+      $set: { rels: rels }
+    },
+    { upsert: true });
 }
 
-rem = db.getSiblingDB('rem');
-colls = rem.getCollectionNames();
+function main() {
+  rs.initiate();
+  sleep(2500);
 
-rem.createCollection("properties");
+  rem = connect('mongodb:27017/rem');
 
-rem.runCommand({
-   collMod:"properties",
-   validator:{},
-   validationLevel:"strict"
-});
+  colls = rem.getCollectionNames();
 
-rem.properties.createIndex({ name: "text", description: "text", county: "text", state: "text" });
+  // Properties
+  rem.createCollection("properties");  // This is idempotent
 
-rem.createCollection("_properties");
-rem.getCollection("_properties").insert({"_id": "_properties.properties",
-                                         rels: [ rel: "leases", type: "MANY_TO_MANY", "target-coll": "leases"
+  rem.runCommand({
+     collMod:"properties",
+     validator:{ $or: [
+       { "current.propType": { $in: ["land", "commercial", "residential"] } }
+     ]},
+     validationLevel:"strict"
+  });
+
+  rem.properties.dropIndex("text-search");
+  rem.properties.createIndex({
+    name: "text",
+    description: "text",
+    county: "text",
+    state: "text",
+  }, {
+    name: "text-search",
+    weights: {
+      name: 100,
+      description: 50,
+      county: 10,
+      state: 10,
+    }
+  });
+
+  setRelations("properties", [
+    {
+      rel: "leases",
+      type: "MANY_TO_MANY",
+      role: "OWNING",
+      "target-coll": "leases",
+      "ref-field": "$.current.leases",
+    },
+    {
+      rel: "contacts",
+      type: "MANY_TO_MANY",
+      role: "OWNING",
+      "target-coll": "contacts",
+      "ref-field": "$.current.contacts"
+    },
+    {
+      rel: "notes",
+      type: "ONE_TO_MANY",
+      role: "OWNING",
+      "target-coll": "notes",
+      "ref-field": "$.current.notes",
+    },
+  ]);
+
+  // Leases
+  rem.createCollection("leases");
+
+  rem.runCommand({
+     collMod:"leases",
+     validator:{},
+     validationLevel:"strict"
+  });
+
+  rem.leases.dropIndex("text-search");
+  rem.leases.createIndex({ description: "text" }, {name: "text-search"});
+  setRelations("leases", [
+    {
+      rel: "properties",
+      type: "MANY_TO_MANY",
+      role: "INVERSE",
+      "target-coll": "properties",
+      "ref-field": "$.current.leases",
+    },
+    {
+      rel: "lessees",
+      type: "MANY_TO_MANY",
+      role: "OWNING",
+      "target-coll": "contacts",
+      "ref-field": "$.current.lessees"
+    }
+  ]);
+
+  // Contacts
+  rem.createCollection("contacts");
+
+  rem.runCommand({
+     collMod:"contacts",
+     validator:{},
+     validationLevel:"strict"
+  });
+
+  rem.contacts.dropIndex("text-search");
+  rem.contacts.createIndex({ name: "text" }, {name: "text-search"});
+  setRelations("contacts", [
+    {
+      rel: "properties",
+      type: "MANY_TO_MANY",
+      role: "INVERSE",
+      "target-coll": "properties",
+      "ref-field": "$.current.contacts",
+    },
+    {
+      rel: "leases",
+      type: "MANY_TO_MANY",
+      role: "INVERSE",
+      "target-coll": "leases",
+      "ref-field": "$.current.lessees"
+    }
+  ]);
+
+  // Notes
+  rem.createCollection("notes");
+
+  rem.runCommand({
+     collMod:"notes",
+     validator:{},
+     validationLevel:"strict"
+  });
+
+  rem.notes.dropIndex("text-search");
+  rem.notes.createIndex({ name: "text", note: "text" }, {name: "text-search"});
+  setRelations("notes", [
+    //{
+      //rel: "properties",
+      //type: "MANY_TO_ONE",
+      //role: "INVERSE",
+      //"target-coll": "properties",
+      //"ref-field": "$.current.notes",
+    //},
+    {
+      rel: "leases",
+      type: "MANY_TO_ONE",
+      role: "INVERSE",
+      "target-coll": "leases",
+      "ref-field": "$.notes"
+    },
+    {
+      rel: "contacts",
+      type: "MANY_TO_ONE",
+      role: "INVERSE",
+      "target-coll": "contacts",
+      "ref-field": "$.notes"
+    }
+  ]);
+
+  // Media (docs, images, etc.)
+  rem.createCollection("media.files");
+
+  rem.runCommand({
+     collMod:"media.files",
+     validator:{},
+     validationLevel:"strict"
+  });
+
+  rem.media.files.dropIndex("name-date");
+  rem.media.files.createIndex({ filename: 1, uploadDate: 1 }, {name: "name-date"});
+  setRelations("media.files", [
+    {
+      rel: "properties",
+      type: "MANY_TO_MANY",
+      role: "INVERSE",
+      "target-coll": "properties",
+      "ref-field": "$.media",
+    },
+    {
+      rel: "leases",
+      type: "MANY_TO_MANY",
+      role: "INVERSE",
+      "target-coll": "leases",
+      "ref-field": "$.media"
+    }
+  ]);
+
+}
+
+main();

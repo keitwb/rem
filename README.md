@@ -16,3 +16,7 @@ I intend to get JWT tokens from [Auth0](https://manage.auth0.com/), which
 manages the user accounts (the basic service is free for under 7000 users).
 Any other JWT service could be used though, as long as the OpenResty instance
 is configured with its secret.
+
+## TODO
+Use https://github.com/flitbit/diff to determine changes between versions of
+docs.

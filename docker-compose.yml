@@ -4,38 +4,29 @@ services:
     build: docker/restheart
     depends_on:
       - mongodb
-    networks:
-      - db
-      - frontend
 
   mongodb:
     image: mongo:3.4
     command: "mongod --replSet rs0"
     volumes:
       - mongodata:/data/db
-    networks:
-      - db
 
   mongodb-setup:
     build: docker/mongodb-setup
     depends_on:
       - mongodb
-    networks:
-      - db
     restart: on-failure
 
-  # Acts as a reverse proxy and does auth for RESTheart
-  # Also serves static content
+  # Acts as a reverse proxy for pretty much everything
   nginx:
     build: docker/nginx
     depends_on:
       - restheart
-    networks:
-      - frontend
+      - webapp
+
+  # Builds and serves static content
+  webapp:
+    build: webapp
 
 volumes:
   mongodata: {}
-
-networks:
-  db: {}
-  frontend: {}

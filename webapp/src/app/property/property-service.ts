@@ -7,30 +7,37 @@ import { Observable } from 'rxjs/Observable';
 import { of }         from 'rxjs/observable/of';
 import * as _         from 'lodash';
 
-import { Property, County, Lease, Document, Note, Contact } from './models';
+import { Property, Lease, Media, Note, Contact, User } from './models';
 
 
-type Model = Property | County | Lease | Document | Note | Contact;
+type Model = Property | Lease | Media | Note | Contact | User;
 type CacheEntry = {etag: string, previous: Model};
 
 class MongoVersioningClient {
   cache: { [index:string]: { [index:string]: CacheEntry } };
-  httpOptions: RequestOptions;
 
   constructor(private http: Http, private kindToPath: {[index:string]: string}) {
     // Init empty cache
     this.cache = _.mapValues(kindToPath, _ => <{ [index: string]: CacheEntry }>{});
+  }
 
-    const headers = new Headers({ 'Content-Type': 'application/json' });
-    this.httpOptions = new RequestOptions({headers});
+  getRequestOptions(etag: string = null): RequestOptions {
+    const headers = new Headers({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    });
+    if (etag) {
+      headers.set("If-Match", etag);
+    }
+    return (new RequestOptions({headers}));
   }
 
   getEtag(obj: Model): string {
-    return this.cache[obj.kind][obj.id].etag;
+    return this.cache[obj.constructor["kind"]][obj.id].etag;
   }
 
   getPrevious(obj: Model): Model {
-    return this.cache[obj.kind][obj.id].previous;
+    return this.cache[obj.constructor["kind"]][obj.id].previous;
   }
 
   private base_path(kind: string): string {
@@ -66,7 +73,8 @@ class MongoVersioningClient {
   private updateCacheForUpdate(model: Model, res: Response): Model {
     let id: string;
     if (res.status == 201) {
-      id = res.headers.get("Location");
+      const href = res.headers.get("Location");
+      id = href.split("/").pop();
       model.id = id;
     }
     else {
@@ -75,7 +83,7 @@ class MongoVersioningClient {
 
     if (!id) throw `Model ID not found: $model; $res`;
 
-    this.cache[model.kind][id] = {
+    this.cache[model.constructor["kind"]][id] = {
       etag: res.headers.get('ETag'),
       previous: model,
     };
@@ -94,11 +102,11 @@ class MongoVersioningClient {
 
 
   private post(path: string, body: object): Observable<Response> {
-    return this.http.post(path, JSON.stringify(body), this.httpOptions).catch(this.raiseTextError);
+    return this.http.post(path, JSON.stringify(body), this.getRequestOptions()).catch(this.raiseTextError);
   }
 
-  private patch(path: string, body: object): Observable<Response> {
-    return this.http.patch(path, JSON.stringify(body), this.httpOptions).catch(this.raiseTextError);
+  private patch(path: string, body: object, etag: string): Observable<Response> {
+    return this.http.patch(path, JSON.stringify(body), this.getRequestOptions(etag)).catch(this.raiseTextError);
   }
 
   // `kind` should be one of the `kind` attributes of a Model.  It is a hack
@@ -116,7 +124,7 @@ class MongoVersioningClient {
   }
 
   create<T extends Model>(obj: T): Observable<T> {
-    const path = `${this.base_path(obj.kind)}/${obj.id}`;
+    const path = `${this.base_path(obj.constructor["kind"])}/${obj.id}?checkEtag`;
     const bodyObj = {
                       "current": obj,
                       "prev": [],
@@ -126,13 +134,14 @@ class MongoVersioningClient {
   }
 
   update<T extends Model>(obj: T): Observable<T> {
-    const path = `${this.base_path(obj.kind)}/${obj.id}?etag=${this.getEtag(obj)}`;
+    const path = `${this.base_path(obj.constructor["kind"])}/${obj.id}?checkEtag`;
     const bodyObj = {
                    "$set": {"current": obj },
                    "$push": {"prev": this.getPrevious(obj)}
                  };
 
-    return this.patch(path, bodyObj).map(_.partial(this.updateCacheForUpdate, obj));
+    return this.patch(path, bodyObj, this.getEtag(obj))
+               .map(_.partial(this.updateCacheForUpdate, obj));
   }
 }
 
@@ -140,7 +149,11 @@ class MongoVersioningClient {
 export class PropertyService {
   kindToPath = {
     property: "/properties",
-    county: "/counties",
+    lease: "/leases",
+    contact: "/contacts",
+    media: "/media.files",
+    note: "/notes",
+    user: "/users",
   }
   client: MongoVersioningClient
 
@@ -149,11 +162,11 @@ export class PropertyService {
   }
 
   getProperties({page = 1, count = 10, sort_by = 'name'} = {}): Observable<Property[]> {
-    return this.client.get_list((<Property>{}).kind, {page, count, sort_by});
+    return this.client.get_list(Property.kind, {page, count, sort_by});
   }
 
   getProperty(id: string): Observable<Property> {
-    return this.client.get_one(id, (<Property>{}).kind);
+    return this.client.get_one(id, Property.kind);
   }
 
   create<T extends Model>(obj: T): Observable<T> {
