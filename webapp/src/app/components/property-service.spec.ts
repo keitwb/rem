@@ -25,6 +25,5 @@ describe("PropertyService", () => {
 
   it("should get property lists", () => {
     this.service.getProperties();
-
   });
 });

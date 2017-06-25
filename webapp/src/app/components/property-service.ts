@@ -5,20 +5,19 @@ import { Injectable } from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import { of }         from 'rxjs/observable/of';
+import { Store }      from '@ngrx/store';
 import * as _         from 'lodash';
 
 import { Property, Lease, Media, Note, Contact, User } from './models';
 
 
 type Model = Property | Lease | Media | Note | Contact | User;
-type CacheEntry = {etag: string, previous: Model};
+type ModelState = { [index:string]: {etag: string, model: Model} };
+
+type SortOrdering = "asc" | "desc"
 
 class MongoVersioningClient {
-  cache: { [index:string]: { [index:string]: CacheEntry } };
-
   constructor(private http: Http, private kindToPath: {[index:string]: string}) {
-    // Init empty cache
-    this.cache = _.mapValues(kindToPath, _ => <{ [index: string]: CacheEntry }>{});
   }
 
   getRequestOptions(etag: string = null): RequestOptions {
@@ -71,7 +70,7 @@ class MongoVersioningClient {
   }
 
   private updateCacheForUpdate(model: Model, res: Response): Model {
-    let id: string;
+    let id string;
     if (res.status == 201) {
       const href = res.headers.get("Location");
       id = href.split("/").pop();
@@ -109,11 +108,11 @@ class MongoVersioningClient {
     return this.http.patch(path, JSON.stringify(body), this.getRequestOptions(etag)).catch(this.raiseTextError);
   }
 
-  // `kind` should be one of the `kind` attributes of a Model.  It is a hack
-  // needed in order to get the type of the model since TS erases all types
-  // upon translation to JS.
-  get_list(kind: string, params: {page: number, count: number, sort_by: string}): Observable<Model[]> {
-    const url = `${this.base_path(kind)}?page=${params.page}&pagesize=${params.count}&sort_by=${params.sort_by}`;
+  // `kind` should be one of the `kind` attributes of a Model.
+  get_list(kind: string, params: {page: number, count: number, sort_by: string, order: SortOrdering}): Observable<Model[]> {
+    const ordering_flag = order == "asc" ? "" : "-1";
+    const url = `${this.base_path(kind)}?page=${params.page}&pagesize=${params.count}` +
+                `&sort_by=${ordering_flag}${params.sort_by}`;
 
     return this.http.get(url).map(_.partial(this.extractListFromResponse, kind));
   }
@@ -157,12 +156,12 @@ export class PropertyService {
   }
   client: MongoVersioningClient
 
-  constructor(private http: Http) {
+  constructor(private http: Http, private store: Store<AppState>) {
     this.client = new MongoVersioningClient(http, this.kindToPath);
   }
 
-  getProperties({page = 1, count = 10, sort_by = 'name'} = {}): Observable<Property[]> {
-    return this.client.get_list(Property.kind, {page, count, sort_by});
+  getProperties({page = 1, count = 10, sort_by = 'name', order = 'asc'} = {}): Observable<Property[]> {
+    return this.client.get_list(Property.kind, {page, count, sort_by, order});
   }
 
   getProperty(id: string): Observable<Property> {
@@ -172,4 +171,6 @@ export class PropertyService {
   create<T extends Model>(obj: T): Observable<T> {
     return this.client.create(obj);
   }
+
+
 }

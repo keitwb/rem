@@ -86,7 +86,14 @@ function main() {
 
   rem.runCommand({
      collMod:"leases",
-     validator:{},
+     validator:{ $and: [
+       {
+         $or: [
+           { "options.current.leaseType": { $exists: false } },
+           { "options.current.leaseType": { $eq: "option" } },
+         ]
+       }
+     ]},
      validationLevel:"strict"
   });
 
@@ -109,18 +116,18 @@ function main() {
     }
   ]);
 
-  // Contacts
-  rem.createCollection("contacts");
+  // Parties
+  rem.createCollection("parties");
 
   rem.runCommand({
-     collMod:"contacts",
+     collMod:"parties",
      validator:{},
      validationLevel:"strict"
   });
 
   rem.contacts.dropIndex("text-search");
   rem.contacts.createIndex({ name: "text" }, {name: "text-search"});
-  setRelations("contacts", [
+  setRelations("parties", [
     {
       rel: "properties",
       type: "MANY_TO_MANY",
@@ -134,12 +141,18 @@ function main() {
       role: "INVERSE",
       "target-coll": "leases",
       "ref-field": "$.current.lessees"
-    }
+    },
+    {
+      rel: "subParties",
+      type: "MANY_TO_ONE",
+      role: "OWNING",
+      "target-coll": "parties",
+      "ref-field": "$.current.subParties",
+    },
   ]);
 
   // Notes
   rem.createCollection("notes");
-
   rem.runCommand({
      collMod:"notes",
      validator:{},

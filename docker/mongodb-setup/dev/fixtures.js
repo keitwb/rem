@@ -23,7 +23,7 @@ upsert("properties", [
       notes:        ["1", "2"],
       leases:       ["1", "2"],
       modifiedDate: new Date("2017-04-01"),
-      modifiedBy:   "ben"
+      modifiedBy:   "2"
     },
     prev: [
       {
@@ -38,7 +38,7 @@ upsert("properties", [
         pinNumbers:   null,
         notes:        ["1"],
         modifiedDate: new Date("2017-03-01"),
-        modifiedBy:   "ben"
+        modifiedBy:   "1"
       },
     ]
   },
@@ -55,7 +55,7 @@ upsert("properties", [
       pinNumbers:   ["123-45-678"],
       leases:       ["3"],
       modifiedDate: new Date("2017-05-01"),
-      modifiedBy:   "ben"
+      modifiedBy:   "2"
     },
     prev: [
       {
@@ -68,7 +68,7 @@ upsert("properties", [
         pinNumbers:   ["123-45-678"],
         leases:       [],
         modifiedDate: new Date("2017-02-01"),
-        modifiedBy:   "ben"
+        modifiedBy:   "1"
       },
     ]
   },
@@ -88,7 +88,7 @@ upsert("leases", [
       media:        ["1"],
       notes:        [],
       modifiedDate: new Date("2016-02-05"),
-      modifiedBy:   "ben",
+      modifiedBy:   "1",
     },
     prev: [
       {
@@ -101,7 +101,7 @@ upsert("leases", [
         media:        [],
         notes:        [],
         modifiedDate: new Date("2016-02-01"),
-        modifiedBy:   "ben",
+        modifiedBy:   "2",
       },
     ],
   },
@@ -115,7 +115,7 @@ upsert("leases", [
       termUnit:     "years",
       rate:         100,
       modifiedDate: new Date("2016-11-01"),
-      modifiedBy:   "ben",
+      modifiedBy:   "1",
     },
     prev: [
     ],
@@ -135,7 +135,7 @@ upsert("notes", [
       {
         note:           "Needs work.",
         modifiedDate:   new Date("2017-03-01"),
-        lastModifiedBy: "ben"
+        lastModifiedBy: "2"
       },
     ]
   },
@@ -145,9 +145,75 @@ upsert("notes", [
     current: {
       note:         "Work Completed.",
       modifiedDate: new Date("2017-04-01"),
-      modifiedBy:   "ben"
+      modifiedBy:   "1"
     },
     prev: []
+  }
+]);
+
+upsert("contacts", [
+  {
+    _id: "1",
+    createdDate: new Date("2017-01-01"),
+    current: {
+      name:          "Billy Bob",
+      type:          "person",
+      phone:         "555-555-5555",
+      address:       "123 Main St.",
+      city:          "Springfield",
+      state:         "MI",
+      zipcode:       "12345",
+      modifiedDate:  new Date("2017-01-01"),
+      modifiedBy:    "1",
+    },
+    prev: [
+    ]
+  },
+  {
+    _id: "2",
+    createdDate: new Date("2017-01-01"),
+    current: {
+      name:          "Modern Real Estate",
+      type:          "company",
+      phone:         "777-777-7777",
+      subParties:    ["1"],
+      address:       "123 Land St.",
+      city:          "Springfield",
+      state:         "MI",
+      zipcode:       "12345",
+      modifiedDate:  new Date("2017-01-01"),
+      modifiedBy:    "1",
+    },
+    prev: [
+    ]
+  }
+]);
+
+// Users
+upsert("user", [
+  {
+    _id: "1",
+    createdDate: new Date("2016-02-01"),
+    current: {
+      username:  "john",
+      email:     "john@example.com",
+      firstName: "John",
+      lastName:  "Smith",
+    },
+    prev: [
+    ]
+  },
+  {
+    _id: "2",
+    createdDate: new Date("2016-02-05"),
+    current: {
+      username:  "bill",
+      email:     "bill@example.com",
+      firstName: "Bill",
+      lastName:  "Johnson",
+    },
+    prev: [
+    ]
   }
 ]);
 

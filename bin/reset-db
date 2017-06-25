@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Resets the Mongo database and loads development fixtures
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $SCRIPT_DIR/..
+
+./dc stop mongodb && ./dc rm -fv mongodb && docker volume rm rem_mongodata && ./dc up -d mongodb
+./dc build mongodb-setup && ./dc run --rm mongodb-setup
+./dc run --rm mongodb-setup /opt/dev/load-fixtures.sh

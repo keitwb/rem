@@ -1,6 +1,7 @@
+export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
 export type TimeUnit = "months" | "years" | "quarters";
 export type PropertyType = "land" | "commercial" | "residential";
-export type ContactType = "person" | "business";
+export type PartyType = "person" | "business";
 
 export class User {
   static kind = "user";
@@ -15,6 +16,7 @@ export class Note {
   static kind = "note";
   id:           string;
   note:         string;
+  media:        Media[];
   createdDate:  Date;
   modifiedDate: Date;
   modifiedBy:   User;
@@ -23,13 +25,15 @@ export class Note {
 export class Lease {
   static kind = "lease";
   id:           string;
+  leaseType:    LeaseType;
   description:  string;
   properties:   Property[];
   startDate:    Date;
   termLength:   number;
   termUnit:     TimeUnit;
   rate:         number;
-  lessees:      Contact[];
+  lessees:      Party[];
+  options:      Lease[];
   media:        Media[];
   notes:        Note[];
   createdDate:  Date;
@@ -55,11 +59,29 @@ export class Property {
   desiredRent?:       number;
   desiredSalesPrice?: number;
   tryingToSell?:      boolean;
-  contacts?:          Contact[];
+  contacts?:          Party[];
   notes:              Note[];
+  media:              Media[];
   createdDate:        Date;
   modifiedDate:       Date;
   modifiedBy:         User;
+}
+
+export class Party {
+  static kind = "party";
+  id:            string;
+  name:          string;
+  type:          PartyType;
+  subParties     Party[];
+  phone?:        string;
+  address?:      string;
+  city?:         string;
+  state?:        string;
+  zipcode?:      string;
+  notes?:        Note[];
+  createdDate?:  Date;
+  modifiedDate?: Date;
+  modifiedBy?:   User;
 }
 
 export class Media {
@@ -73,18 +95,3 @@ export class Media {
   modifiedBy:   User;
 }
 
-export class Contact {
-  static kind = "contact";
-  id:            string;
-  name:          string;
-  type:          ContactType;
-  phone?:        string;
-  address?:      string;
-  city?:         string;
-  state?:        string;
-  zipcode?:      string;
-  notes?:        Note[];
-  createdDate?:  Date;
-  modifiedDate?: Date;
-  modifiedBy?:   User;
-}

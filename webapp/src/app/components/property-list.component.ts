@@ -13,7 +13,7 @@ import { Property } from './models';
 export class PropertyListComponent implements OnInit {
   properties: Observable<Property[]>;
 
-  constructor(private propertyService: PropertyService, private router: Router) { }
+  constructor(private store: Store<AppState>, private router: Router) { }
 
   ngOnInit() {
     this.properties = this.propertyService.getProperties();
