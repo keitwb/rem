@@ -10,6 +10,9 @@ export class User {
   email:     string;
   firstName: string;
   lastName:  string;
+  createdDate:  Date;
+  modifiedDate: Date;
+  modifiedBy:   User;
 }
 
 export class Note {
