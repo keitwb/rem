@@ -5,8 +5,7 @@ import { HttpModule } from '@angular/http';
 import { RouterModule, Routes } from '@angular/router';
 
 //import { PropertyCreateComponent } from './property/property-create.component';
-import { PropertyComponent } from './property.component';
-import { PropertyListComponent } from './property-list.component';
+import { PropertyComponent, PropertyListComponent } from './components';
 import { PropertyService } from './property-service';
 
 const routes: Routes = [

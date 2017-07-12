@@ -1,7 +1,0 @@
-<ul>
-  <li *ngFor="let prop of properties | async">
-    <h2><a [routerLink]="[prop.id]">{{prop.name}}</a></h2>
-    <div>{{prop.description}}</div>
-    <div *ngIf="prop.county">{{prop.county.name}} County, {{prop.county.state}}</div>
-  </li>
-</ul>

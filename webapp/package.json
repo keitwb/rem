@@ -10,8 +10,7 @@
     "test": "ng test --browsers Firefox",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "reset-db": "./dc stop mongodb && ./dc rm -fv mongodb && docker volume rm rem_mongodata && ./dc up -d mongodb",
-
+    "reset-db": "./dc stop mongodb && ./dc rm -fv mongodb && docker volume rm rem_mongodata && ./dc up -d mongodb"
   },
   "private": true,
   "dependencies": {
@@ -23,11 +22,17 @@
     "@angular/platform-browser": "^4.0.0",
     "@angular/platform-browser-dynamic": "^4.0.0",
     "@angular/router": "^4.0.0",
+    "@ngrx/core": "^1.2.0",
+    "@ngrx/effects": "^2.0.4",
+    "@ngrx/store": "^2.2.2",
     "@types/lodash": "^4.14.66",
+    "@types/ramda": "^0.24.3",
     "auth0-js": "^8.7.0",
     "core-js": "^2.4.1",
     "lodash": "^4.17.4",
-    "rxjs": "^5.1.0",
+    "ramda": "^0.24.1",
+    "rxjs": "^5.4.2",
+    "urijs": "^1.18.10",
     "zone.js": "^0.8.4"
   },
   "devDependencies": {
@@ -41,13 +46,13 @@
     "karma": "~1.4.1",
     "karma-chrome-launcher": "~2.0.0",
     "karma-cli": "~1.0.1",
+    "karma-coverage-istanbul-reporter": "^0.2.0",
     "karma-firefox-launcher": "^1.0.1",
     "karma-jasmine": "~1.1.0",
     "karma-jasmine-html-reporter": "^0.2.2",
-    "karma-coverage-istanbul-reporter": "^0.2.0",
     "protractor": "~5.1.0",
     "ts-node": "~2.0.0",
     "tslint": "~4.5.0",
-    "typescript": "~2.2.0"
+    "typescript": "^2.4.1"
   }
 }

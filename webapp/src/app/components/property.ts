@@ -1,15 +1,16 @@
 import { Component, OnInit, OnChanges, Input } from '@angular/core';
 import { FormControl, FormBuilder, FormGroup } from '@angular/forms';
-import { Router, ActivatedRoute, Params } from '@angular/router';
+import { Router, ActivatedRoute, Params }      from '@angular/router';
 import 'rxjs/add/operator/switchMap';
 
-import { PropertyService } from './property-service';
-import { Property } from './models';
+import { AppStore } from 'app/store';
+import { Property } from 'app/models';
 
 @Component({
-  selector: 'property',
+  selector:    'property',
   templateUrl: './property.component.html',
-  styleUrls: ['./property.component.css']
+  styles:   [
+  ]
 })
 export class PropertyComponent implements OnInit, OnChanges {
   @Input() property: Property;
@@ -18,7 +19,7 @@ export class PropertyComponent implements OnInit, OnChanges {
 
   constructor(private route: ActivatedRoute,
               private fb: FormBuilder,
-              private service: PropertyService) {
+              private store: AppStore) {
     this.editing = false;
 
     this.propForm = this.fb.group({

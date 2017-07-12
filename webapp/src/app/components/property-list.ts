@@ -1,21 +1,30 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
+import { Router }            from '@angular/router';
+import { AppStore }          from 'app/store';
+import { Observable }        from 'rxjs/Observable';
 
-import { PropertyService } from './property-service';
-import { Property } from './models';
+import { Property } from 'app/models';
 
 @Component({
   selector: 'property-list',
-  templateUrl: './property-list.component.html',
-  styleUrls: ['./property-list.component.css']
+  styles: [],
+  template: `
+    <ul>
+      <li *ngFor="let prop of properties | async">
+        <h2><a [routerLink]="[prop.id]">{{prop.name}}</a></h2>
+        <div>{{prop.description}}</div>
+        <div *ngIf="prop.county">{{prop.county.name}} County, {{prop.county.state}}</div>
+      </li>
+    </ul>
+  `
 })
 export class PropertyListComponent implements OnInit {
   properties: Observable<Property[]>;
 
-  constructor(private store: Store<AppState>, private router: Router) { }
+  constructor(private store: AppStore, private router: Router) { }
 
   ngOnInit() {
-    this.properties = this.propertyService.getProperties();
+    this.properties = this.store.select();
   }
+
 }

@@ -9,7 +9,9 @@ function upsert(collName, docs) {
 
 upsert("properties", [
   {
-    _id: "swamp-tract",
+    _id: {
+      $oid: "swamp-tract",
+    },
     createdDate: new Date("2017-02-01"),
     current: {
       name:         "Swamp Tract",
@@ -43,7 +45,9 @@ upsert("properties", [
     ]
   },
   {
-    _id: "office-building",
+    _id: {
+      $oid: "office-building",
+    },
     createdDate: new Date("2017-01-01"),
     current: {
       name:         "Robeson Office Building",
@@ -76,7 +80,9 @@ upsert("properties", [
 
 upsert("leases", [
   {
-    _id: "1",
+    _id: {
+      $oid: "1",
+    },
     createdDate: new Date("2016-02-01"),
     current: {
       description:  "First lease",
@@ -106,7 +112,9 @@ upsert("leases", [
     ],
   },
   {
-    _id: "2",
+    _id: {
+      $oid: "2",
+    },
     createdDate: new Date("2017-01-01"),
     current: {
       description: "Second lease",
@@ -124,7 +132,9 @@ upsert("leases", [
 
 upsert("notes", [
   {
-    _id: "1",
+    _id: {
+      $oid: "1",
+    },
     createdDate: new Date("2017-03-01"),
     current: {
       note:           "Needs work -- lawn needs mowing.",
@@ -140,7 +150,9 @@ upsert("notes", [
     ]
   },
   {
-    _id: "2",
+    _id: {
+      $oid: "2",
+    },
     createdDate: new Date("2017-04-01"),
     current: {
       note:         "Work Completed.",
@@ -153,7 +165,9 @@ upsert("notes", [
 
 upsert("contacts", [
   {
-    _id: "1",
+    _id: {
+      $oid: "1",
+    },
     createdDate: new Date("2017-01-01"),
     current: {
       name:          "Billy Bob",
@@ -170,7 +184,9 @@ upsert("contacts", [
     ]
   },
   {
-    _id: "2",
+    _id: {
+      $oid: "2",
+    },
     createdDate: new Date("2017-01-01"),
     current: {
       name:          "Modern Real Estate",
@@ -192,7 +208,9 @@ upsert("contacts", [
 // Users
 upsert("user", [
   {
-    _id: "1",
+    _id: {
+      $oid: "1",
+    },
     createdDate: new Date("2016-02-01"),
     current: {
       username:  "john",
@@ -204,7 +222,9 @@ upsert("user", [
     ]
   },
   {
-    _id: "2",
+    _id: {
+      $oid: "2",
+    },
     createdDate: new Date("2016-02-05"),
     current: {
       username:  "bill",
