@@ -13,7 +13,7 @@ interface ModelState<T> {
   fetchInProgress: boolean;
   fetchError: string,
   docs: {[id:string]: MongoDoc<T>};
-  filters: {[id:string]: FilteredDocs};
+  queries: {[queryId:string]: FilteredDocs};
 }
 
 export interface State {
@@ -26,7 +26,7 @@ export interface State {
   selectedProperty: string | null;
 }
 
-const defaultModelState = {fetchInProgress: false, fetchError: null, docs: {}, filters: {}};
+const defaultModelState = {fetchInProgress: false, fetchError: null, docs: {}, queries: {}};
 
 export const initialState: State = {
   users:            defaultModelState,
@@ -63,6 +63,13 @@ export function reducer(state = initialState, action: dbActions.Actions): State 
         [collection]: {
           ...state[collection],
           docs: {...state[collection].docs, ...newDocMap},
+          queries: {...state[collection].queries,
+              [action.payload.queryId]: {
+                docIds: action.payload.docs.map(d => d._id.$oid),
+                size: action.payload.size,
+                totalPages: action.payload.totalPages,
+              }
+          },
         },
       }};
 

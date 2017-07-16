@@ -117,13 +117,13 @@ export class MongoVersioningClient {
       .map((r) => r.json())
   }
 
-  getList<T>(collection: string, params: {filter: object, page: number, count: number, sort_by: string, order: SortOrder}): Observable<ListResult<T>> {
-    const ordering_flag = params.order == "asc" ? "" : "-1";
+  getList<T>(collection: string, params: {filter: object, page: number, pageSize: number, sortBy: string, sortOrder: SortOrder}): Observable<ListResult<T>> {
+    const ordering_flag = params.sortOrder == "asc" ? "" : "-1";
     const url = new URL(this.baseUrl.href);
     url.pathname += collection;
     url.searchParams.set("page", String(params.page));
-    url.searchParams.set("pagesize", String(params.count));
-    url.searchParams.set("sort_by", params.sort_by);
+    url.searchParams.set("pagesize", String(params.pageSize));
+    url.searchParams.set("sort_by", params.sortBy);
     // This makes it return pagination stats
     url.searchParams.set("count", "");
     if (params.filter) {

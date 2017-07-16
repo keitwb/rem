@@ -3,7 +3,9 @@ import { Router }            from '@angular/router';
 import { AppStore }          from 'app/store';
 import { Observable }        from 'rxjs/Observable';
 
-import { Property } from 'app/models';
+import { Property }          from 'app/models';
+import * as actions          from 'app/store/actions';
+import * as selectors        from 'app/store/selectors';
 
 @Component({
   selector: 'property-list',
@@ -20,11 +22,23 @@ import { Property } from 'app/models';
 })
 export class PropertyListComponent implements OnInit {
   properties: Observable<Property[]>;
+  page: number;
+  pageSize: number;
+  filter: object;
+  sortBy: string;
+  sortOrder: string;
 
   constructor(private store: AppStore, private router: Router) { }
 
+  makeAction() {
+    return new RequestManyAction({
+      collection: 'properties',
+    });
+
   ngOnInit() {
-    this.properties = this.store.select();
+    const action = this.makeAction();
+    this.store.dispatch(action);
+    this.properties = this.store.select(selectors.getList('properties')(action.queryId));
   }
 
 }

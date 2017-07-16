@@ -20,10 +20,10 @@ export class DBEffects {
   requestMany$ = this.actions$
     .ofType(db.REQUEST_MANY)
     .map(toPayload)
-    .switchMap(({collection, filter, page, count, sort_by, order}) => {
-       return this.mongo.getList(collection, {filter, page, count, sort_by, order})
+    .switchMap(({collection, filter, page, pageSize, sortBy, sortOrder, queryId}) => {
+       return this.mongo.getList(collection, {filter, page, pageSize, sortBy, sortOrder})
          .map(listRes => new db.RequestManySuccessAction({
-           collection, filter, page, count, sort_by, order, ...listRes,
+           collection, filter, page, pageSize, sortBy, sortOrder, queryId, ...listRes,
          }))
          .catch(error => Observable.of(new db.RequestFailureAction({error, collection})));
     });

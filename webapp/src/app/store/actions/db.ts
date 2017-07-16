@@ -1,4 +1,5 @@
 import { Action }    from '@ngrx/store';
+import { Md5 }       from 'ts-md5/dist/md5';
 
 import { SortOrder } from 'app/services';
 import { MongoDoc }  from "app/services/mongo";
@@ -12,24 +13,41 @@ export const REQUEST_FAILURE = '[Mongo] Request Failed';
 
 interface RequestManyPayload {
   collection: string;
-  filter?:    string;
-  page?:      number;
-  count?:     number;
-  sort_by?:   string;
-  order?:     SortOrder;
+  filter:    string;
+  page:      number;
+  pageSize:  number;
+  sortBy:    string;
+  sortOrder: SortOrder;
+  queryId?:  string;
 }
 
 interface RequestManySuccessPayload extends RequestManyPayload {
-  docs:        MongoDoc<any>[];
-  returned?:   number;
-  size?:       number;
-  totalPages?: number;
+  docs:       MongoDoc<any>[];
+  // The total number of docs across all pages
+  size:       number;
+  totalPages: number;
 }
 
 export class RequestManyAction implements Action {
   readonly type = REQUEST_MANY;
 
-  constructor(public payload: RequestManyPayload) {}
+  get queryId() {
+    const s = JSON.stringify([this.payload.collection, this.payload.filter,
+      this.payload.page, this.payload.pageSize, this.payload.sortBy,
+      this.payload.sortOrder]);
+    return <string>Md5.hashStr(s);
+  }
+
+  constructor(public payload: RequestManyPayload) {
+    this.payload = payload;
+    this.payload.queryId = this.queryId;
+  }
+}
+
+export class RequestManySuccessAction implements Action {
+  readonly type = REQUEST_MANY_SUCCESS;
+
+  constructor(public payload: RequestManySuccessPayload) { }
 }
 
 export class RequestOneAction implements Action {
@@ -42,12 +60,6 @@ export class RequestOneSuccessAction implements Action {
   readonly type = REQUEST_ONE_SUCCESS;
 
   constructor(public payload: {collection: string, doc: MongoDoc<any>}) { }
-}
-
-export class RequestManySuccessAction implements Action {
-  readonly type = REQUEST_MANY_SUCCESS;
-
-  constructor(public payload: RequestManySuccessPayload) { }
 }
 
 export class RequestFailureAction implements Action {

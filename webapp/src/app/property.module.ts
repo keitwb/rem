@@ -6,7 +6,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 //import { PropertyCreateComponent } from './property/property-create.component';
 import { PropertyComponent, PropertyListComponent } from './components';
-import { PropertyService } from './property-service';
+import { MongoVersioningClient } from './services';
 
 const routes: Routes = [
   { path: 'properties/:id', component: PropertyComponent },
@@ -28,6 +28,6 @@ const routes: Routes = [
     HttpModule,
     RouterModule.forChild(routes),
   ],
-  providers: [ PropertyService ],
+  providers: [ MongoVersioningClient ],
 })
 export class PropertyModule { }

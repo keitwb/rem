@@ -1,6 +1,7 @@
 import { Component, OnInit, OnChanges, Input } from '@angular/core';
 import { FormControl, FormBuilder, FormGroup } from '@angular/forms';
 import { Router, ActivatedRoute, Params }      from '@angular/router';
+import { Observable }        from 'rxjs/Observable';
 import 'rxjs/add/operator/switchMap';
 
 import { AppStore } from 'app/store';
@@ -13,7 +14,7 @@ import { Property } from 'app/models';
   ]
 })
 export class PropertyComponent implements OnInit, OnChanges {
-  @Input() property: Property;
+  @Input() property$: Observable<Property>;
   editing: boolean = false;
   propForm: FormGroup;
 
@@ -33,7 +34,7 @@ export class PropertyComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.route.params
-      .switchMap((params: Params) => this.service.getProperty(this.route.params['id']))
+      .switchMap((params: Params) => this.getProperty(this.route.params['id']))
       .subscribe((prop: Property) => this.property = prop );
 
   }

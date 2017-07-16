@@ -1,5 +1,4 @@
-export { MongoDoc } from './mongo';
-export { PropertyService } from './property';
+export { MongoVersioningClient, MongoDoc } from './mongo';
 
 export type SortOrder = "asc" | "desc";
 
