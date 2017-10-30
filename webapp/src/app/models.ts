@@ -1,25 +1,25 @@
 import { Observable } from "rxjs/Observable";
 
-export type MongoDate = { $date: number }
+export type ID = { $oid: string };
+export type MongoDate = { $date: number };
 export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
 export type TimeUnit = "months" | "years" | "quarters";
 export type PropertyType = "land" | "commercial" | "residential";
 export type PartyType = "person" | "business";
 
+export interface Model {}
+
 export module User {
   export const collection = "users";
 }
 
-export interface User {
+export interface User extends Model{
   //static collection = "users";
-  id:            string;
   username:      string;
   email:         string;
   firstName:     string;
   lastName:      string;
-  createdDate?:  MongoDate;
-  modifiedDate?: MongoDate;
-  modifiedBy?:   User;
+  createdDate:   MongoDate;
 }
 
 export module Note {
@@ -28,12 +28,10 @@ export module Note {
 
 export interface Note {
   //static collection = "notes";
-  id:            string;
   note:          string;
   media:         Media[];
-  createdDate?:  MongoDate;
-  modifiedDate?: MongoDate;
-  modifiedBy?:   User;
+  createdDate:   MongoDate;
+  createdBy:     ID;
 }
 
 export module Lease {
@@ -41,7 +39,6 @@ export module Lease {
 }
 
 export interface Lease {
-  id:            string;
   leaseType:     LeaseType;
   description:   string;
   properties:    Property[];
@@ -53,9 +50,8 @@ export interface Lease {
   options:       Lease[];
   media:         Media[];
   notes:         Note[];
-  createdDate?:  MongoDate;
-  modifiedDate?: MongoDate;
-  modifiedBy?:   User;
+  createdDate:   MongoDate;
+  createdBy:     ID;
 }
 
 export module Property {
@@ -64,7 +60,6 @@ export module Property {
 
 export interface Property {
   //static collection = "properties";
-  id:                 string;
   name:               string;
   description?:       string;
   leases?:            Observable<Lease[]>;
@@ -95,7 +90,6 @@ export module Party {
 
 export interface Party {
   //static collection = "parties";
-  id:            string;
   name:          string;
   type:          PartyType;
   subParties:    Party[];
@@ -116,7 +110,6 @@ export module Media {
 
 export interface Media {
   //static collection = "media.files";
-  id:            string;
   name:          string;
   url:           string;
   description:   string;

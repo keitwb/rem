@@ -19,24 +19,46 @@ export class DBEffects {
   @Effect()
   requestMany$ = this.actions$
     .ofType(db.REQUEST_MANY)
-    .map(toPayload)
-    .switchMap(({collection, filter, page, pageSize, sortBy, sortOrder, queryId}) => {
-       return this.mongo.getList(collection, {filter, page, pageSize, sortBy, sortOrder})
-         .map(listRes => new db.RequestManySuccessAction({
-           collection, filter, page, pageSize, sortBy, sortOrder, queryId, ...listRes,
-         }))
-         .catch(error => Observable.of(new db.RequestFailureAction({error, collection})));
+    .switchMap((action: db.RequestManyAction) => {
+      const {collection, filter, page, pageSize, sortBy, sortOrder} = action.payload;
+      const queryId = action.queryId;
+      const nextRequest$ = this.actions$.ofType(db.REQUEST_MANY).skip(1);
+
+      return this.mongo.getList(collection, {filter, page, pageSize, sortBy, sortOrder})
+        .takeUntil(nextRequest$)
+        .map(listRes => new db.RequestManySuccessAction({
+          collection, filter, page, pageSize, sortBy, sortOrder, queryId, ...listRes,
+        }))
+        .catch(error => Observable.of(new db.RequestFailureAction({error, queryId, collection})));
     });
 
   @Effect()
-  requestOne$: Observable<Action> = this.actions$
+  requestOne$ = this.actions$
     .ofType(db.REQUEST_ONE)
-    .map(toPayload)
-    .switchMap(({collection, id}) => {
-      return this.mongo.getOne(id, collection)
+    .switchMap((action: db.RequestOneAction) => {
+      const {collection, id} = action.payload;
+      const queryId = action.queryId;
+      const nextRequest$ = this.actions$.ofType(db.REQUEST_ONE).skip(1);
+
+      return this.mongo.getOne(collection, id)
+        .takeUntil(nextRequest$)
         .map(doc => new db.RequestOneSuccessAction({doc, collection}))
-        .catch(error => Observable.of(new db.RequestFailureAction({error, collection})));
+        .catch(error => Observable.of(new db.RequestFailureAction({error, queryId, collection})));
     });
 
-    constructor(private actions$: Actions, private mongo: MongoVersioningClient) { }
+  @Effect()
+  update$ = this.actions$
+    .ofType(db.UPDATE)
+    .switchMap((action: db.UpdateAction) => {
+      const {collection, id, etag, update} = action.payload;
+
+      const nextRequest$ = this.actions$.ofType(db.UPDATE).skip(1);
+
+      return this.mongo.update(collection, id, etag, [update])
+        .takeUntil(nextRequest$)
+        .map(doc => new db.PersistSuccessAction({collection, doc}))
+        .catch(error => Observable.of(new db.PersistFailureAction({error, collection, id})));
+    });
+
+  constructor(private actions$: Actions, private mongo: MongoVersioningClient) { }
 }

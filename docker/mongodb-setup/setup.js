@@ -36,7 +36,7 @@ function main() {
   rem.runCommand({
      collMod:"properties",
      validator:{ $or: [
-       { "current.propType": { $in: ["land", "commercial", "residential"] } }
+       { "propType": { $in: ["land", "commercial", "residential"] } }
      ]},
      validationLevel:"strict"
   });
@@ -63,21 +63,21 @@ function main() {
       type: "MANY_TO_MANY",
       role: "OWNING",
       "target-coll": "leases",
-      "ref-field": "$.current.leases",
+      "ref-field": "$.leases.[*]",
     },
     {
       rel: "contacts",
       type: "MANY_TO_MANY",
       role: "OWNING",
       "target-coll": "contacts",
-      "ref-field": "$.current.contacts"
+      "ref-field": "$.contacts.[*]"
     },
     {
       rel: "notes",
       type: "ONE_TO_MANY",
       role: "OWNING",
       "target-coll": "notes",
-      "ref-field": "$.current.notes",
+      "ref-field": "$.notes.[*]",
     },
   ]);
 
@@ -89,8 +89,8 @@ function main() {
      validator:{ $and: [
        {
          $or: [
-           { "options.current.leaseType": { $exists: false } },
-           { "options.current.leaseType": { $eq: "option" } },
+           { "options.leaseType": { $exists: false } },
+           { "options.leaseType": { $eq: "option" } },
          ]
        }
      ]},
@@ -105,14 +105,14 @@ function main() {
       type: "MANY_TO_MANY",
       role: "INVERSE",
       "target-coll": "properties",
-      "ref-field": "$.current.leases",
+      "ref-field": "$.leases.[*]",
     },
     {
       rel: "lessees",
       type: "MANY_TO_MANY",
       role: "OWNING",
       "target-coll": "contacts",
-      "ref-field": "$.current.lessees"
+      "ref-field": "$.lessees.[*]"
     }
   ]);
 
@@ -133,21 +133,21 @@ function main() {
       type: "MANY_TO_MANY",
       role: "INVERSE",
       "target-coll": "properties",
-      "ref-field": "$.current.contacts",
+      "ref-field": "$.contacts.[*]",
     },
     {
       rel: "leases",
       type: "MANY_TO_MANY",
       role: "INVERSE",
       "target-coll": "leases",
-      "ref-field": "$.current.lessees"
+      "ref-field": "$.lessees.[*]"
     },
     {
       rel: "subParties",
       type: "MANY_TO_ONE",
       role: "OWNING",
       "target-coll": "parties",
-      "ref-field": "$.current.subParties",
+      "ref-field": "$.subParties.[*]",
     },
   ]);
 
@@ -174,14 +174,14 @@ function main() {
       type: "MANY_TO_ONE",
       role: "INVERSE",
       "target-coll": "leases",
-      "ref-field": "$.notes"
+      "ref-field": "$.notes.[*]"
     },
     {
       rel: "contacts",
       type: "MANY_TO_ONE",
       role: "INVERSE",
       "target-coll": "contacts",
-      "ref-field": "$.notes"
+      "ref-field": "$.notes.[*]"
     }
   ]);
 
@@ -202,14 +202,14 @@ function main() {
       type: "MANY_TO_MANY",
       role: "INVERSE",
       "target-coll": "properties",
-      "ref-field": "$.media",
+      "ref-field": "$.media.[*]",
     },
     {
       rel: "leases",
       type: "MANY_TO_MANY",
       role: "INVERSE",
       "target-coll": "leases",
-      "ref-field": "$.media"
+      "ref-field": "$.media.[*]"
     }
   ]);
 

@@ -5,8 +5,10 @@ export interface AppState {
   db: db.State;
 }
 
-export function reducer(s: AppState, a: Action) {
-  return combineReducers({
-    db: db.reducer,
-  });
-}
+export const reducers = {
+  db: db.reducer,
+};
+
+export const initialState = {
+  db: db.initialState,
+};

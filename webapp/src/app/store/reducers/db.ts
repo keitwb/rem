@@ -2,18 +2,21 @@ import { MongoDoc }   from "app/services/mongo";
 import * as models    from "app/models";
 import * as dbActions from "app/store/actions/db";
 
-interface FilteredDocs {
+export interface QueryResult {
   docIds: string[];
   returned: number;
   size: number;
   totalPages: number;
+  inProgress: boolean;
+  fetchError: string,
 }
 
-interface ModelState<T> {
-  fetchInProgress: boolean;
-  fetchError: string,
-  docs: {[id:string]: MongoDoc<T>};
-  queries: {[queryId:string]: FilteredDocs};
+export type MongoDocs<T> = {[id:string]: MongoDoc<T>};
+
+export interface ModelState<T> {
+  docs: MongoDocs<T>;
+  queryResults: {[queryId:string]: QueryResult};
+  persistResults: {[id:string]: PersistResult};
 }
 
 export interface State {
@@ -23,10 +26,14 @@ export interface State {
   notes:            ModelState<models.Note>;
   parties:          ModelState<models.Party>;
   media:            ModelState<models.Media>;
-  selectedProperty: string | null;
 }
 
-const defaultModelState = {fetchInProgress: false, fetchError: null, docs: {}, queries: {}};
+export interface PersistResult {
+  inProgress: boolean;
+  error: string;
+}
+
+const defaultModelState = {docs: {}, queryResults: {}, persistResults: {}};
 
 export const initialState: State = {
   users:            defaultModelState,
@@ -35,23 +42,39 @@ export const initialState: State = {
   notes:            defaultModelState,
   parties:          defaultModelState,
   media:            defaultModelState,
-  selectedProperty: null,
 };
 
 
-export function reducer(state = initialState, action: dbActions.Actions): State {
-  const {collection} = action.payload;
+export function reducer(state, action: dbActions.Actions): State {
+  const {collection = null} = action.payload || {};
   switch (action.type) {
     case dbActions.REQUEST_MANY:
     case dbActions.REQUEST_ONE:
-      return {...state, [collection]: {...state[collection], fetchInProgress: true}};
+      return {...state, [collection]: {
+        ...state[collection],
+        queryResults: {...state[collection].queryResults,
+          [action.queryId]: {
+            inProgress: true,
+            fetchError: null,
+          }
+        },
+      }};
 
     case dbActions.REQUEST_ONE_SUCCESS:
-      const doc = action.payload.doc;
+      let doc = action.payload.doc;
       return {...state, ...{
         [collection]: {
           ...state[collection],
           docs: {...state[collection].docs, [doc._id.$oid]: doc},
+          queryResults: {...state[collection].queryResults,
+            [action.queryId]: {
+              docIds: [doc._id.$oid],
+              size: 1,
+              totalPages: 1,
+              inProgress: false,
+              fetchError: null,
+            },
+          },
         },
       }};
 
@@ -63,20 +86,73 @@ export function reducer(state = initialState, action: dbActions.Actions): State 
         [collection]: {
           ...state[collection],
           docs: {...state[collection].docs, ...newDocMap},
-          queries: {...state[collection].queries,
-              [action.payload.queryId]: {
-                docIds: action.payload.docs.map(d => d._id.$oid),
+          queryResults: {...state[collection].queryResults,
+              [action.queryId]: {
+                docIds: action.payload.docs.map(d => d._id),
                 size: action.payload.size,
                 totalPages: action.payload.totalPages,
-              }
+                inProgress: false,
+                fetchError: null,
+              },
           },
         },
       }};
 
     case dbActions.REQUEST_FAILURE:
       return {...state, ...{
-        [collection]: {...state[collection], fetchError: action.payload.error},
+        [collection]: {
+          ...state[collection],
+          queryResults: {...state[collection].queryResults,
+            [action.queryId]: {
+              inProgress: false,
+              fetchError: action.payload.error,
+            },
+          }
+        },
       }};
+
+    case dbActions.UPDATE:
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          persistResults: {...state[collection].persistResults,
+            [action.payload.id.$oid]: {
+              inProgress: true,
+              error: undefined,
+            },
+          }
+        },
+      }};
+
+    case dbActions.PERSIST_SUCCESS:
+      doc = action.payload.doc;
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          docs: {...state[collection].docs, [doc._id.$oid]: doc},
+          persistResults: {...state[collection].persistResults,
+            [doc._id.$oid]: {
+              inProgress: false,
+              error: null,
+            },
+          }
+        },
+      }};
+
+    case dbActions.PERSIST_FAILURE:
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          persistResults: {...state[collection].persistResults,
+            [action.payload.id.$oid]: {
+              inProgress: false,
+              error: action.payload.error,
+            },
+          }
+        },
+      }};
+    default:
+      return state;
   }
 }
 

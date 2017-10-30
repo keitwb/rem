@@ -6,21 +6,29 @@ import { Injectable }                              from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { Observable }                              from 'rxjs/Observable';
 import * as _                                      from 'lodash';
+
 import {SortOrder}                                 from '.';
+import {ModelUpdate} from './updates';
+import {AppConfig}                                 from 'app/config';
+import {Model}                                 from 'app/models';
+
+export type MongoID = { $oid: string };
 
 export interface MongoDoc<T> {
-  _id:         { $oid: string };
-  //_collection: string;
-  _links:      { [id:string]: { href: string } };
-  etag:        string;
-  createdDate: { $date: number };
-  current:     T;
-  prev:        T[],
+  _id:          MongoID;
+  _links:       { [id:string]: { href: string } };
+  _etag:        MongoID;
+  _createdDate: { $date: number };
+  _updates:     MongoUpdate[],
+}
+
+interface MongoUpdate {
+  'type': string;
+  update: object;
 }
 
 export interface ListResult<T> {
   docs:       MongoDoc<T>[];
-  returned:   number;
   size:       number;
   totalPages: number;
 }
@@ -35,6 +43,8 @@ interface Rel {
 interface CollectionRels {
   [index: string /* Collection name */]: {[index: string /* relation name */]: Rel};
 }
+
+export type ETag = {$oid: string};
 
 class LinkManager {
   private _links: Observable<CollectionRels>
@@ -61,30 +71,38 @@ class LinkManager {
     }
     return this._links;
   }
-
 }
 
 @Injectable()
 export class MongoVersioningClient {
   private linkManager: LinkManager
+  private baseUrl: URL;
 
-  constructor(private http: Http, private baseUrl: URL) {
+  constructor(private http: Http, private config: AppConfig) {
+    this.baseUrl = new URL(config.dbPath, window.location.href);
+
     // Make sure the base url path ends in "/" for easier processing later
     if (!this.baseUrl.pathname.endsWith("/")) {
       this.baseUrl.pathname += "/";
     }
-    this.linkManager = new LinkManager(http, baseUrl);
+    this.linkManager = new LinkManager(http, this.baseUrl);
   }
 
-  getRequestOptions(etag: string = null): RequestOptions {
+  getRequestOptions(etag: ETag = null): RequestOptions {
     const headers = new Headers({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     });
     if (etag) {
-      headers.set("If-Match", etag);
+      headers.set("If-Match", etag.$oid);
     }
     return (new RequestOptions({headers}));
+  }
+
+  getUrl(path: string): URL {
+    const url = new URL(this.baseUrl.href);
+    url.pathname += path;
+    return url;
   }
 
   private raiseTextError<T>(res: Response): Observable<T> {
@@ -104,7 +122,7 @@ export class MongoVersioningClient {
 
     const url = new URL(res.headers.get("Location"));
     const [id, collection] = url.pathname.split("/").reverse();
-    return this.getOne(id, collection);
+    return this.getOne(collection, {$oid: id});
   }
 
   fetchRelated<T, R>(doc: MongoDoc<T>, relName: string): Observable<MongoDoc<R>[]> {
@@ -119,8 +137,7 @@ export class MongoVersioningClient {
 
   getList<T>(collection: string, params: {filter: object, page: number, pageSize: number, sortBy: string, sortOrder: SortOrder}): Observable<ListResult<T>> {
     const ordering_flag = params.sortOrder == "asc" ? "" : "-1";
-    const url = new URL(this.baseUrl.href);
-    url.pathname += collection;
+    const url = this.getUrl(collection);
     url.searchParams.set("page", String(params.page));
     url.searchParams.set("pagesize", String(params.pageSize));
     url.searchParams.set("sort_by", params.sortBy);
@@ -134,48 +151,46 @@ export class MongoVersioningClient {
       .map(r => r.json())
       .map(o => ({
         docs: o._embedded,
-        returned: o._returned,
         size: o._size,
         totalPages: o._total_pages,
       }));
   }
 
-  getOne<T>(collection: string, id: string): Observable<MongoDoc<T>> {
-    const url = new URL(this.baseUrl.href);
-    url.pathname += `${collection}/${id}`;
+  getOne<T>(collection: string, id: MongoID): Observable<MongoDoc<T>> {
+    const url = this.getUrl(`${collection}/${id.$oid}`);
     return this.http.get(url.href).map((r) => r.json());
   }
 
   create<T>(collection: string, obj: T): Observable<MongoDoc<T>> {
     const path = `${collection}`;
     const bodyObj = {
-                      $set: {
-                        "createdDate": (new Date()).toJSON(),
-                        "current": obj,
-                        "prev": [],
-                      },
+                      $set: _.merge({}, 
+                        obj,
+                        {
+                          "_createdDate": (new Date()).toJSON(),
+                          "_updates": [],
+                        }
+                      ),
                     };
 
-    const url = new URL(this.baseUrl.href);
-    url.pathname += path;
+    const url = this.getUrl(path);
+    url.search = "checkEtag";
+
     return this.http.post(url.href, JSON.stringify(bodyObj), this.getRequestOptions())
       .switchMap((r) => this.fetchNew<T>(r))
       .catch((e) => this.raiseTextError<MongoDoc<T>>(e));
   }
 
-  update<T>(collection: string, doc: MongoDoc<T>): Observable<MongoDoc<T>> {
-    const path = `${collection}/${doc._id.$oid}?checkEtag`;
-    const bodyObj = {
-      "$set": {"current": doc.current},
-      "$push": {"prev": doc.current},
-    };
+  update<T>(collection: string, id: MongoID, etag: ETag, updates: ModelUpdate[]): Observable<MongoDoc<T>> {
+    const path = `${collection}/${id}`;
+    const bodyObj = _.merge({}, ..._.map(updates, u => u.updateObj));
 
-    const url = new URL(this.baseUrl.href);
-    url.pathname += path;
+    const url = this.getUrl(path);
+    url.search = "checkEtag";
 
-    return this.http.patch(url.href, JSON.stringify(bodyObj), this.getRequestOptions(doc.etag))
-      .map((r) => <MongoDoc<T>>r.json())
-      .catch((e) => this.raiseTextError<MongoDoc<T>>(e));
+    return this.http.patch(url.href, JSON.stringify(bodyObj), this.getRequestOptions(etag))
+      .switchMap((r) => this.getOne<T>(collection, id))
+      .catch((e) => this.raiseTextError<MongoDoc<T>>(e))
   }
 }
 

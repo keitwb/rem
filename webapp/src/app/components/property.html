@@ -1,11 +1,7 @@
-<form [formGroup]="propForm" (ngSubmit)="onSubmit()" novalidate>
-  <div *ngIf="!editing">
-    <h2 *ngIf="!editing">{{ property.name }}</h2>
-    <span (click)="toggleEdit()">Edit</span>
-  </div>
-  <div *ngIf="editing">
-    <input formControlName="name">
-    <button type="submit">Save</button>
-    <p (click)="toggleEdit()">Cancel</p>
-  </div>
-</form>
+<div class="d-flex flex-column" *ngIf="property">
+  <rem-editable-text (edit)="save($event)" [obj]="property" property="name" elm="h3"></rem-editable-text>
+  <rem-editable-text (edit)="save($event)" [obj]="property" property="description"></rem-editable-text>
+</div>
+<div *ngIf="!property">
+  Loading...
+</div>
