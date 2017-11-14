@@ -1,0 +1,1 @@
+export {AlwaysFocusDirective} from './autofocus';

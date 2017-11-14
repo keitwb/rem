@@ -1,39 +1,90 @@
 import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'rem-editable-text',
   template: `
-    <div (mouseenter)="showEditButton=true" (mouseleave)="showEditButton=false">
-      <div *ngIf="editing" [delayClickOutsideInit]="true" (clickOutside)="toggleEditing()">
-        <input type="text" value="{{obj[property]}}" #textinput />
-        <button type="button" class="btn btn-link btn-sm px-0 mx-0" (click)="save(textinput.value)">Save</button>
+    <div class="d-flex d-flex-row position-relative" (mouseenter)="showEditButton=true" (mouseleave)="showEditButton=false">
+      <div *ngIf="editing" class="d-flex flex-row position-absolute" style="z-index:9999;" [delayClickOutsideInit]="true" (clickOutside)="toggleEditing()">
+        <input type="text"
+          class="form-control border"
+          alwaysfocus
+          [class.border-danger]="!!error"
+          value="{{value}}"
+          placeholder="{{placeholder}}"
+          (keyup.escape)="toggleEditing()"
+          (keyup.enter)="doSave(textinput.value)"
+          style="width: 300px"
+          #textinput />
+        <div class="text-danger bg-light p-1" *ngIf="!!error">{{error}}</div>
+        <button type="button" class="btn btn-link btn-sm px-0 mx-0" (click)="doSave(textinput.value)">Save</button>
       </div>
-      <div class="d-flex" *ngIf="!editing">
-        <div #content [class.border]="showEditButton" style="padding-right: 30px;" *ngIf="!editing">
-          <h3 *ngIf="elm=='h3'">{{obj[property]}}</h3>
-          <span *ngIf="elm=='span' || !elm">{{obj[property]}}</span>
+      <div class="d-flex flex-row position-relative" #editParent *ngIf="!editing">
+        <div *ngIf="value">
+          <h3 *ngIf="elm=='h3'">{{value}}</h3>
+          <span *ngIf="elm=='span' || !elm">{{value}}</span>
         </div>
-        <button class="btn btn-link btn-sm px-0 my-0" (click)="toggleEditing()" style="margin-left: -30px;" *ngIf="showEditButton">Edit</button>
+        <div *ngIf="showEditButton" class="position-absolute border w-100 h-100"></div>
+        <button class="btn btn-link btn-sm px-0 py-0 my-0 position-absolute" style="z-index: 9999; background-color:rgba(255,255,255,0.8)" [style.bottom]="editTop+'px'" (click)="toggleEditing()" *ngIf="showEditButton || (!value && !placeholder)">Edit</button>
       </div>
+      <div class="font-italic text-muted" *ngIf="!value && placeholder">{{placeholder}}</div>
     </div>
   `,
 })
 export class EditableTextComponent<T> {
-  @Input() obj: T;
-  @Input() property: string;
+  @Input() value: T;
   @Input() elm: string;
-  @Output() edit = new EventEmitter<[string, any]>();
+  @Input() placeholder: string;
+  @Input() validator: TextValidator;
+  @Input() valType: "string" | "float" | "integer";
+  @Output() edit = new EventEmitter<any>();
 
-  @ViewChild("content") textNode: ElementRef;
+  @ViewChild('textinput') input: ElementRef;
+
+  @ViewChild('editParent')
+  set editParent(elm: ElementRef) {
+    this.editTop = elm.nativeElement.offsetHeight;
+  }
+
   editing: boolean;
+  editTop: Number;
   showEditButton: boolean;
+  error: string;
 
-  save(text: string) {
-    this.edit.emit([this.property, text]);
+  doSave(text: string) {
+    if (this.validator) {
+      const [valid, error] = this.validator(text);
+      if (!valid) {
+        this.error = error;
+        return;
+      }
+    }
+
+    var val: any;
+    if (text.length == 0) {
+      val = null;
+    } else if (this.valType === "float" || this.valType === "integer") {
+      const num = _.toNumber(text);
+      if (this.valType === "integer" && !_.isInteger(num)) {
+        this.error = "Input must be a round number";
+        return;
+      } else if (this.valType === "float" && !_.isFinite(num)) {
+        this.error = "Input must be a number";
+        return;
+      }
+      val = num;
+    } else {
+      val = text;
+    }
+
+    this.edit.emit(val);
     this.toggleEditing();
   }
 
   toggleEditing() {
+    this.error = null;
     this.editing = !this.editing;
   }
 }
+
+type TextValidator = (string) => [boolean, string];

@@ -13,6 +13,7 @@ import { Component } from '@angular/core';
             <a class="nav-item nav-link" routerLink="/properties">Properties</a>
             <a class="nav-item nav-link" routerLink="/leases">Leases</a>
             <a class="nav-item nav-link" routerLink="/contacts">Contacts</a>
+            <rem-search></rem-search>
           </div>
           <div class="navbar-nav">
             <a class="nav-item nav-link" routerLink="/logout">Logout</a>

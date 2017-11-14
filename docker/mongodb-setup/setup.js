@@ -42,20 +42,7 @@ function main() {
   });
 
   rem.properties.dropIndex("text-search");
-  rem.properties.createIndex({
-    name: "text",
-    description: "text",
-    county: "text",
-    state: "text",
-  }, {
-    name: "text-search",
-    weights: {
-      name: 100,
-      description: 50,
-      county: 10,
-      state: 10,
-    }
-  });
+  rem.properties.createIndex({ "$**": "text" }, {name: "text-search"});
 
   setRelations("properties", [
     {
@@ -66,10 +53,17 @@ function main() {
       "ref-field": "$.leases.[*]",
     },
     {
+      rel: "owners",
+      type: "MANY_TO_MANY",
+      role: "OWNING",
+      "target-coll": "parties",
+      "ref-field": "$.owners.[*].id",
+    },
+    {
       rel: "contacts",
       type: "MANY_TO_MANY",
       role: "OWNING",
-      "target-coll": "contacts",
+      "target-coll": "parties",
       "ref-field": "$.contacts.[*]"
     },
     {
@@ -98,7 +92,7 @@ function main() {
   });
 
   rem.leases.dropIndex("text-search");
-  rem.leases.createIndex({ description: "text" }, {name: "text-search"});
+  rem.leases.createIndex({ "$**": "text" }, {name: "text-search"});
   setRelations("leases", [
     {
       rel: "properties",
@@ -111,7 +105,7 @@ function main() {
       rel: "lessees",
       type: "MANY_TO_MANY",
       role: "OWNING",
-      "target-coll": "contacts",
+      "target-coll": "parties",
       "ref-field": "$.lessees.[*]"
     }
   ]);
@@ -121,31 +115,40 @@ function main() {
 
   rem.runCommand({
      collMod:"parties",
-     validator:{},
+     validator:{ $or: [
+       { "type": { $in: ["person", "company"] } }
+     ]},
      validationLevel:"strict"
   });
 
-  rem.contacts.dropIndex("text-search");
-  rem.contacts.createIndex({ name: "text" }, {name: "text-search"});
+  rem.parties.dropIndex("text-search");
+  rem.parties.createIndex({ "$**": "text" }, {name: "text-search"});
   setRelations("parties", [
     {
-      rel: "properties",
+      rel: "properties-contacts",
       type: "MANY_TO_MANY",
       role: "INVERSE",
       "target-coll": "properties",
       "ref-field": "$.contacts.[*]",
     },
     {
-      rel: "leases",
+      rel: "properties-owned",
+      type: "MANY_TO_MANY",
+      role: "INVERSE",
+      "target-coll": "properties",
+      "ref-field": "$.owners.[*].id",
+    },
+    {
+      rel: "leases-held",
       type: "MANY_TO_MANY",
       role: "INVERSE",
       "target-coll": "leases",
       "ref-field": "$.lessees.[*]"
     },
     {
-      rel: "subParties",
+      rel: "parent-parties",
       type: "MANY_TO_ONE",
-      role: "OWNING",
+      role: "INVERSE",
       "target-coll": "parties",
       "ref-field": "$.subParties.[*]",
     },
@@ -160,15 +163,15 @@ function main() {
   });
 
   rem.notes.dropIndex("text-search");
-  rem.notes.createIndex({ name: "text", note: "text" }, {name: "text-search"});
+  rem.notes.createIndex({ "$**": "text" }, {name: "text-search"});
   setRelations("notes", [
-    //{
-      //rel: "properties",
-      //type: "MANY_TO_ONE",
-      //role: "INVERSE",
-      //"target-coll": "properties",
-      //"ref-field": "$.current.notes",
-    //},
+    {
+      rel: "properties",
+      type: "MANY_TO_ONE",
+      role: "INVERSE",
+      "target-coll": "properties",
+      "ref-field": "$.notes.[*]",
+    },
     {
       rel: "leases",
       type: "MANY_TO_ONE",
@@ -177,10 +180,10 @@ function main() {
       "ref-field": "$.notes.[*]"
     },
     {
-      rel: "contacts",
+      rel: "parties",
       type: "MANY_TO_ONE",
       role: "INVERSE",
-      "target-coll": "contacts",
+      "target-coll": "parties",
       "ref-field": "$.notes.[*]"
     }
   ]);
@@ -194,6 +197,8 @@ function main() {
      validationLevel:"strict"
   });
 
+  rem.media.files.dropIndex("text-search");
+  rem.media.files.createIndex({ "$**": "text" }, {name: "text-search"});
   rem.media.files.dropIndex("name-date");
   rem.media.files.createIndex({ filename: 1, uploadDate: 1 }, {name: "name-date"});
   setRelations("media.files", [

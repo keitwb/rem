@@ -10,7 +10,6 @@ import * as _                                      from 'lodash';
 import {SortOrder}                                 from '.';
 import {ModelUpdate} from './updates';
 import {AppConfig}                                 from 'app/config';
-import {Model}                                 from 'app/models';
 
 export type MongoID = { $oid: string };
 
@@ -158,7 +157,7 @@ export class MongoVersioningClient {
 
   getOne<T>(collection: string, id: MongoID): Observable<MongoDoc<T>> {
     const url = this.getUrl(`${collection}/${id.$oid}`);
-    return this.http.get(url.href).map((r) => r.json());
+    return this.http.get(url.href).map(r => r.json());
   }
 
   create<T>(collection: string, obj: T): Observable<MongoDoc<T>> {
@@ -182,7 +181,7 @@ export class MongoVersioningClient {
   }
 
   update<T>(collection: string, id: MongoID, etag: ETag, updates: ModelUpdate[]): Observable<MongoDoc<T>> {
-    const path = `${collection}/${id}`;
+    const path = `${collection}/${id.$oid}`;
     const bodyObj = _.merge({}, ..._.map(updates, u => u.updateObj));
 
     const url = this.getUrl(path);

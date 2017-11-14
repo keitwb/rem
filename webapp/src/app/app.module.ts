@@ -15,16 +15,22 @@ import { reducers, initialState } from './store/reducers';
 import * as effects               from './store/effects';
 import * as components            from './components';
 import * as containers            from './containers';
+import * as directives            from './directives';
 import { MongoVersioningClient }  from './services';
 import { AppConfig }              from './config';
 
 @NgModule({
   declarations: [
     components.EditableTextComponent,
+    components.EditableSingleValueComponent,
     components.PropertyListComponent,
     components.PropertyComponent,
+    components.SearchBarComponent,
     containers.AppComponent,
+    containers.PropertiesComponent,
     containers.PropertyPageComponent,
+    containers.SearchComponent,
+    directives.AlwaysFocusDirective,
   ],
   imports: [
     StoreModule.forRoot(reducers, {initialState: initialState}),

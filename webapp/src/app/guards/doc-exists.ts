@@ -29,11 +29,12 @@ export class DocExistsGuard implements CanActivate {
       .switchMap(inStore => {
         if (inStore) return of(inStore);
 
-        const action = new RequestOneAction({ collection: 'properties', id: route.params['id']})
+        const action = new RequestOneAction({ collection: 'properties', id: {$oid: route.params['id']}})
         this.store.dispatch(action);
+
         return this.store
           .select(selectors.getQueryResult('properties')(action.queryId))
-          .filter(qr => qr.inProgress)
+          .filter(qr => !qr.inProgress)
           .map(qr => !qr.fetchError)
       }).catch(() => {
         this.router.navigate(['/404']);

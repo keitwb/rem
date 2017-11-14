@@ -10,7 +10,7 @@ const appRoutes: Routes = [
     component: containers.PropertyPageComponent,
     canActivate: [guards.DocExistsGuard],
   },
-  { path: 'properties',     component: components.PropertyListComponent },
+  { path: 'properties',     component: containers.PropertiesComponent },
   //{ path: 'properties/new', component: PropertyCreateComponent },
   { path: '', redirectTo: '/properties', pathMatch: 'full' },
   { path: '**', redirectTo: '' }

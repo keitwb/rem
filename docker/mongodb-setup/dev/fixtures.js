@@ -30,10 +30,11 @@ upsert("properties", [
     county:       "Pender",
     state:        "NC",
     propType:     "land",
-    owners:       [ID(1), ID(2)],
+    owners:       [{id: ID(1), portion: 50}, {id: ID(2), portion: 50}],
     pinNumbers:   ["123-45-678"],
     notes:        [ID(1), ID(2)],
     leases:       [ID(1), ID(2)],
+    contacts:     [ID(1)],
     _updates: [
       {
         type: "push",
@@ -122,7 +123,7 @@ upsert("notes", [
   }
 ]);
 
-upsert("contacts", [
+upsert("parties", [
   {
     _id: ID(1),
     createdDate: new Date("2017-01-01"),
