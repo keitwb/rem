@@ -47,6 +47,20 @@ export class DBEffects {
     });
 
   @Effect()
+  create$ = this.actions$
+    .ofType(db.CREATE)
+    .switchMap((action: db.CreateAction) => {
+      const {collection, createId, model} = action.payload;
+
+      const nextRequest$ = this.actions$.ofType(db.CREATE).skip(1);
+
+      return this.mongo.create(collection, model)
+        .takeUntil(nextRequest$)
+        .map(doc => new db.CreateSuccessAction({collection, createId, doc}))
+        .catch(error => Observable.of(new db.CreateFailureAction({error, createId, collection})));
+    });
+
+  @Effect()
   update$ = this.actions$
     .ofType(db.UPDATE)
     .switchMap((action: db.UpdateAction) => {
@@ -56,8 +70,8 @@ export class DBEffects {
 
       return this.mongo.update(collection, id, etag, [update])
         .takeUntil(nextRequest$)
-        .map(doc => new db.PersistSuccessAction({collection, doc}))
-        .catch(error => Observable.of(new db.PersistFailureAction({error, collection, id})));
+        .map(doc => new db.UpdateSuccessAction({collection, doc}))
+        .catch(error => Observable.of(new db.UpdateFailureAction({error, collection, id})));
     });
 
   constructor(private actions$: Actions, private mongo: MongoVersioningClient) { }

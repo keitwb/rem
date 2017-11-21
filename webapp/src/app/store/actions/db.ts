@@ -11,9 +11,12 @@ export const REQUEST_SUCCESS = '[Mongo] Request Success';
 export const REQUEST_ONE_SUCCESS = '[Mongo] Request One Success';
 export const REQUEST_MANY_SUCCESS = '[Mongo] Request Many Success';
 export const REQUEST_FAILURE = '[Mongo] Request Failed';
+export const CREATE = '[Mongo] Create';
+export const CREATE_SUCCESS = '[Mongo] Create Success';
+export const CREATE_FAILURE = '[Mongo] Create Failure';
 export const UPDATE = '[Mongo] Update';
-export const PERSIST_SUCCESS = '[Mongo] Persist Success';
-export const PERSIST_FAILURE = '[Mongo] Persist Failure';
+export const UPDATE_SUCCESS = '[Mongo] Update Success';
+export const UPDATE_FAILURE = '[Mongo] Update Failure';
 
 export interface RequestManyPayload {
   collection: string;
@@ -73,24 +76,43 @@ export class RequestFailureAction implements Action {
   constructor(public payload: {error: string, queryId: string, collection: string}) { }
 }
 
+export class CreateAction implements Action {
+  readonly type = CREATE;
+
+  constructor(public payload: {collection: string, createId: string, model: any}) { }
+}
+
+export class CreateSuccessAction implements Action {
+  readonly type = CREATE_SUCCESS;
+
+  constructor(public payload: {collection: string, createId: string, doc: MongoDoc<any>}) { }
+}
+
+export class CreateFailureAction implements Action {
+  readonly type = CREATE_FAILURE;
+
+  constructor(public payload: {collection: string, createId: string, error: string}) { }
+}
+
 export class UpdateAction implements Action {
   readonly type = UPDATE;
 
   constructor(public payload: {collection: string, id: MongoID, etag: ETag, update: ModelUpdate}) { }
 }
 
-export class PersistSuccessAction implements Action {
-  readonly type = PERSIST_SUCCESS;
+export class UpdateSuccessAction implements Action {
+  readonly type = UPDATE_SUCCESS;
 
   constructor(public payload: {collection: string, doc: MongoDoc<any>}) { }
 }
 
-export class PersistFailureAction implements Action {
-  readonly type = PERSIST_FAILURE;
+export class UpdateFailureAction implements Action {
+  readonly type = UPDATE_FAILURE;
 
   constructor(public payload: {error: string, collection: string, id: MongoID}) { }
 }
 
 export type Actions = RequestManyAction | RequestOneAction |
   RequestManySuccessAction | RequestOneSuccessAction | RequestFailureAction |
-  UpdateAction | PersistSuccessAction | PersistFailureAction;
+  CreateAction | CreateSuccessAction | CreateFailureAction |
+  UpdateAction | UpdateSuccessAction | UpdateFailureAction;

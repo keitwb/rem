@@ -6,6 +6,7 @@ import * as containers           from './containers';
 import * as guards from './guards';
 
 const appRoutes: Routes = [
+  { path: 'properties/create', component: containers.NewPropertyComponent },
   { path: 'properties/:id',
     component: containers.PropertyPageComponent,
     canActivate: [guards.DocExistsGuard],

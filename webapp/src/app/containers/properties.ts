@@ -15,6 +15,7 @@ import { SortOrder, MongoDoc }         from 'app/services/index';
 @Component({
   selector: 'rem-properties',
   template: `
+    <rem-property-toolbar></rem-property-toolbar>
     <rem-property-list [properties]="displayedProperties"></rem-property-list>
   `,
   styles: [`

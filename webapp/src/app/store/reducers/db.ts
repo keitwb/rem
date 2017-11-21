@@ -16,7 +16,8 @@ export type MongoDocs<T> = {[id:string]: MongoDoc<T>};
 export interface ModelState<T> {
   docs: MongoDocs<T>;
   queryResults: {[queryId:string]: QueryResult};
-  persistResults: {[id:string]: PersistResult};
+  updateResults: {[id:string]: PersistResult};
+  createResults: {[createId:string]: CreateResult};
 }
 
 export interface State {
@@ -33,7 +34,11 @@ export interface PersistResult {
   error: string;
 }
 
-const defaultModelState = {docs: {}, queryResults: {}, persistResults: {}};
+export interface CreateResult extends PersistResult {
+  docId: string;
+}
+
+const defaultModelState = {docs: {}, queryResults: {}, updateResults: {}, createResults: {}};
 
 export const initialState: State = {
   users:            defaultModelState,
@@ -111,11 +116,57 @@ export function reducer(state, action: dbActions.Actions): State {
         },
       }};
 
+
+
+    case dbActions.CREATE:
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          createResults: {...state[collection].createResults,
+            inProgress: true,
+            error: undefined,
+          },
+        },
+      }};
+
+    case dbActions.CREATE_SUCCESS:
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          docs: {...state[collection].docs, [action.payload.doc._id.$oid]: doc},
+          createResults: {...state[collection].createResults,
+            [action.payload.createId]: {
+              inProgress: false,
+              error: null,
+              docId: action.payload.doc._id.$oid,
+            },
+          }
+        },
+      }};
+
+    case dbActions.CREATE_FAILURE:
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          createResults: {...state[collection].createResults,
+            [action.payload.createId]: {
+              inProgress: false,
+              error: action.payload.error,
+              docId: undefined,
+            },
+          }
+        },
+      }};
+
+
+
+
+
     case dbActions.UPDATE:
       return {...state, ...{
         [collection]: {
           ...state[collection],
-          persistResults: {...state[collection].persistResults,
+          updateResults: {...state[collection].updateResults,
             [action.payload.id.$oid]: {
               inProgress: true,
               error: undefined,
@@ -124,13 +175,13 @@ export function reducer(state, action: dbActions.Actions): State {
         },
       }};
 
-    case dbActions.PERSIST_SUCCESS:
+    case dbActions.UPDATE_SUCCESS:
       doc = action.payload.doc;
       return {...state, ...{
         [collection]: {
           ...state[collection],
           docs: {...state[collection].docs, [doc._id.$oid]: doc},
-          persistResults: {...state[collection].persistResults,
+          updateResults: {...state[collection].updateResults,
             [doc._id.$oid]: {
               inProgress: false,
               error: null,
@@ -139,11 +190,11 @@ export function reducer(state, action: dbActions.Actions): State {
         },
       }};
 
-    case dbActions.PERSIST_FAILURE:
+    case dbActions.UPDATE_FAILURE:
       return {...state, ...{
         [collection]: {
           ...state[collection],
-          persistResults: {...state[collection].persistResults,
+          updateResults: {...state[collection].updateResults,
             [action.payload.id.$oid]: {
               inProgress: false,
               error: action.payload.error,

@@ -1,6 +1,6 @@
 <div class="d-flex flex-column" *ngIf="property">
   <rem-editable-text (edit)="save('name', $event)" [value]="property.name" elm="h3"></rem-editable-text>
-  <rem-editable-text (edit)="save('description', $event)" [value]="property.description"></rem-editable-text>
+  <rem-editable-text (edit)="save('description', $event)" [value]="property.description" placeholder="Description"></rem-editable-text>
   <div class="d-flex flex-row">
     <span>Acreage:</span><rem-editable-text (edit)="save('acreage', $event)" [value]="property.acreage" valType="float"></rem-editable-text>
   </div>

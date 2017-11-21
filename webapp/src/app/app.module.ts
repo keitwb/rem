@@ -4,10 +4,9 @@ import { EffectsModule }        from '@ngrx/effects';
 import { StoreModule }          from "@ngrx/store";
 import { StoreDevtoolsModule }  from '@ngrx/store-devtools';
 import { CommonModule }         from '@angular/common';
-import { ReactiveFormsModule }  from '@angular/forms';
+import { ReactiveFormsModule, FormsModule }  from '@angular/forms';
 import { HttpModule }           from '@angular/http';
 import { RouterModule, Routes } from '@angular/router';
-import { NgbModule }            from '@ng-bootstrap/ng-bootstrap';
 import { ClickOutsideModule } from 'ng-click-outside';
 
 import { AppRoutingModule }       from './app-routing.module';
@@ -16,20 +15,24 @@ import * as effects               from './store/effects';
 import * as components            from './components';
 import * as containers            from './containers';
 import * as directives            from './directives';
-import { MongoVersioningClient }  from './services';
+import { MongoVersioningClient, SearchClient }  from './services';
 import { AppConfig }              from './config';
 
 @NgModule({
   declarations: [
     components.EditableTextComponent,
     components.EditableSingleValueComponent,
-    components.PropertyListComponent,
+    components.SelectComponent,
     components.PropertyComponent,
+    components.PropertyCreateComponent,
+    components.PropertyListComponent,
+    components.PropertyToolbarComponent,
     components.SearchBarComponent,
     containers.AppComponent,
     containers.PropertiesComponent,
     containers.PropertyPageComponent,
     containers.SearchComponent,
+    containers.NewPropertyComponent,
     directives.AlwaysFocusDirective,
   ],
   imports: [
@@ -43,11 +46,11 @@ import { AppConfig }              from './config';
     RouterModule,
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     HttpModule,
-    NgbModule.forRoot(),
     ClickOutsideModule,
   ],
-  providers: [ AppConfig, MongoVersioningClient ],
+  providers: [ AppConfig, MongoVersioningClient, SearchClient ],
   bootstrap: [containers.AppComponent]
 })
 export class AppModule { }

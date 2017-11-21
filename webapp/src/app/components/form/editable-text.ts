@@ -19,15 +19,15 @@ import * as _ from 'lodash';
         <div class="text-danger bg-light p-1" *ngIf="!!error">{{error}}</div>
         <button type="button" class="btn btn-link btn-sm px-0 mx-0" (click)="doSave(textinput.value)">Save</button>
       </div>
-      <div class="d-flex flex-row position-relative" #editParent *ngIf="!editing">
+      <div class="d-flex flex-row position-relative" *ngIf="!editing">
         <div *ngIf="value">
           <h3 *ngIf="elm=='h3'">{{value}}</h3>
           <span *ngIf="elm=='span' || !elm">{{value}}</span>
         </div>
         <div *ngIf="showEditButton" class="position-absolute border w-100 h-100"></div>
-        <button class="btn btn-link btn-sm px-0 py-0 my-0 position-absolute" style="z-index: 9999; background-color:rgba(255,255,255,0.8)" [style.bottom]="editTop+'px'" (click)="toggleEditing()" *ngIf="showEditButton || (!value && !placeholder)">Edit</button>
+        <button class="btn btn-link btn-sm px-0 py-0 my-0 position-absolute" style="z-index: 9999; background-color:rgba(255,255,255,0.8); top: 0;" [style.transform]="this.value || this.placeholder ? 'translateY(-100%)' : ''" (click)="toggleEditing()" *ngIf="showEditButton || (!value && !placeholder)">Edit</button>
+        <div class="font-italic text-muted" *ngIf="!value && placeholder">{{placeholder}}</div>
       </div>
-      <div class="font-italic text-muted" *ngIf="!value && placeholder">{{placeholder}}</div>
     </div>
   `,
 })
@@ -41,13 +41,7 @@ export class EditableTextComponent<T> {
 
   @ViewChild('textinput') input: ElementRef;
 
-  @ViewChild('editParent')
-  set editParent(elm: ElementRef) {
-    this.editTop = elm.nativeElement.offsetHeight;
-  }
-
   editing: boolean;
-  editTop: Number;
   showEditButton: boolean;
   error: string;
 

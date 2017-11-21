@@ -6,7 +6,7 @@ import * as updates   from 'app/services/updates';
 
 @Component({
   selector:    'rem-property',
-  templateUrl: './property.html',
+  templateUrl: './detail.html',
   //styles:   []
 })
 export class PropertyComponent {

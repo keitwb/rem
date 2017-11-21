@@ -12,6 +12,10 @@ export const selectModelState = M((collection: string) =>
 export const getQueryResult = M((collection: string) => M((queryId: string) =>
   createSelector(selectModelState(collection), <T>(ms: db.ModelState<T>) => ms.queryResults[queryId])));
 
+// Get the result of a creation action
+export const getCreateResult = M((collection: string) => M((createId: string) =>
+  createSelector(selectModelState(collection), <T>(ms: db.ModelState<T>) => ms.createResults[createId])));
+
 export const getModelDocs = M((collection: string) =>
   createSelector(selectModelState(collection), <T>(ms: db.ModelState<T>) => ms.docs));
 
