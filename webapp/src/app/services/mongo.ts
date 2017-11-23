@@ -1,9 +1,15 @@
-import { Observable }                              from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/observable/concat';
+import 'rxjs/add/observable/defer';
+import 'rxjs/add/observable/from';
+import 'rxjs/add/observable/empty';
+import { Observable }                              from 'rxjs/Observable';
+import { Subject }                              from 'rxjs/Subject';
 import { Injectable }                              from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import * as _                                      from 'lodash';
@@ -28,9 +34,9 @@ interface MongoUpdate {
 }
 
 export interface ListResult<T> {
-  docs:       MongoDoc<T>[];
-  size:       number;
-  totalPages: number;
+  _returned:       MongoDoc<T>[];
+  _size:       number;
+  _totalPages: number;
 }
 
 interface Rel {
@@ -74,7 +80,7 @@ class LinkManager {
 }
 
 @Injectable()
-export class MongoVersioningClient {
+export class MongoClient {
   private linkManager: LinkManager
   private baseUrl: URL;
 
@@ -135,11 +141,46 @@ export class MongoVersioningClient {
       .map((r) => r.json())
   }
 
-  getList<T>(collection: string, params: {filter: object, page: number, pageSize: number, sortBy: string, sortOrder: SortOrder}): Observable<ListResult<T>> {
+  getAggregation<T>(collection: string, name: string, params: object): [Observable<number>, Observable<T>] {
+    const url = this.getUrl(`${collection}/_aggrs/${name}`);
+    url.searchParams.set("avars", JSON.stringify(params));
+    return this.streamEmbeddedDocs(url);
+  }
+
+  streamEmbeddedDocs<T>(url: URL): [Observable<number>, Observable<T>] {
+    const self = this;
+    const sizeObs = new Subject<number>();
+
+    function fetchLazily({page, pageSize}: {page: number, pageSize: number}): Observable<T> {
+      const pageUrl = new URL(url.href);
+      pageUrl.searchParams.set("page", String(page));
+      pageUrl.searchParams.set("pagesize", String(pageSize));
+
+      return Observable.defer(() => {
+        const page$ = self.http.get(pageUrl.href).map(r => r.json())
+
+        return page$.mergeMap(resp => {
+          const doc$: Observable<T> = Observable.from(resp._embedded);
+          const nextPage = page + 1;
+          const next$ = resp._total_pages >= nextPage
+                          ? fetchLazily({page: nextPage, pageSize})
+                          : Observable.empty<T>();
+
+          if (page === 1) {
+            sizeObs.next(resp._size);
+            sizeObs.complete();
+          }
+          return Observable.concat(doc$, next$);
+        });
+      });
+    };
+
+    return [sizeObs, fetchLazily({page: 1, pageSize: 10})];
+  }
+
+  getList<T>(collection: string, params: {filter: object, sortBy: string, sortOrder: SortOrder}): [Observable<number>, Observable<T>] {
     const ordering_flag = params.sortOrder == "asc" ? "" : "-1";
     const url = this.getUrl(collection);
-    url.searchParams.set("page", String(params.page));
-    url.searchParams.set("pagesize", String(params.pageSize));
     url.searchParams.set("sort_by", params.sortBy);
     // This makes it return pagination stats
     url.searchParams.set("count", "");
@@ -147,13 +188,7 @@ export class MongoVersioningClient {
       url.searchParams.set("filter", JSON.stringify(params.filter));
     }
 
-    return this.http.get(url.href)
-      .map(r => r.json())
-      .map(o => ({
-        docs: o._embedded,
-        size: o._size,
-        totalPages: o._total_pages,
-      }));
+    return this.streamEmbeddedDocs<T>(url);
   }
 
   getOne<T>(collection: string, id: MongoID): Observable<MongoDoc<T>> {

@@ -6,16 +6,17 @@ import { Subscription }      from 'rxjs/Subscription';
 import { Store }             from '@ngrx/store';
 
 import { AppState }          from 'app/store/reducers';
-import { getDocsLazily }     from 'app/store/paginator';
 
 import { Property }          from 'app/models';
 import * as selectors        from 'app/store/selectors';
-import { SortOrder, MongoDoc }         from 'app/services/index';
+import { SortOrder, MongoDoc, MongoClient }         from 'app/services/index';
 
 @Component({
   selector: 'rem-properties',
   template: `
-    <rem-property-toolbar></rem-property-toolbar>
+    <div class="py-2">
+      <rem-property-toolbar [totalCount]="size$ | async"></rem-property-toolbar>
+    </div>
     <rem-property-list [properties]="displayedProperties"></rem-property-list>
   `,
   styles: [`
@@ -27,18 +28,18 @@ import { SortOrder, MongoDoc }         from 'app/services/index';
 export class PropertiesComponent implements OnInit {
   displayedProperties: MongoDoc<Property>[];
   properties$: Observable<MongoDoc<Property>>;
+  size$: Observable<number>;
   propSub: Subscription;
 
   filter: object;
   sortBy: string = "name";
   sortOrder: SortOrder = "asc";
 
-  constructor(private store: Store<AppState>, private router: Router) { }
+  constructor(private mongo: MongoClient, private router: Router) { }
 
   ngOnInit() {
     this.displayedProperties = [];
-    this.properties$ = getDocsLazily<Property>(this.store, {
-      collection: Property.collection,
+    [this.size$, this.properties$] = this.mongo.getList<MongoDoc<Property>>(Property.collection, {
       filter: this.filter,
       sortBy: this.sortBy,
       sortOrder: this.sortOrder});

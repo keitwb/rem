@@ -15,7 +15,7 @@ import * as effects               from './store/effects';
 import * as components            from './components';
 import * as containers            from './containers';
 import * as directives            from './directives';
-import { MongoVersioningClient, SearchClient }  from './services';
+import { MongoClient, SearchClient, SuggestorService }  from './services';
 import { AppConfig }              from './config';
 
 @NgModule({
@@ -50,7 +50,12 @@ import { AppConfig }              from './config';
     HttpModule,
     ClickOutsideModule,
   ],
-  providers: [ AppConfig, MongoVersioningClient, SearchClient ],
+  providers: [
+    AppConfig,
+    MongoClient,
+    SearchClient,
+    SuggestorService,
+  ],
   bootstrap: [containers.AppComponent]
 })
 export class AppModule { }

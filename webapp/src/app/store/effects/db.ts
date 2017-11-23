@@ -11,26 +11,10 @@ import { Observable }                 from 'rxjs/Observable';
 import { empty }                      from 'rxjs/observable/empty';
 import { of }                         from 'rxjs/observable/of';
 import * as db                        from 'app/store/actions/db';
-import { MongoVersioningClient }      from 'app/services/mongo';
+import { MongoClient }      from 'app/services/mongo';
 
 @Injectable()
 export class DBEffects {
-
-  @Effect()
-  requestMany$ = this.actions$
-    .ofType(db.REQUEST_MANY)
-    .switchMap((action: db.RequestManyAction) => {
-      const {collection, filter, page, pageSize, sortBy, sortOrder} = action.payload;
-      const queryId = action.queryId;
-      const nextRequest$ = this.actions$.ofType(db.REQUEST_MANY).skip(1);
-
-      return this.mongo.getList(collection, {filter, page, pageSize, sortBy, sortOrder})
-        .takeUntil(nextRequest$)
-        .map(listRes => new db.RequestManySuccessAction({
-          collection, filter, page, pageSize, sortBy, sortOrder, queryId, ...listRes,
-        }))
-        .catch(error => Observable.of(new db.RequestFailureAction({error, queryId, collection})));
-    });
 
   @Effect()
   requestOne$ = this.actions$
@@ -74,5 +58,5 @@ export class DBEffects {
         .catch(error => Observable.of(new db.UpdateFailureAction({error, collection, id})));
     });
 
-  constructor(private actions$: Actions, private mongo: MongoVersioningClient) { }
+  constructor(private actions$: Actions, private mongo: MongoClient) { }
 }

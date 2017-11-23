@@ -1,7 +1,7 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core';
 
-import { MongoDoc }   from 'app/services/mongo';
 import { Property }   from 'app/models';
+import { MongoDoc }   from 'app/services/index';
 import * as updates   from 'app/services/updates';
 
 @Component({

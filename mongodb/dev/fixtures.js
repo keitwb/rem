@@ -67,6 +67,21 @@ upsert("properties", [
       },
     ]
   },
+  {
+    _id: ID(3),
+    createdDate:  new Date("2017-06-01"),
+    createdBy:    ID(1),
+    name:         "Industrial Complex",
+    description:  "Manufacturing building off the highway",
+    acreage:      5,
+    county:       "Cumberland",
+    state:        "NC",
+    propType:     "commercial",
+    pinNumbers:   ["123-45-678"],
+    leases:       [],
+    _updates: [
+    ]
+  },
 ]);
 
 upsert("leases", [

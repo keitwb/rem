@@ -12,7 +12,7 @@ services:
       - mongodata:/data/db
 
   mongodb-setup:
-    build: docker/mongodb-setup
+    build: mongodb
     depends_on:
       - mongodb
     restart: on-failure

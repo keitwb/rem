@@ -9,7 +9,7 @@ type ChoiceDisplay = string;
   template: `
   <div>
     <div (click)="toggleChoices()" class="toggle">{{displayTextFor(value)}}</div>
-    <div class="position-absolute" id="choices" *ngIf="showChoices">
+    <div class="position-absolute" id="choices" *ngIf="showChoices" [delayClickOutsideInit]="true" (clickOutside)="toggleChoices()">
       <ul>
         <li *ngFor="let choice of choices; let last = last" class="border" [class.border-bottom-0]="!last" (click)="select(choice[1])">{{choice[0]}}</li>
       </ul>

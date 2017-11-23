@@ -6,6 +6,7 @@ export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
 export type TimeUnit = "months" | "years" | "quarters";
 export type PropertyType = "land" | "commercial" | "residential";
 export type PartyType = "person" | "business";
+export type State = "NC" | "SC";
 
 export interface Model {}
 
