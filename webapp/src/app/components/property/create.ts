@@ -8,7 +8,7 @@ import { SuggestorService } from 'app/services/suggestor';
   selector: 'rem-property-create',
   template: `
   <ng-container>
-    <form [formGroup]="form" noValidate>
+    <form [formGroup]="form" novalidate>
       <div class="form-group">
         <label>Name</label>
         <input class="form-control" formControlName="name">
@@ -17,16 +17,18 @@ import { SuggestorService } from 'app/services/suggestor';
         <label>Description</label>
         <input class="form-control" formControlName="description">
       </div>
-      <div class="form-group">
-        <label>Type</label>
-        <rem-select formControlName="propType" [choices]="propTypeChoices" placeholder="Select a type"></rem-select>
-      </div>
       <div class="form-row">
-        <div class="col-md-6">
-          <label>County</label>
-          <input formControlName="county" suggestions="suggestor.suggestCounties" class="form-control" placeholder="County">
+        <div class="col-md-2">
+          <label>Type</label>
+          <rem-select formControlName="propType" [choices]="propTypeChoices" placeholder="Select a type"></rem-select>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-5">
+          <label>County</label>
+          <rem-suggestor [provider]="suggestor.suggestCounties.bind(suggestor)">
+            <input formControlName="county" class="form-control" placeholder="County">
+          </rem-suggestor>
+        </div>
+        <div class="col-md-5">
           <label>State</label>
           <rem-select formControlName="state" [choices]="stateChoices" placeholder="State"></rem-select>
         </div>

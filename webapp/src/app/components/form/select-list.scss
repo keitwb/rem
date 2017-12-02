@@ -1,36 +1,37 @@
 @import 'bootstrap';
 
-.top {
-  padding: 0.5em;
+div {
+  z-index: 9999;
 }
 
-#choices {
-  z-index: 9999;
+ul {
+  padding: 0;
+  margin: 0;
 }
 
 li {
   list-style: none;
-  padding: 0.5em;
+  padding: 0.5em 0.9em;
   opacity: 100;
   background-color: white;
+  border: 1px solid #d6d6d6;
+  box-shadow: 0 2px 4px rgba(0,0,0,.16);
 }
 
-li:hover {
-  background-color: $gray-100;
+.not-last {
+  border-bottom: 0;
 }
 
-.toggle {
-  position: relative;
+$active-color: theme-color-level("primary", -10);
+
+li.active {
+  background-color: $active-color;
 }
 
 .toggle::after {
   display:inline-block;
-  position: absolute;
   width:0;
   height:0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
   opacity: 100;
   margin-left:.255em;
   vertical-align:.255em;
@@ -39,8 +40,4 @@ li:hover {
   border-right:.3em solid transparent;
   border-bottom:0;
   border-left:.3em solid transparent
-}
-
-:host(.ng-invalid) > div {
-  border: 1px solid $red;
 }

@@ -7,18 +7,14 @@ type ChoiceDisplay = string;
 @Component({
   selector: 'rem-select',
   template: `
-  <div>
-    <div (click)="toggleChoices()" class="toggle">{{displayTextFor(value)}}</div>
-    <div class="position-absolute" id="choices" *ngIf="showChoices" [delayClickOutsideInit]="true" (clickOutside)="toggleChoices()">
-      <ul>
-        <li *ngFor="let choice of choices; let last = last" class="border" [class.border-bottom-0]="!last" (click)="select(choice[1])">{{choice[0]}}</li>
-      </ul>
-    </div>
+  <div class="top" tabindex="0" (blur)="ensureHidden()" (focus)="ensureShowing()">
+    <div class="toggle" (click)="ensureShowing($event)">{{displayTextFor(value)}}</div>
+    <rem-select-list (chosen)="select($event)" [value]="value" [choices]="choices" [(show)]="showChoices"></rem-select-list>
   </div>
   `,
   styleUrls: ['./select.scss'],
   providers: [
-    { 
+    {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SelectComponent),
       multi: true
@@ -29,7 +25,7 @@ export class SelectComponent<T> implements ControlValueAccessor {
   @Input() choices: [[ChoiceDisplay, T]];
   @Input() placeholder: string;
 
-  value: T;
+  @Input() value: T;
   _onChange: (any) => void;
   _onTouched: () => void;
   isDisabled: boolean;
@@ -39,7 +35,7 @@ export class SelectComponent<T> implements ControlValueAccessor {
   select(val: T) {
     this.writeValue(val);
     this._onChange(val);
-    this.toggleChoices();
+    this.ensureHidden();
   }
 
   displayTextFor(val: T) {
@@ -55,7 +51,23 @@ export class SelectComponent<T> implements ControlValueAccessor {
   }
 
   toggleChoices() {
+    this._onTouched();
     this.showChoices = !this.showChoices;
+  }
+
+  ensureShowing($event) {
+    console.log("focus");
+    if (!this.showChoices) {
+      this.toggleChoices();
+    }
+    if ($event) $event.stopPropagation();
+  }
+
+  ensureHidden() {
+    console.log("blur");
+    if (this.showChoices) {
+      this.toggleChoices();
+    }
   }
 
   writeValue(obj: any): void {

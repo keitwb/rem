@@ -8,3 +8,6 @@ export * from './search-bar';
 export * from './form/editable-text';
 export * from './form/editable-single-value';
 export * from './form/select';
+export * from './form/select-list';
+export * from './form/suggestor';
+

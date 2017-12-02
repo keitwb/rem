@@ -23,6 +23,8 @@ import { AppConfig }              from './config';
     components.EditableTextComponent,
     components.EditableSingleValueComponent,
     components.SelectComponent,
+    components.SelectListComponent,
+    components.SuggestorComponent,
     components.PropertyComponent,
     components.PropertyCreateComponent,
     components.PropertyListComponent,
