@@ -1,4 +1,4 @@
-FROM nginx:1.13.1
+FROM debian:9 as builder
 
 RUN apt update &&\
     apt install -y curl gnupg2
@@ -21,4 +21,7 @@ RUN ng build --output-path /build/dist --sourcemaps --deploy-url /static --prod 
 # TODO: Make pretty much everything above be in a separate build stage once
 # multistage build is in the mainline Docker
 
+FROM nginx:1.13.1
+
+COPY --from=builder /build/dist/ /build/dist
 COPY docker/nginx.conf /etc/nginx/nginx.conf

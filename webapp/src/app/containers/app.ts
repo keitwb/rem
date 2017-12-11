@@ -11,7 +11,6 @@ import { Component } from '@angular/core';
         <div class="collapse navbar-collapse justify-content-between" id="navbar">
           <div class="navbar-nav">
             <a class="nav-item nav-link" routerLink="/properties">Properties</a>
-            <a class="nav-item nav-link" routerLink="/leases">Leases</a>
             <a class="nav-item nav-link" routerLink="/contacts">Contacts</a>
             <rem-search></rem-search>
           </div>

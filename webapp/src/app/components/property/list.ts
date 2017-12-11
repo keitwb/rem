@@ -21,5 +21,5 @@ import { MongoDoc }         from 'app/services/index';
   `]
 })
 export class PropertyListComponent {
-  @Input() properties: MongoDoc<Property>[];
+  @Input() properties: Property[];
 }

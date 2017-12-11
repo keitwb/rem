@@ -11,9 +11,9 @@ export interface QueryResult {
   fetchError: string,
 }
 
-export type MongoDocs<T> = {[id:string]: MongoDoc<T>};
+export type MongoDocs<T extends MongoDoc> = {[id:string]: T};
 
-export interface ModelState<T> {
+export interface ModelState<T extends MongoDoc> {
   docs: MongoDocs<T>;
   queryResults: {[queryId:string]: QueryResult};
   updateResults: {[id:string]: PersistResult};

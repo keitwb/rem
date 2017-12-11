@@ -26,8 +26,8 @@ import { SortOrder, MongoDoc, MongoClient }         from 'app/services/index';
   `]
 })
 export class PropertiesComponent implements OnInit {
-  displayedProperties: MongoDoc<Property>[];
-  properties$: Observable<MongoDoc<Property>>;
+  displayedProperties: Property[];
+  properties$: Observable<Property>;
   size$: Observable<number>;
   propSub: Subscription;
 
@@ -39,7 +39,7 @@ export class PropertiesComponent implements OnInit {
 
   ngOnInit() {
     this.displayedProperties = [];
-    [this.size$, this.properties$] = this.mongo.getList<MongoDoc<Property>>(Property.collection, {
+    [this.size$, this.properties$] = this.mongo.streamList<Property>(Property.collection, {
       filter: this.filter,
       sortBy: this.sortBy,
       sortOrder: this.sortOrder});

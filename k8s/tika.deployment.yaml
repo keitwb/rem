@@ -1,0 +1,20 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: tika-deployment
+  namespace: rem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tika
+  template:
+    metadata:
+      labels:
+        app: tika
+    spec:
+      containers:
+      - name: tika
+        image: logicalspark/docker-tikaserver
+        ports:
+        - containerPort: 9998

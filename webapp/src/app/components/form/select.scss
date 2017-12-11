@@ -41,6 +41,6 @@ li:hover {
   border-left:.3em solid transparent
 }
 
-:host(.ng-invalid) > div {
+:host(.ng-invalid.ng-touched) > div {
   border: 1px solid $red;
 }

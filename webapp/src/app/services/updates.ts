@@ -1,7 +1,12 @@
+import * as _ from 'lodash';
 
 export interface ModelUpdate {
   updateObj: object;
   type: string;
+}
+
+export function patchWithObject(obj: object): SetFieldUpdate[] {
+  return _.map(_.toPairs(obj), ([k, v]) => set(k, v));
 }
 
 export function set(fieldName: string, value: string): SetFieldUpdate {

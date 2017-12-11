@@ -1,7 +1,7 @@
 version: '2'
 services:
   restheart:
-    build: docker/restheart
+    build: mongodb/restheart
     depends_on:
       - mongodb
 

@@ -33,6 +33,7 @@ upsert("properties", [
     owners:       [{id: ID(1), portion: 50}, {id: ID(2), portion: 50}],
     pinNumbers:   ["123-45-678"],
     notes:        [ID(1), ID(2)],
+    media:        [ID(1)],
     leases:       [ID(1), ID(2)],
     contacts:     [ID(1)],
     _updates: [
@@ -192,14 +193,15 @@ upsert("user", [
 ]);
 
 var fileMetadata = [
-  { filename: "doc1.pdf", meta: { description: "2016 Tax Bill" } }
+  { filename: "doc1.pdf", description: "2016 Tax Bill", tags: ['taxes', 'bills'] },
 ];
 
 fileMetadata.forEach(function(o) {
   var fileDoc = rem.media.files.findOne({filename: o.filename});
-  fileDoc.metadata = Object.assign({}, fileDoc.metadata, o.metadata);
+  Object.assign(fileDoc, o);
+  fileDoc._etag = new ObjectId();
 
-  print("Updating file metadata for " + o.filename);
+  print("Updating file metadata to " + JSON.stringify(fileDoc) + " for " + o.filename);
   if (rem.media.files.updateOne({ _id: fileDoc._id }, {$set: fileDoc}).modifiedCount != 1) {
     throw 'File not found: ' + o.filename;
   }

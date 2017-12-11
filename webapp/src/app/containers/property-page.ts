@@ -15,7 +15,7 @@ import {ModelUpdate} from 'app/services/updates';
 @Component({
   selector: 'rem-property-page',
   template: `
-    <rem-property 
+    <rem-property
       [property]="property$ | async"
       (update)="save($event)"
       >
@@ -34,7 +34,7 @@ export class PropertyPageComponent implements OnInit {
         .select(selectors.getDoc(Property.collection)(params['id'])));
   }
 
-  save({doc, update}: {doc: MongoDoc<Property>, update: ModelUpdate}) {
+  save({doc, update}: {doc: Property, update: ModelUpdate}) {
     this.store.dispatch(new UpdateAction({
       collection: Property.collection,
       id: doc._id,

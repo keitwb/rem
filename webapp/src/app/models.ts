@@ -1,4 +1,5 @@
 import { Observable } from "rxjs/Observable";
+import { MongoDoc, MongoID } from 'app/services/mongo';
 
 export type ID = { $oid: string };
 export type MongoDate = { $date: number };
@@ -14,7 +15,7 @@ export module User {
   export const collection = "users";
 }
 
-export interface User extends Model{
+export interface User extends MongoDoc {
   //static collection = "users";
   username:      string;
   email:         string;
@@ -27,7 +28,7 @@ export module Note {
   export const collection = "notes";
 }
 
-export interface Note {
+export interface Note extends MongoDoc {
   //static collection = "notes";
   note:          string;
   media:         Media[];
@@ -39,7 +40,7 @@ export module Lease {
   export const collection = "leases";
 }
 
-export interface Lease {
+export interface Lease extends MongoDoc {
   leaseType:     LeaseType;
   description:   string;
   properties:    Property[];
@@ -59,16 +60,16 @@ export module Property {
   export const collection = "properties";
 }
 
-export interface Property {
+export interface Property extends MongoDoc {
   //static collection = "properties";
   name:               string;
   description?:       string;
-  leases?:            Observable<Lease[]>;
+  leases?:            MongoID[];
   county?:            string;
   state?:             string;
   acreage?:           number;
   propType?:          PropertyType;
-  owners?:            Observable<Party[]>;
+  owners?:            MongoID[];
   pinNumbers?:        string[];
   latitude?:          string;
   longitude?:         string;
@@ -76,9 +77,9 @@ export interface Property {
   desiredRent?:       number;
   desiredSalesPrice?: number;
   tryingToSell?:      boolean;
-  contacts?:          Observable<Party[]>;
-  notes?:             Observable<Note[]>;
-  media?:             Observable<Media[]>;
+  contacts?:          MongoID[]
+  notes?:             MongoID[];
+  media?:             MongoID[]
   createdDate?:       MongoDate;
   modifiedDate?:      MongoDate;
   modifiedBy?:        User;
@@ -89,7 +90,7 @@ export module Party {
   export const collection = "parties";
 }
 
-export interface Party {
+export interface Party extends MongoDoc {
   //static collection = "parties";
   name:          string;
   type:          PartyType;
@@ -109,13 +110,14 @@ export module Media {
   export const collection = "media.files";
 }
 
-export interface Media {
-  //static collection = "media.files";
-  name:          string;
-  url:           string;
+export interface Media extends MongoDoc {
+  filename:      string;
+  md5:           string;
+  length:        number;
+  contentType:   string;
   description:   string;
-  createdDate?:  MongoDate;
-  modifiedDate?: MongoDate;
-  modifiedBy?:   User;
+  tags:          string[];
+  uploadDate:    MongoDate;
 }
 
+export type CollectionName = string;

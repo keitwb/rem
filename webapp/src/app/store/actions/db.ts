@@ -29,7 +29,7 @@ export interface RequestManyPayload {
 }
 
 interface RequestManySuccessPayload extends RequestManyPayload {
-  docs:       MongoDoc<any>[];
+  docs:       MongoDoc[];
   // The total number of docs across all pages
   size:       number;
   totalPages: number;
@@ -66,7 +66,7 @@ export class RequestOneSuccessAction implements Action {
   readonly type = REQUEST_ONE_SUCCESS;
 
   get queryId() { return this.payload.doc._id.$oid; }
-  constructor(public payload: {collection: string, doc: MongoDoc<any>}) { }
+  constructor(public payload: {collection: string, doc: MongoDoc}) { }
 }
 
 export class RequestFailureAction implements Action {
@@ -85,7 +85,7 @@ export class CreateAction implements Action {
 export class CreateSuccessAction implements Action {
   readonly type = CREATE_SUCCESS;
 
-  constructor(public payload: {collection: string, createId: string, doc: MongoDoc<any>}) { }
+  constructor(public payload: {collection: string, createId: string, doc: MongoDoc}) { }
 }
 
 export class CreateFailureAction implements Action {
@@ -103,7 +103,7 @@ export class UpdateAction implements Action {
 export class UpdateSuccessAction implements Action {
   readonly type = UPDATE_SUCCESS;
 
-  constructor(public payload: {collection: string, doc: MongoDoc<any>}) { }
+  constructor(public payload: {collection: string, doc: MongoDoc}) { }
 }
 
 export class UpdateFailureAction implements Action {

@@ -1,5 +1,8 @@
-import { Component, ElementRef, Input, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, Output, EventEmitter, ContentChild, ViewChild, Renderer2 } from '@angular/core';
+import { NgControl } from '@angular/forms';
 import * as _ from 'lodash';
+
+import {TextDirective} from 'app/directives';
 
 @Component({
   selector: 'rem-editable-text',
@@ -7,22 +10,31 @@ import * as _ from 'lodash';
     <div class="d-flex d-flex-row position-relative" (mouseenter)="showEditButton=true" (mouseleave)="showEditButton=false">
       <div *ngIf="editing" class="d-flex flex-row position-absolute" style="z-index:9999;" [delayClickOutsideInit]="true" (clickOutside)="toggleEditing()">
         <input type="text"
+          *ngIf="!textarea"
           class="form-control border"
           alwaysfocus
           [class.border-danger]="!!error"
-          value="{{value}}"
+          [(ngModel)]="inputVal"
           placeholder="{{placeholder}}"
           (keyup.escape)="toggleEditing()"
-          (keyup.enter)="doSave(textinput.value)"
-          style="width: 300px"
-          #textinput />
+          (keyup.enter)="doSave()"
+          [style.width]="inputWidth+'px'" />
+        <textarea
+          *ngIf="textarea"
+          class="form-control border"
+          alwaysfocus
+          [class.border-danger]="!!error"
+          [(ngModel)]="inputVal"
+          placeholder="{{placeholder}}"
+          (keyup.escape)="toggleEditing()"
+          (keyup.enter)="doSave()"
+          [style.width]="inputWidth+'px'"></textarea>
         <div class="text-danger bg-light p-1" *ngIf="!!error">{{error}}</div>
-        <button type="button" class="btn btn-link btn-sm px-0 mx-0" (click)="doSave(textinput.value)">Save</button>
+        <button type="button" class="btn btn-link btn-sm px-0 mx-0" (click)="doSave()">Save</button>
       </div>
       <div class="d-flex flex-row position-relative" *ngIf="!editing">
         <div *ngIf="value">
-          <h3 *ngIf="elm=='h3'">{{value}}</h3>
-          <span *ngIf="elm=='span' || !elm">{{value}}</span>
+          <ng-content></ng-content>
         </div>
         <div *ngIf="showEditButton" class="position-absolute border w-100 h-100"></div>
         <button class="btn btn-link btn-sm px-0 py-0 my-0 position-absolute" style="z-index: 9999; background-color:rgba(255,255,255,0.8); top: 0;" [style.transform]="this.value || this.placeholder ? 'translateY(-100%)' : ''" (click)="toggleEditing()" *ngIf="showEditButton || (!value && !placeholder)">Edit</button>
@@ -33,21 +45,44 @@ import * as _ from 'lodash';
 })
 export class EditableTextComponent<T> {
   @Input() value: T;
-  @Input() elm: string;
   @Input() placeholder: string;
   @Input() validator: TextValidator;
   @Input() valType: "string" | "float" | "integer";
+  // Whether to use a textarea or input
+  @Input() textarea: boolean = false;
   @Output() edit = new EventEmitter<any>();
 
-  @ViewChild('textinput') input: ElementRef;
+  @ContentChild(TextDirective)
+  textView: TextDirective
+
 
   editing: boolean;
   showEditButton: boolean;
   error: string;
+  inputWidth: number = 300;
+  inputVal: string;
 
-  doSave(text: string) {
+  constructor(private renderer: Renderer2) {}
+
+  ngOnChanges() {
+    this.updateView();
+    this.inputVal = String(this.value);
+  }
+
+  ngAfterContentInit() {
+    this.updateView();
+  }
+
+  updateView() {
+    if (this.textView) {
+      this.textView.setText(this.value);
+      this.inputWidth = Math.max(this.textView.width, 300);
+    }
+  }
+
+  doSave() {
     if (this.validator) {
-      const [valid, error] = this.validator(text);
+      const [valid, error] = this.validator(this.inputVal);
       if (!valid) {
         this.error = error;
         return;
@@ -55,10 +90,10 @@ export class EditableTextComponent<T> {
     }
 
     var val: any;
-    if (text.length == 0) {
+    if (!this.inputVal) {
       val = null;
     } else if (this.valType === "float" || this.valType === "integer") {
-      const num = _.toNumber(text);
+      const num = _.toNumber(this.inputVal);
       if (this.valType === "integer" && !_.isInteger(num)) {
         this.error = "Input must be a round number";
         return;
@@ -68,7 +103,7 @@ export class EditableTextComponent<T> {
       }
       val = num;
     } else {
-      val = text;
+      val = this.inputVal;
     }
 
     this.edit.emit(val);

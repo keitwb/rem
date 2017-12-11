@@ -4,6 +4,7 @@ import 'rxjs/add/operator/do';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/reduce';
 import 'rxjs/add/observable/concat';
 import 'rxjs/add/observable/defer';
 import 'rxjs/add/observable/from';
@@ -20,7 +21,7 @@ import {AppConfig}                                 from 'app/config';
 
 export type MongoID = { $oid: string };
 
-export interface MongoDoc<T> {
+export interface MongoDoc {
   _id:          MongoID;
   _links:       { [id:string]: { href: string } };
   _etag:        MongoID;
@@ -34,9 +35,10 @@ interface MongoUpdate {
 }
 
 export interface ListResult<T> {
-  _returned:       MongoDoc<T>[];
+  _embedded:   T[];
+  _returned:   number;
   _size:       number;
-  _totalPages: number;
+  _total_pages: number;
 }
 
 interface Rel {
@@ -111,17 +113,9 @@ export class MongoClient {
     return url;
   }
 
-  private raiseTextError<T>(res: Response): Observable<T> {
-    try {
-      const data = res.json();
-      if (data && data.message) return Observable.throw(data.message);
-    } catch(e) {}
-    return Observable.throw(res.text() || "Unknown Error");
-  }
-
   // Since RESTHeart doesn't return the new doc upon creation, go fetch it
   // based on the Location header returned.
-  private fetchNew<T>(res: Response): Observable<MongoDoc<T>> {
+  private fetchNew<T extends MongoDoc>(res: Response): Observable<T> {
     if (res.status != 201) {
       throw `Document was not created: ${res.toString()}`;
     }
@@ -131,7 +125,7 @@ export class MongoClient {
     return this.getOne(collection, {$oid: id});
   }
 
-  fetchRelated<T, R>(doc: MongoDoc<T>, relName: string): Observable<MongoDoc<R>[]> {
+  fetchRelated<T extends MongoDoc, R extends MongoDoc>(doc: T, relName: string): Observable<R[]> {
     if (!doc._links[relName] || !doc._links[relName].href) {
       return Observable.of([]);
     }
@@ -147,17 +141,19 @@ export class MongoClient {
     return this.streamEmbeddedDocs(url);
   }
 
+  getPage<T>(url: URL, {page, pageSize}: {page: number, pageSize: number}): Observable<ListResult<T>> {
+    const pageUrl = this.urlForPage(url, {page, pageSize});
+    return this.http.get(pageUrl.href)
+      .map(r => r.json());
+  }
+
   streamEmbeddedDocs<T>(url: URL): [Observable<number>, Observable<T>] {
     const self = this;
     const sizeObs = new Subject<number>();
 
     function fetchLazily({page, pageSize}: {page: number, pageSize: number}): Observable<T> {
-      const pageUrl = new URL(url.href);
-      pageUrl.searchParams.set("page", String(page));
-      pageUrl.searchParams.set("pagesize", String(pageSize));
-
       return Observable.defer(() => {
-        const page$ = self.http.get(pageUrl.href).map(r => r.json())
+        const page$ = self.getPage<T>(url, {page, pageSize});
 
         return page$.mergeMap(resp => {
           const doc$: Observable<T> = Observable.from(resp._embedded);
@@ -178,25 +174,60 @@ export class MongoClient {
     return [sizeObs, fetchLazily({page: 1, pageSize: 10})];
   }
 
-  getList<T>(collection: string, params: {filter: object, sortBy: string, sortOrder: SortOrder}): [Observable<number>, Observable<T>] {
-    const ordering_flag = params.sortOrder == "asc" ? "" : "-1";
-    const url = this.getUrl(collection);
-    url.searchParams.set("sort_by", params.sortBy);
-    // This makes it return pagination stats
-    url.searchParams.set("count", "");
-    if (params.filter) {
-      url.searchParams.set("filter", JSON.stringify(params.filter));
-    }
+  private urlForPage(url: URL, {page, pageSize}: {page: number, pageSize: number}): URL {
+    const pageUrl = new URL(url.href);
 
-    return this.streamEmbeddedDocs<T>(url);
+    pageUrl.searchParams.set("page", String(page));
+    pageUrl.searchParams.set("pagesize", String(pageSize));
+    return pageUrl;
   }
 
-  getOne<T>(collection: string, id: MongoID): Observable<MongoDoc<T>> {
+
+  private makeListURL(collection: string, params: {filter?: object, sortBy?: string, sortOrder?: SortOrder}): URL {
+    const ordering_flag = params.sortOrder == "asc" ? "" : "-";
+    const url = this.getUrl(collection);
+
+    // This makes it return pagination stats
+    url.searchParams.set("count", "");
+
+    if (params.sortBy) url.searchParams.set("sort_by", `${ordering_flag}${params.sortBy}`);
+    if (params.filter) url.searchParams.set("filter", JSON.stringify(params.filter));
+
+    return url;
+  }
+
+  streamList<T extends MongoDoc>(collection: string, params: {filter?: object, sortBy?: string, sortOrder?: SortOrder}): [Observable<number>, Observable<T>] {
+    return this.streamEmbeddedDocs<T>(this.makeListURL(collection, params));
+  }
+
+  // Simply grabs all of the pages of a query and concatenates all of the
+  // embedded docs into a single list that is emitted from the returned
+  // Observable.  Useful if you know the list is small.
+  getList<T extends MongoDoc>(collection: string, params: {filter?: object, sortBy?: string, sortOrder?: SortOrder}): Observable<T[]> {
+    const url = this.makeListURL(collection, params);
+
+    function fetchNextPages({page, pageSize}: {page: number, pageSize: number}): Observable<T[]> {
+      const page$ = this.getPage(url, {page, pageSize});
+
+      return page$.mergeMap(resp => {
+        const nextPage = page + 1;
+        const hasMorePages = resp._total_pages >= nextPage;
+        const next$ = hasMorePages
+          ? fetchNextPages({page: nextPage, pageSize})
+          : Observable.empty()
+        return Observable.concat(Observable.of<T[]>(resp._embedded), next$);
+      });
+    }
+
+    return fetchNextPages({page: 1, pageSize: 1}).reduce((acc, docs) => acc.concat(docs), []);
+  }
+
+  getOne<T extends MongoDoc>(collection: string, id: MongoID): Observable<T> {
     const url = this.getUrl(`${collection}/${id.$oid}`);
     return this.http.get(url.href).map(r => r.json());
   }
 
-  create<T>(collection: string, obj: T): Observable<MongoDoc<T>> {
+  create<T extends MongoDoc>(collection: string, obj: T): Observable<T> {
     const path = `${collection}`;
     const bodyObj = {
                       $set: _.merge({}, 
@@ -209,14 +240,25 @@ export class MongoClient {
                     };
 
     const url = this.getUrl(path);
-    url.search = "checkEtag";
 
     return this.http.post(url.href, JSON.stringify(bodyObj), this.getRequestOptions())
-      .switchMap((r) => this.fetchNew<T>(r))
-      .catch((e) => this.raiseTextError<MongoDoc<T>>(e));
+      .switchMap(r => this.fetchNew<T>(r))
   }
 
-  update<T>(collection: string, id: MongoID, etag: ETag, updates: ModelUpdate[]): Observable<MongoDoc<T>> {
+  createFile<T extends MongoDoc>(collection: string, file: File, metadata: object): Observable<T> {
+    const url = this.getUrl(collection);
+    const fd = new FormData();
+    fd.append("properties", JSON.stringify(metadata));
+    fd.append("file", file);
+    const headers = new Headers({
+      'Content-Type': 'multipart/form',
+      'Accept': 'application/json',
+    });
+    return this.http.post(url.href, fd, new RequestOptions({headers}))
+      .switchMap(r => this.fetchNew<T>(r))
+  }
+
+  update<T extends MongoDoc>(collection: string, id: MongoID, etag: ETag, updates: ModelUpdate[]): Observable<T> {
     const path = `${collection}/${id.$oid}`;
     const bodyObj = _.merge({}, ..._.map(updates, u => u.updateObj));
 
@@ -225,7 +267,6 @@ export class MongoClient {
 
     return this.http.patch(url.href, JSON.stringify(bodyObj), this.getRequestOptions(etag))
       .switchMap((r) => this.getOne<T>(collection, id))
-      .catch((e) => this.raiseTextError<MongoDoc<T>>(e))
   }
 }
 

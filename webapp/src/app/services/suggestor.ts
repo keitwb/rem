@@ -3,7 +3,7 @@ import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/defaultIfEmpty';
 import * as _ from 'lodash';
 
-import { MongoClient } from './mongo';
+import { MongoClient, MongoDoc } from './mongo';
 import { Property} from 'app/models';
 
 interface SuggestResult {
