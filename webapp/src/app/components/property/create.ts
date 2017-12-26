@@ -1,8 +1,9 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import * as _ from 'lodash';
 
 import { Property, PropertyType, State } from 'app/models';
-import { SuggestorService } from 'app/services/suggestor';
+import { SuggestorService, SuggestionProvider } from 'app/services/suggestor';
 import { markAllControlsTouched } from 'app/util/forms';
 
 @Component({
@@ -26,7 +27,7 @@ import { markAllControlsTouched } from 'app/util/forms';
         </div>
         <div class="col-md-2">
           <label><strong>County</strong></label>
-          <rem-suggestor [provider]="suggestor.suggestCounties.bind(suggestor)">
+          <rem-suggestor [provider]="suggestorFor('counties')">
             <input formControlName="county" class="form-control" placeholder="County">
           </rem-suggestor>
           <div class="invalid-feedback">Please enter the county</div>
@@ -37,9 +38,9 @@ import { markAllControlsTouched } from 'app/util/forms';
         </div>
       </div>
       <div class="form-row">
-        <div class="col-md-3">
+        <div>
           <label>PIN Numbers</label>
-          <rem-set-input formControlName="pinNumbers"></rem-set-input>
+          <rem-set-input formControlName="pinNumbers" ></rem-set-input>
           <small class="form-text text-muted">If you input PIN numbers, details on the property can be looked up and autopopulated</small>
         </div>
       </div>
@@ -71,6 +72,15 @@ export class PropertyCreateComponent {
     this.createForm();
   }
 
+  suggestorFor(type_: string): SuggestionProvider {
+    switch (type_) {
+      case 'counties':
+        return this.suggestor.suggestCounties.bind(this.suggestor);
+      default:
+        throw new Error(`Unknown suggestion provider ${type_}`);
+    }
+  }
+
   createForm() {
     this.form = this.fb.group({
       name: ['', Validators.required],
@@ -87,6 +97,8 @@ export class PropertyCreateComponent {
       markAllControlsTouched(this.form);
       return;
     }
-    this.create.emit(this.form.value);
+    const formVal = _.clone(this.form.value);
+    formVal.pinNumbers = Array.from(formVal.pinNumbers);
+    this.create.emit(formVal);
   }
 }

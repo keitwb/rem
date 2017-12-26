@@ -3,7 +3,7 @@ import { Md5 }       from 'ts-md5/dist/md5';
 
 import { SortOrder } from 'app/services';
 import { MongoDoc, ETag, MongoID }  from "app/services/mongo";
-import { ModelUpdate }  from "app/services/updates";
+import { ModelUpdate }  from "app/util/updates";
 
 export const REQUEST_ONE = '[Mongo] Request One';
 export const REQUEST_MANY = '[Mongo] Request Many';

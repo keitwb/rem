@@ -1,0 +1,15 @@
+# Run this as a single pod until I can figure out the logic for running in a
+# StatefulSet if/when necessary to scale up
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mongo
+  namespace: rem
+  labels:
+    app: mongo
+spec:
+  containers:
+  - name: mongo
+    image: mongo:3.6
+    ports:
+    - containerPort: 27017

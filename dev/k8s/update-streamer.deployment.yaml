@@ -1,0 +1,20 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: update-streamer
+  namespace: rem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: update-streamer
+  template:
+    metadata:
+      labels:
+        app: update-streamer
+    spec:
+      containers:
+      - name: update-streamer
+        image: quay.io/rem/update-streamer:dev
+        ports:
+        - containerPort: 8080

@@ -33,18 +33,8 @@ upsert("properties", [
     owners:       [{id: ID(1), portion: 50}, {id: ID(2), portion: 50}],
     pinNumbers:   ["123-45-678"],
     notes:        [ID(1), ID(2)],
-    media:        [ID(1)],
     leases:       [ID(1), ID(2)],
     contacts:     [ID(1)],
-    _updates: [
-      {
-        type: "push",
-        fieldName: "notes",
-        value: 2,
-        userId: ID(1),
-        timestamp: new Date("2017-05-01"),
-      },
-    ]
   },
   {
     _id: ID(2),
@@ -58,15 +48,6 @@ upsert("properties", [
     propType:     "commercial",
     pinNumbers:   ["123-45-678"],
     leases:       [ID(3)],
-    _updates: [
-      {
-        type: "set",
-        fieldName: "acreage",
-        value: 0.5,
-        userId: ID(1),
-        timestamp: new Date("2017-06-01"),
-      },
-    ]
   },
   {
     _id: ID(3),
@@ -80,8 +61,6 @@ upsert("properties", [
     propType:     "commercial",
     pinNumbers:   ["123-45-678"],
     leases:       [],
-    _updates: [
-    ]
   },
 ]);
 
@@ -96,7 +75,6 @@ upsert("leases", [
     termUnit:     "months",
     rate:         100,
     lessees:      [ID(1)],
-    media:        [ID(1)],
     notes:        [],
     createdBy:   "1",
     _updates: [],
@@ -120,22 +98,12 @@ upsert("notes", [
     createdDate: new Date("2017-03-01"),
     createdBy:   ID(1),
     note:        "Needs work -- lawn needs mowing.",
-    _updates: [
-      {
-        type: "set",
-        fieldName: "note",
-        value: "Needs work.",
-        userId: ID(2),
-        timestamp: new Date("2017-03-01"),
-      },
-    ]
   },
   {
     _id: ID(2),
     createdDate: new Date("2017-04-01"),
     createdBy:   ID(1),
     note:        "Work Completed.",
-    _updates: []
   }
 ]);
 
@@ -151,7 +119,6 @@ upsert("parties", [
     city:        "Springfield",
     state:       "MI",
     zipcode:     "12345",
-    _updates: [ ]
   },
   {
     _id: ID(2),
@@ -165,7 +132,6 @@ upsert("parties", [
     city:        "Springfield",
     state:       "MI",
     zipcode:     "12345",
-    _updates: [ ]
   }
 ]);
 
@@ -179,7 +145,6 @@ upsert("user", [
     email:       "john@example.com",
     firstName:   "John",
     lastName:    "Smith",
-    _updates: [ ]
   },
   {
     _id: ID(2),
@@ -188,12 +153,16 @@ upsert("user", [
     email:       "bill@example.com",
     firstName:   "Bill",
     lastName:    "Johnson",
-    _updates: [ ]
   }
 ]);
 
 var fileMetadata = [
-  { filename: "doc1.pdf", description: "2016 Tax Bill", tags: ['taxes', 'bills'] },
+  {
+    filename: "doc1.pdf",
+    description: "2016 Tax Bill",
+    tags: ['taxes', 'bills'],
+    properties: [ID(1)],
+  },
 ];
 
 fileMetadata.forEach(function(o) {

@@ -14,6 +14,7 @@ import { of } from 'rxjs/observable/of';
 import { AppState }   from 'app/store/reducers';
 import * as selectors from 'app/store/selectors';
 import { RequestOneAction } from 'app/store/actions/db';
+import { Property } from 'app/models';
 
 @Injectable()
 export class DocExistsGuard implements CanActivate {
@@ -22,18 +23,20 @@ export class DocExistsGuard implements CanActivate {
     private router: Router) {}
 
   canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
+    const collection = route.data['collection'];
+    const id = route.params['id'];
     return this.store
-      .select(selectors.getDoc('properties')(route.params['id']))
+      .select(selectors.getDoc(collection)(id))
       .map(doc => !!doc)
       .take(1)
       .switchMap(inStore => {
         if (inStore) return of(inStore);
 
-        const action = new RequestOneAction({ collection: 'properties', id: {$oid: route.params['id']}})
+        const action = new RequestOneAction({ collection: collection, id: {$oid: route.params['id']}})
         this.store.dispatch(action);
 
         return this.store
-          .select(selectors.getQueryResult('properties')(action.queryId))
+          .select(selectors.getQueryResult(collection)(action.queryId))
           .filter(qr => !qr.inProgress)
           .map(qr => !qr.fetchError)
       }).catch(() => {

@@ -1,9 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, InjectionToken } from '@angular/core';
+import {environment} from 'environments/environment';
 
-@Injectable()
-export class AppConfig {
-  public dbPath = "/db/rem";
-  public searchPath = "/search";
+export const APP_CONFIG = new InjectionToken<string>('config');
+export const ConfigProvider = { provide: APP_CONFIG, useValue: environment };
 
-  constructor() {}
+export interface AppConfig {
+  dbURL: string;
+  updateStreamURL: string;
+  searchURL: string;
+  production: boolean;
 }
+

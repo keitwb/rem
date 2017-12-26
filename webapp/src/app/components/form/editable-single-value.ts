@@ -5,10 +5,8 @@ import * as _ from 'lodash';
   selector: 'rem-editable-single-value',
   template: `
     <div (mouseenter)="showEditButton=true" (mouseleave)="showEditButton=false">
-      <div *ngIf="editing" (keyup.enter)="save(selectbox.value)" [delayClickOutsideInit]="true" (clickOutside)="toggleEditing()">
-        <select #selectbox [size]="selectSize">
-          <option *ngFor="let val of valueChoices" [value]="val[0]" [selected]="val[0]==value">{{val[1]}}</option>
-        </select>
+      <div *ngIf="editing" (keyup.enter)="save(selectbox.value)">
+        <rem-select #selectbox [value]="value" [choices]="valueChoices"></rem-select>
         <button type="button" class="btn btn-link btn-sm px-0 mx-0" (click)="save(selectbox.value)">Save</button>
       </div>
       <div class="d-flex" *ngIf="!editing">
@@ -22,16 +20,16 @@ import * as _ from 'lodash';
 })
 export class EditableSingleValueComponent {
   @Input() value: string;
-  @Input() valueChoices: [[string, string]];
+  @Input() valueChoices: [string, string][];
   @Output() edit = new EventEmitter<any>();
 
   editing: boolean;
   showEditButton: boolean;
 
   displayFor(val: string) {
-    const match = _.find(this.valueChoices, ([v, d]) => v === val);
+    const match = _.find(this.valueChoices, ([d, v]) => v === val);
     if (match) {
-      return match[1];
+      return match[0];
     }
     throw new Error(`No display value found for ${val}`);
   }

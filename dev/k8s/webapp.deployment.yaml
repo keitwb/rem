@@ -1,0 +1,28 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: webapp
+  namespace: rem
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: static
+        image: quay.io/rem/webapp:dev
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /build/dist
+          name: test-volume
+      volumes:
+      - name: test-volume
+        hostPath:
+          path: /code/webapp/tmp/dist
+          type: Directory

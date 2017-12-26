@@ -39,20 +39,23 @@ export class SelectListComponent<T> {
     this.chosen.emit(val);
   }
 
-  @HostListener('window:keyup.enter')
-  selectActive() {
+  @HostListener('window:keyup.enter', ["$event"])
+  selectActive(event) {
+    event.stopPropagation();
     if (!this.show) return;
     this.select(this.choices[this.activeIndex][1]);
   }
 
-  @HostListener('window:keyup.arrowdown')
-  moveDown() {
+  @HostListener('window:keyup.arrowdown', ["$event"])
+  moveDown(event) {
+    event.stopPropagation();
     if (!this.show) return;
     this.activeIndex = Math.min(this.choices.length - 1, this.activeIndex + 1);
   }
 
-  @HostListener('window:keyup.arrowup')
-  moveUp() {
+  @HostListener('window:keyup.arrowup', ["$event"])
+  moveUp(event) {
+    event.stopPropagation();
     if (this.activeIndex < 0 || !this.show) {
       return;
     }
@@ -60,8 +63,9 @@ export class SelectListComponent<T> {
     this.activeIndex -= 1;
   }
 
-  @HostListener('window:keyup.esc')
-  handleEscape() {
+  @HostListener('window:keyup.esc', ["$event"])
+  handleEscape(event) {
+    event.stopPropagation();
     if (!this.show) return;
     this.showChange.emit(false);
   }

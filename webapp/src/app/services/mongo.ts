@@ -11,15 +11,16 @@ import 'rxjs/add/observable/from';
 import 'rxjs/add/observable/empty';
 import { Observable }                              from 'rxjs/Observable';
 import { Subject }                              from 'rxjs/Subject';
-import { Injectable }                              from '@angular/core';
+import { Injectable, Inject }                              from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import * as _                                      from 'lodash';
 
 import {SortOrder}                                 from '.';
-import {ModelUpdate} from './updates';
-import {AppConfig}                                 from 'app/config';
+import {ModelUpdate} from 'app/util/updates';
+import {APP_CONFIG, AppConfig}                                 from 'app/config';
 
 export type MongoID = { $oid: string };
+export type MongoDate = { $date: number };
 
 export interface MongoDoc {
   _id:          MongoID;
@@ -27,6 +28,15 @@ export interface MongoDoc {
   _etag:        MongoID;
   _createdDate: { $date: number };
   _updates:     MongoUpdate[],
+}
+
+export interface GridFSDoc {
+  md5: string;
+  length: number;
+  chunkSize: number;
+  filename: string;
+  contentType: string;
+  uploadDate:    MongoDate;
 }
 
 interface MongoUpdate {
@@ -86,8 +96,8 @@ export class MongoClient {
   private linkManager: LinkManager
   private baseUrl: URL;
 
-  constructor(private http: Http, private config: AppConfig) {
-    this.baseUrl = new URL(config.dbPath, window.location.href);
+  constructor(private http: Http, @Inject(APP_CONFIG) private config: AppConfig) {
+    this.baseUrl = new URL(config.dbURL);
 
     // Make sure the base url path ends in "/" for easier processing later
     if (!this.baseUrl.pathname.endsWith("/")) {
@@ -171,7 +181,7 @@ export class MongoClient {
       });
     };
 
-    return [sizeObs, fetchLazily({page: 1, pageSize: 10})];
+    return [sizeObs, fetchLazily({page: 1, pageSize: 1})];
   }
 
   private urlForPage(url: URL, {page, pageSize}: {page: number, pageSize: number}): URL {
@@ -205,17 +215,18 @@ export class MongoClient {
   // Observable.  Useful if you know the list is small.
   getList<T extends MongoDoc>(collection: string, params: {filter?: object, sortBy?: string, sortOrder?: SortOrder}): Observable<T[]> {
     const url = this.makeListURL(collection, params);
+    const self = this;
 
     function fetchNextPages({page, pageSize}: {page: number, pageSize: number}): Observable<T[]> {
-      const page$ = this.getPage(url, {page, pageSize});
+      const page$ = self.getPage(url, {page, pageSize});
 
       return page$.mergeMap(resp => {
         const nextPage = page + 1;
         const hasMorePages = resp._total_pages >= nextPage;
         const next$ = hasMorePages
           ? fetchNextPages({page: nextPage, pageSize})
-          : Observable.empty()
-        return Observable.concat(Observable.of<T[]>(resp._embedded), next$);
+          : Observable.empty<T>()
+        return Observable.concat(Observable.of<T[]>(<T[]>resp._embedded), next$);
       });
     }
 

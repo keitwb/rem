@@ -1,14 +1,20 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import * as md5 from 'md5';
+import * as _ from 'lodash';
 
 import { MongoClient, MongoID } from './mongo';
 import { Media } from 'app/models';
-import { patchWithObject } from './updates';
+import { patchWithObject } from 'app/util/updates';
 
 @Injectable()
 export class FileService {
   constructor(private mongo: MongoClient) { }
+
+  getFilesForIds(idsToInclude: {[index: string]: MongoID[]}) {
+    const filter = {'$or': _.map(_.toPairs(idsToInclude), ([coll, ids]) => ({[coll]: ids}))};
+    return this.mongo.getList<Media>(Media.collection, {filter});
+  }
 
   uploadFile(file: File, metadata: object): Observable<Media> {
     return readFileContent(file).switchMap(content => {

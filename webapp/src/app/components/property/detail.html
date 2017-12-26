@@ -1,8 +1,9 @@
 <div class="d-flex flex-column" *ngIf="property">
   <rem-editable-text (edit)="save('name', $event)" [value]="property.name" placeholder="Name">
     <h3 remText></h3>
+    <input ngModel remFocus type="text" class="form-control border" />
   </rem-editable-text>
-  <rem-editable-text [textarea]="true" (edit)="save('description', $event)" [value]="property.description" placeholder="Description">
+  <rem-editable-text (edit)="save('description', $event)" [value]="property.description" placeholder="Description">
     <div remText></div>
   </rem-editable-text>
   <div class="d-flex flex-row">
@@ -12,17 +13,21 @@
     <span>Owners:</span><!--<rem-ownership (edit)="save('ownership', $event)" [value]="property.owners"></rem-ownership>-->
   </div>
   <h4>Location</h4>
-  <rem-editable-single-value (edit)="save('propType', $event)" [value]="property.propType" [valueChoices]="propTypeValues"></rem-editable-single-value>
+  <rem-editable-single-value (edit)="save('propType', $event)" [value]="property.propType" [valueChoices]="propTypeValues">
+    <div remText></div>
+  </rem-editable-single-value>
   <div class="d-flex flex-row">
     <rem-editable-text (edit)="save('city', $event)" [value]="property.city" valType="string" placeholder="City">
       <div remText></div>
     </rem-editable-text>,
-    <!--<rem-editable-text (edit)="save('county', $event)" [value]="property.county" valType="string" placeholder="County"></rem-editable-text>-->
+    <rem-editable-text (edit)="save('county', $event)" [value]="property.county" valType="string" placeholder="County">
+      <div remText></div>
+    </rem-editable-text>
     <span *ngIf="property.county">&nbsp;County</span>
   </div>
 
   <h3>Media</h3>
-  <rem-media-list [idsToInclude]="mediaLinks"></rem-media-list>
+  <rem-media-list [media]="media$ | async"></rem-media-list>
 </div>
 <div *ngIf="!property">
   Loading...

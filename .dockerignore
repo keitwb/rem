@@ -1,3 +1,5 @@
 .git/
 ansible/
 tmp/
+/webapp/node_modules/**
+/webapp/tmp/**

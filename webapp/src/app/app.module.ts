@@ -16,7 +16,7 @@ import * as components            from './components';
 import * as containers            from './containers';
 import * as directives            from './directives';
 import { MongoClient, SearchClient, SuggestorService }  from './services';
-import { AppConfig }              from './config';
+import { ConfigProvider }         from './config';
 
 @NgModule({
   declarations: [
@@ -32,12 +32,13 @@ import { AppConfig }              from './config';
     components.PropertyToolbarComponent,
     components.SearchBarComponent,
     components.MediaListComponent,
+    components.SearchResultListComponent,
     containers.AppComponent,
     containers.PropertiesComponent,
     containers.PropertyPageComponent,
     containers.SearchComponent,
     containers.NewPropertyComponent,
-    directives.AlwaysFocusDirective,
+    directives.FocusDirective,
     directives.TextDirective,
   ],
   imports: [
@@ -56,10 +57,10 @@ import { AppConfig }              from './config';
     ClickOutsideModule,
   ],
   providers: [
-    AppConfig,
     MongoClient,
     SearchClient,
     SuggestorService,
+    ConfigProvider,
   ],
   bootstrap: [containers.AppComponent]
 })

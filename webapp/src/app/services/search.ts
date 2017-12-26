@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import {AppConfig} from 'app/config';
+import { Injectable, Inject } from '@angular/core';
+import {AppConfig, APP_CONFIG} from 'app/config';
 import { Http } from '@angular/http';
 import { Observable }                 from 'rxjs/Observable';
 
@@ -8,8 +8,8 @@ import { Observable }                 from 'rxjs/Observable';
 export class SearchClient {
   private baseUrl: URL;
 
-  constructor(private http: Http, private config: AppConfig) {
-    this.baseUrl = new URL(config.searchPath, window.location.href);
+  constructor(private http: Http, @Inject(APP_CONFIG) private config: AppConfig) {
+    this.baseUrl = new URL(config.searchURL);
   }
 
   query(q: string): Observable<string[]> {

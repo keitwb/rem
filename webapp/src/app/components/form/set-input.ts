@@ -1,5 +1,5 @@
-import { Component, ElementRef, Input, Output, forwardRef } from '@angular/core';
-import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { Component, ElementRef, Input, Output, forwardRef, ViewChild } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 
@@ -10,17 +10,27 @@ import * as _ from 'lodash';
 @Component({
   selector: 'rem-set-input',
   template: `
-  <div>
-    <ul class="list-group">
-      <li *ngFor="let item of value" class="list-group-item">{{ item }}</li>
+  <div class="d-flex">
+    <ul class="d-flex flex-row flex-wrap align-items-center list-unstyled">
+      <li *ngFor="let item of value" class="d-flex align-items-center set-item">
+        <span>{{ item }}</span>
+        <button type="button" class="close" (click)="deleteItem(item)">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </li>
     </ul>
-    <rem-suggestor *ngIf="inputActive" [provider]="suggestionProvider">
-      <input #in type="text" class="form-control" ngModel (keyup.enter)="enterValue(in.value); in.value=''" />
+    <rem-suggestor [provider]="suggestionProvider" (select)="enterValue()">
+      <div class="d-flex align-items-center">
+        <input #in autofocus ngModel
+          type="text"
+          class="form-control"
+          (keyup.enter)="enterValue(); $event.stopPropagation()" />
+        <button type="button" class="add" (click)="enterValue()"><strong>&#x2b;</strong></button>
+      </div>
     </rem-suggestor>
-    <div (click)="showInput()">&#x2b;</div>
   </div>
   `,
-  //styleUrls: ['./set-input.scss'],
+  styleUrls: ['./set-input.scss'],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -38,29 +48,32 @@ export class SetInputComponent<T> implements ControlValueAccessor {
   _onChange: (any) => void;
   _onTouched: () => void;
   isDisabled: boolean;
-  inputActive: boolean;
 
-  enterValue(val: T) {
+  @ViewChild(NgControl)
+  inputEl: NgControl;
+
+  enterValue() {
+    const val = this.inputEl.value;
+    this.inputEl.reset();
+    if (!val) return;
     if (!this.value) this.value = new Set<T>();
 
     if (!this.value.has(val)) {
-      const newSet = new Set([val, ...Array.from(this.value)]);
+      const newSet = new Set([...Array.from(this.value), val]);
       this.writeValue(newSet);
       this._onChange(newSet);
     }
-    this.hideInput();
-  }
-
-  showInput() {
-    this.inputActive = true;
-  }
-
-  hideInput() {
-    this.inputActive = false;
   }
 
   writeValue(obj: any): void {
     this.value = obj;
+  }
+
+  deleteItem(obj: any): void {
+    const setArr = Array.from(this.value);
+    const newSet = new Set(_.filter(setArr, i => i !== obj));
+    this.writeValue(newSet);
+    this._onChange(newSet);
   }
 
   registerOnChange(fn: any): void {

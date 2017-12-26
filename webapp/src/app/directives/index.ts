@@ -1,2 +1,2 @@
-export {AlwaysFocusDirective} from './autofocus';
+export {FocusDirective} from './focus';
 export {TextDirective} from './text';

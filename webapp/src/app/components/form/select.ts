@@ -7,7 +7,7 @@ type ChoiceDisplay = string;
 @Component({
   selector: 'rem-select',
   template: `
-  <div class="top" tabindex="0" (blur)="ensureHidden()" (focus)="ensureShowing()">
+  <div class="top" tabindex="0" (blur)="ensureHidden()" (focus)="ensureShowing($event)">
     <div class="toggle" (click)="ensureShowing($event)">{{displayTextFor(value)}}</div>
     <rem-select-list (chosen)="select($event)" [value]="value" [choices]="choices" [(show)]="showChoices"></rem-select-list>
   </div>
@@ -22,7 +22,7 @@ type ChoiceDisplay = string;
   ]
 })
 export class SelectComponent<T> implements ControlValueAccessor {
-  @Input() choices: [[ChoiceDisplay, T]];
+  @Input() choices: [ChoiceDisplay, T][];
   @Input() placeholder: string;
 
   @Input() value: T;
@@ -34,7 +34,7 @@ export class SelectComponent<T> implements ControlValueAccessor {
 
   select(val: T) {
     this.writeValue(val);
-    this._onChange(val);
+    if (this._onChange) this._onChange(val);
     this.ensureHidden();
   }
 
@@ -51,7 +51,7 @@ export class SelectComponent<T> implements ControlValueAccessor {
   }
 
   toggleChoices() {
-    this._onTouched();
+    if (this._onTouched) this._onTouched();
     this.showChoices = !this.showChoices;
   }
 

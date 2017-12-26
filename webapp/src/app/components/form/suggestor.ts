@@ -1,4 +1,4 @@
-import { Component, Input, ContentChild } from '@angular/core';
+import { Component, Input, ContentChild, Output, EventEmitter } from '@angular/core';
 import { NgControl } from '@angular/forms';
 import * as _ from 'lodash';
 
@@ -20,6 +20,7 @@ import 'rxjs/add/observable/of';
 })
 export class SuggestorComponent {
   @Input() provider: (string) => Observable<string[]>;
+  @Output() select = new EventEmitter<string>();
 
   @ContentChild(NgControl)
   input: NgControl;
@@ -48,6 +49,7 @@ export class SuggestorComponent {
   selectSuggestion(val: any) {
     this.input.control.setValue(val);
     this.clearSuggestions();
+    this.select.emit(val);
   }
 
   clearSuggestions() {

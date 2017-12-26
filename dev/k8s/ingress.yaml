@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  namespace: rem
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.org/websocket-services: "update-streamer"
+spec:
+  tls:
+    - hosts:
+      - rem.dev
+      secretName: ingress-tls
+  rules:
+  - host: rem.dev
+    http:
+      paths:
+      - path: /db
+        backend:
+          serviceName: restheart
+          servicePort: 8080
+      - path: /updates
+        backend:
+          serviceName: update-streamer
+          servicePort: 8080
+      - path: /
+        backend:
+          serviceName: webapp
+          servicePort: 80

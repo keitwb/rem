@@ -1,8 +1,8 @@
 import { Component, Input, EventEmitter, Output } from '@angular/core';
 
-import { Property, Lease, Note }   from 'app/models';
+import { Property, Lease, Note, Media }   from 'app/models';
 import { MongoDoc, MongoID }   from 'app/services/mongo';
-import * as updates   from 'app/services/updates';
+import * as updates   from 'app/util/updates';
 
 @Component({
   selector:    'rem-property',
@@ -11,25 +11,14 @@ import * as updates   from 'app/services/updates';
 })
 export class PropertyComponent {
   @Input() property: Property;
+  @Input() mediaFiles: Media[];
   @Output() update = new EventEmitter<{doc: Property, update: updates.ModelUpdate}>();
 
-  mediaLinks: {[index: string]: MongoID[]};
-
   propTypeValues = [
-    ["commercial", "Commercial"],
-    ["residential", "Residential"],
-    ["land", "Land"],
+    ["Commercial", "commercial"],
+    ["Residential", "residential"],
+    ["Land", "land"],
   ];
-
-  ngOnChanges() {
-    if (this.property) {
-      this.mediaLinks = {
-        [Property.collection]: [this.property._id],
-        [Lease.collection]: this.property.leases,
-        [Note.collection]: this.property.notes,
-      };
-    }
-  }
 
   save(propName: string, value: any) {
     this.update.emit({

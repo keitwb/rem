@@ -1,6 +1,0 @@
----
-app_hostname: rem.keithvaluation.com
-static_hostname: rem.keithvaluation.com
-static_path: '/static/'
-database_backup_bucket: rem-db-backup
-media_backup_bucket: rem-media-backup

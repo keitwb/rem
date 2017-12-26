@@ -1,8 +1,7 @@
 import { Observable } from "rxjs/Observable";
-import { MongoDoc, MongoID } from 'app/services/mongo';
+import { MongoDoc, MongoDate, GridFSDoc, MongoID } from 'app/services/mongo';
 
 export type ID = { $oid: string };
-export type MongoDate = { $date: number };
 export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
 export type TimeUnit = "months" | "years" | "quarters";
 export type PropertyType = "land" | "commercial" | "residential";
@@ -16,7 +15,6 @@ export module User {
 }
 
 export interface User extends MongoDoc {
-  //static collection = "users";
   username:      string;
   email:         string;
   firstName:     string;
@@ -29,7 +27,6 @@ export module Note {
 }
 
 export interface Note extends MongoDoc {
-  //static collection = "notes";
   note:          string;
   media:         Media[];
   createdDate:   MongoDate;
@@ -110,14 +107,9 @@ export module Media {
   export const collection = "media.files";
 }
 
-export interface Media extends MongoDoc {
-  filename:      string;
-  md5:           string;
-  length:        number;
-  contentType:   string;
+export interface Media extends MongoDoc, GridFSDoc {
   description:   string;
   tags:          string[];
-  uploadDate:    MongoDate;
 }
 
 export type CollectionName = string;

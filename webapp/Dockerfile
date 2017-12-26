@@ -18,10 +18,7 @@ COPY src /app/src
 
 RUN ng build --output-path /build/dist --sourcemaps --deploy-url /static --prod --aot
 
-# TODO: Make pretty much everything above be in a separate build stage once
-# multistage build is in the mainline Docker
-
 FROM nginx:1.13.1
 
 COPY --from=builder /build/dist/ /build/dist
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY conf/nginx.conf /etc/nginx/nginx.conf

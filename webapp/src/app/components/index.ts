@@ -13,4 +13,5 @@ export * from './property/list';
 export * from './property/toolbar';
 
 export * from './search-bar';
+export * from './search-result-list';
 
