@@ -1,33 +1,45 @@
 <div class="d-flex flex-column" *ngIf="property">
-  <rem-editable-text (edit)="save('name', $event)" [value]="property.name" placeholder="Name">
+  <rem-editable (edit)="save('name', $event)" [value]="property.name">
     <h3 remText></h3>
     <input ngModel remFocus type="text" class="form-control border" />
-  </rem-editable-text>
-  <rem-editable-text (edit)="save('description', $event)" [value]="property.description" placeholder="Description">
+  </rem-editable>
+  <rem-editable (edit)="save('description', $event)" [value]="property.description">
     <div remText></div>
-  </rem-editable-text>
+    <input ngModel remFocus type="text" class="form-control border" />
+  </rem-editable>
   <div class="d-flex flex-row">
-    <span>Acreage:</span><rem-editable-text (edit)="save('acreage', $event)" [value]="property.acreage" valType="float"></rem-editable-text>
+    <span>Acreage:</span>
+    <rem-editable (edit)="save('acreage', $event)" [value]="property.acreage" valType="float">
+      <div remText></div>
+      <input ngModel remFocus type="text" class="form-control border" />
+    </rem-editable>
   </div>
   <div class="d-flex flex-row">
     <span>Owners:</span><!--<rem-ownership (edit)="save('ownership', $event)" [value]="property.owners"></rem-ownership>-->
   </div>
   <h4>Location</h4>
-  <rem-editable-single-value (edit)="save('propType', $event)" [value]="property.propType" [valueChoices]="propTypeValues">
-    <div remText></div>
-  </rem-editable-single-value>
   <div class="d-flex flex-row">
-    <rem-editable-text (edit)="save('city', $event)" [value]="property.city" valType="string" placeholder="City">
+    <rem-editable (edit)="save('city', $event)" [value]="property.city" valType="string" placeholder="City">
       <div remText></div>
-    </rem-editable-text>,
-    <rem-editable-text (edit)="save('county', $event)" [value]="property.county" valType="string" placeholder="County">
+      <input ngModel remFocus type="text" class="form-control border" />
+    </rem-editable>,
+    <rem-editable (edit)="save('county', $event)" [value]="property.county" valType="string" placeholder="County">
       <div remText></div>
-    </rem-editable-text>
+      <input ngModel remFocus type="text" class="form-control border" />
+    </rem-editable>
     <span *ngIf="property.county">&nbsp;County</span>
   </div>
 
   <h3>Media</h3>
   <rem-media-list [media]="media$ | async"></rem-media-list>
+  <h3>Notes</h3>
+  <ul>
+    <li *ngFor="let note of notes">{{note}}</li>
+  </ul>
+  <h3>Leases</h3>
+  <ul>
+    <li *ngFor="let lease of leases">{{lease}}</li>
+  </ul>
 </div>
 <div *ngIf="!property">
   Loading...

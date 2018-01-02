@@ -6,7 +6,6 @@ rem.createCollection("properties");  // This is idempotent
 rem.runCommand({
    collMod:"properties",
    validator:{ $or: [
-     { "propType": { $in: ["land", "commercial", "residential"] } }
    ]},
    validationLevel:"strict"
 });

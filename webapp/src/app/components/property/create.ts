@@ -22,10 +22,6 @@ import { markAllControlsTouched } from 'app/util/forms';
       </div>
       <div class="form-row">
         <div class="col-md-2">
-          <label><strong>Type</strong></label>
-          <rem-select formControlName="propType" [choices]="propTypeChoices" placeholder="Select a type"></rem-select>
-        </div>
-        <div class="col-md-2">
           <label><strong>County</strong></label>
           <rem-suggestor [provider]="suggestorFor('counties')">
             <input formControlName="county" class="form-control" placeholder="County">
@@ -65,7 +61,6 @@ export class PropertyCreateComponent {
 
   wasValidated: boolean = false;
 
-  propTypeChoices: [[string, PropertyType]] = [["Land", "land"], ["Residential", "residential"], ["Commercial", "commercial"]];
   stateChoices: [[string, State]] = [["North Carolina", "NC"], ["South Carolina", "SC"]];
 
   constructor(private fb: FormBuilder, private suggestor: SuggestorService) {
@@ -85,7 +80,6 @@ export class PropertyCreateComponent {
     this.form = this.fb.group({
       name: ['', Validators.required],
       description: '',
-      propType: ['', Validators.required],
       county: ['', Validators.required],
       state: ['', Validators.required],
       pinNumbers: [new Set()],

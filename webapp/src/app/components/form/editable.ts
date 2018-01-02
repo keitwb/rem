@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 import { TextDirective, FocusDirective } from 'app/directives';
 
 @Component({
-  selector: 'rem-editable-text',
+  selector: 'rem-editable',
   template: `
     <div class="d-flex d-flex-row position-relative" (mouseenter)="showEditButton=true" (mouseleave)="showEditButton=false">
       <div *ngIf="editing"
@@ -20,18 +20,18 @@ import { TextDirective, FocusDirective } from 'app/directives';
         <div class="text-danger bg-light p-1" *ngIf="!!error">{{error}}</div>
         <button type="button" class="btn btn-link btn-sm px-0 mx-0" (click)="doSave()">Save</button>
       </div>
-      <div class="d-flex flex-row position-relative" *ngIf="!editing">
+      <div class="d-flex flex-row align-items-center position-relative" *ngIf="!editing">
         <div *ngIf="value">
           <ng-content select="[remText]"></ng-content>
         </div>
         <div *ngIf="showEditButton" class="position-absolute border w-100 h-100"></div>
-        <button class="btn btn-link btn-sm px-0 py-0 my-0 position-absolute" style="z-index: 9999; background-color:rgba(255,255,255,0.8); top: 0;" [style.transform]="this.value || this.placeholder ? 'translateY(-100%)' : ''" (click)="toggleEditing()" *ngIf="showEditButton || (!value && !placeholder)">Edit</button>
+        <button class="btn btn-link btn-sm px-0 py-0 my-0 position-absolute" style="z-index: 9999; background-color:rgba(255,255,255,0.8); right: 0;" [style.transform]="this.value || this.placeholder ? 'translateX(100%)' : ''" (click)="toggleEditing()" *ngIf="showEditButton || (!value && !placeholder)">Edit</button>
         <div class="font-italic text-muted" *ngIf="!value && placeholder">{{placeholder}}</div>
       </div>
     </div>
   `,
 })
-export class EditableTextComponent<T> {
+export class EditableComponent<T> {
   @Input() value: T;
   @Input() placeholder: string;
   @Input() validator: TextValidator;
@@ -105,7 +105,7 @@ export class EditableTextComponent<T> {
     this.editing = !this.editing;
     if (this.editing) {
       this.input.control.setValue(this.value);
-      this.focuser.focus();
+      if (this.focuser) this.focuser.focus();
     }
   }
 }

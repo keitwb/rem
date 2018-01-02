@@ -33,7 +33,7 @@ export class PropertyPageComponent implements OnInit {
   ngOnInit() {
     const id$ = this.route.params.map(p => p.id);
     this.property$ = id$.switchMap(id => this.store.select(selectors.getDoc(Property.collection)(id)));
-    //this.store.select(selectors.get
+    this.mediaFiles$ = this.store.select(selectors.getDocs
     //this.mediaFiles$ = this.property$.switchMap(prop => {
       //return this.{
         //[Property.collection]: [prop._id],

@@ -20,7 +20,7 @@ import { ConfigProvider }         from './config';
 
 @NgModule({
   declarations: [
-    components.EditableTextComponent,
+    components.EditableComponent,
     components.EditableSingleValueComponent,
     components.SelectComponent,
     components.SelectListComponent,

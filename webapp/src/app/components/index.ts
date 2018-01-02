@@ -1,4 +1,4 @@
-export * from './form/editable-text';
+export * from './form/editable';
 export * from './form/editable-single-value';
 export * from './form/select';
 export * from './form/select-list';

@@ -29,12 +29,12 @@ upsert("properties", [
     acreage:      120.5,
     county:       "Pender",
     state:        "NC",
-    propType:     "land",
     owners:       [{id: ID(1), portion: 50}, {id: ID(2), portion: 50}],
     pinNumbers:   ["123-45-678"],
     notes:        [ID(1), ID(2)],
     leases:       [ID(1), ID(2)],
     contacts:     [ID(1)],
+    tags:         ["land", "for-sale", "for-lease"],
   },
   {
     _id: ID(2),
@@ -45,9 +45,9 @@ upsert("properties", [
     acreage:      0.5,
     county:       "Cumberland",
     state:        "NC",
-    propType:     "commercial",
     pinNumbers:   ["123-45-678"],
     leases:       [ID(3)],
+    tags:         ["commercial", "renovating"],
   },
   {
     _id: ID(3),
@@ -58,9 +58,9 @@ upsert("properties", [
     acreage:      5,
     county:       "Cumberland",
     state:        "NC",
-    propType:     "commercial",
     pinNumbers:   ["123-45-678"],
     leases:       [],
+    tags:         ["commercial"],
   },
 ]);
 

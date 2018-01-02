@@ -8,8 +8,15 @@ metadata:
   labels:
     app: mongo
 spec:
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+       claimName: mongo-data-claim
   containers:
   - name: mongo
     image: mongo:3.6
     ports:
     - containerPort: 27017
+    volumeMounts:
+      - mountPath: "/data/db"
+        name: data

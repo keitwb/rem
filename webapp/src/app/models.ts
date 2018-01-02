@@ -74,9 +74,9 @@ export interface Property extends MongoDoc {
   desiredRent?:       number;
   desiredSalesPrice?: number;
   tryingToSell?:      boolean;
-  contacts?:          MongoID[]
+  contacts?:          MongoID[];
   notes?:             MongoID[];
-  media?:             MongoID[]
+  media?:             MongoID[];
   createdDate?:       MongoDate;
   modifiedDate?:      MongoDate;
   modifiedBy?:        User;

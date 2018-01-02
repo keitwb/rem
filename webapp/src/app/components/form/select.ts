@@ -8,7 +8,7 @@ type ChoiceDisplay = string;
   selector: 'rem-select',
   template: `
   <div class="top" tabindex="0" (blur)="ensureHidden()" (focus)="ensureShowing($event)">
-    <div class="toggle" (click)="ensureShowing($event)">{{displayTextFor(value)}}</div>
+    <div class="toggle" (click)="ensureShowing($event)">{{displayText}}</div>
     <rem-select-list (chosen)="select($event)" [value]="value" [choices]="choices" [(show)]="showChoices"></rem-select-list>
   </div>
   `,
@@ -38,14 +38,14 @@ export class SelectComponent<T> implements ControlValueAccessor {
     this.ensureHidden();
   }
 
-  displayTextFor(val: T) {
-    if (!val) {
+  get displayText() {
+    if (!this.value) {
       return this.placeholder || '';
     }
 
-    const choice = _.find(this.choices, c => c[1] === val);
+    const choice = _.find(this.choices, c => c[1] === this.value);
     if (!choice) {
-      console.error(`Value ${val} not found in choices ${this.choices}`);
+      console.error(`Value ${this.value} not found in choices ${this.choices}`);
     }
     return choice[0];
   }

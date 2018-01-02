@@ -21,6 +21,7 @@ export const UPDATE_FAILURE = '[Mongo] Update Failure';
 export interface RequestManyPayload {
   collection: string;
   filter:    object;
+  startAt:   number;
   page:      number;
   pageSize:  number;
   sortBy:    string;
@@ -31,7 +32,7 @@ export interface RequestManyPayload {
 interface RequestManySuccessPayload extends RequestManyPayload {
   docs:       MongoDoc[];
   // The total number of docs across all pages
-  size:       number;
+  size:  number;
   totalPages: number;
 }
 
