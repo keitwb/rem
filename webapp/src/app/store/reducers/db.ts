@@ -53,7 +53,6 @@ export const initialState: State = {
 export function reducer(state, action: dbActions.Actions): State {
   const {collection = null} = action.payload || {};
   switch (action.type) {
-    case dbActions.REQUEST_MANY:
     case dbActions.REQUEST_ONE:
       return {...state, [collection]: {
         ...state[collection],
@@ -91,15 +90,6 @@ export function reducer(state, action: dbActions.Actions): State {
         [collection]: {
           ...state[collection],
           docs: {...state[collection].docs, ...newDocMap},
-          queryResults: {...state[collection].queryResults,
-              [action.queryId]: {
-                docIds: action.payload.docs.map(d => d._id),
-                size: action.payload.size,
-                totalPages: action.payload.totalPages,
-                inProgress: false,
-                fetchError: null,
-              },
-          },
         },
       }};
 
@@ -115,51 +105,6 @@ export function reducer(state, action: dbActions.Actions): State {
           }
         },
       }};
-
-
-
-    case dbActions.CREATE:
-      return {...state, ...{
-        [collection]: {
-          ...state[collection],
-          createResults: {...state[collection].createResults,
-            inProgress: true,
-            error: undefined,
-          },
-        },
-      }};
-
-    case dbActions.CREATE_SUCCESS:
-      return {...state, ...{
-        [collection]: {
-          ...state[collection],
-          docs: {...state[collection].docs, [action.payload.doc._id.$oid]: doc},
-          createResults: {...state[collection].createResults,
-            [action.payload.createId]: {
-              inProgress: false,
-              error: null,
-              docId: action.payload.doc._id.$oid,
-            },
-          }
-        },
-      }};
-
-    case dbActions.CREATE_FAILURE:
-      return {...state, ...{
-        [collection]: {
-          ...state[collection],
-          createResults: {...state[collection].createResults,
-            [action.payload.createId]: {
-              inProgress: false,
-              error: action.payload.error,
-              docId: undefined,
-            },
-          }
-        },
-      }};
-
-
-
 
 
     case dbActions.UPDATE:
@@ -180,7 +125,7 @@ export function reducer(state, action: dbActions.Actions): State {
       return {...state, ...{
         [collection]: {
           ...state[collection],
-          docs: {...state[collection].docs, [doc._id.$oid]: doc},
+          //docs: {...state[collection].docs, [doc._id.$oid]: doc},
           updateResults: {...state[collection].updateResults,
             [doc._id.$oid]: {
               inProgress: false,
@@ -202,6 +147,26 @@ export function reducer(state, action: dbActions.Actions): State {
           }
         },
       }};
+
+    case dbActions.LOAD:
+      doc = action.payload.doc;
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          docs: {...state[collection].docs, [doc._id.$oid]: doc},
+        },
+      }};
+
+    case dbActions.DELETE:
+      const id = action.payload.id;
+      let {[id.$oid]: _, ...newDocs} = state[collection].docs;
+      return {...state, ...{
+        [collection]: {
+          ...state[collection],
+          docs: newDocs,
+        }
+      }};
+
     default:
       return state;
   }

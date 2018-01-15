@@ -8,6 +8,7 @@ import { ReactiveFormsModule, FormsModule }  from '@angular/forms';
 import { HttpModule }           from '@angular/http';
 import { RouterModule, Routes } from '@angular/router';
 import { ClickOutsideModule } from 'ng-click-outside';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 
 import { AppRoutingModule }       from './app-routing.module';
 import { reducers, initialState } from './store/reducers';
@@ -15,7 +16,7 @@ import * as effects               from './store/effects';
 import * as components            from './components';
 import * as containers            from './containers';
 import * as directives            from './directives';
-import { MongoClient, SearchClient, SuggestorService }  from './services';
+import { Logger, LogHandlersProvider, MongoClient, SearchClient, SuggestorService, StoreSyncer, WatcherService }  from './services';
 import { ConfigProvider }         from './config';
 
 @NgModule({
@@ -55,12 +56,17 @@ import { ConfigProvider }         from './config';
     FormsModule,
     HttpModule,
     ClickOutsideModule,
+    InfiniteScrollModule,
   ],
   providers: [
+    Logger,
+    LogHandlersProvider, 
     MongoClient,
     SearchClient,
     SuggestorService,
+    StoreSyncer,
     ConfigProvider,
+    WatcherService,
   ],
   bootstrap: [containers.AppComponent]
 })

@@ -1,45 +1,28 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable }        from 'rxjs/Observable';
 import { Subscription }      from 'rxjs/Subscription';
 import 'rxjs/add/operator/partition';
 import * as uuid from 'uuid/v4';
+import { ObjectID } from 'bson';
 
 import { Property, PropertyType } from 'app/models';
-import { MongoDoc }               from 'app/services/index';
-import { AppState }               from 'app/store/reducers';
-import * as selectors               from 'app/store/selectors';
-import { CreateAction } from 'app/store/actions/db';
-import { CreateResult } from 'app/store/reducers/db';
+import { MongoDoc, MongoClient }               from 'app/services/index';
 
 @Component({
   selector: 'rem-new-property',
   template: `
-  <rem-property-create (create)="submit($event)" [error]="error$ | async">
+  <rem-property-create (create)="submit($event)" [error]="error">
   </rem-property-create>
   `,
   styles: [` `]
 })
 export class NewPropertyComponent {
+  error: string;
 
-  createId: string;
-  resultSub: Subscription;
-  error$: Observable<CreateResult>;
-
-  constructor(private store: Store<AppState>, private router: Router) {
-    this.createId = uuid();
-  }
+  constructor(private mongo: MongoClient, private router: Router) { }
 
   ngOnInit() {
-    const [error$, complete$] =
-      this.store.select(selectors.getCreateResult(Property.collection)(this.createId))
-        .filter(res => res && res.inProgress === false)
-        .partition(res => !!res.error);
-
-    this.error$ = error$.map(res => res.error);
-
-    this.resultSub = complete$.subscribe(res => this.complete(res.docId));
   }
 
   complete(docId: string) {
@@ -47,14 +30,12 @@ export class NewPropertyComponent {
   }
 
   ngOnDestroy() {
-    this.resultSub.unsubscribe();
   }
 
   submit(model: Property) {
-    this.store.dispatch(new CreateAction({
-      collection: Property.collection,
-      createId: this.createId,
-      model,
-    }));
+    this.mongo.create(Property.collection, model)
+      .subscribe(
+        newId => { this.complete(newId.$oid); },
+        err => { this.error = err.text(); });
   }
 }

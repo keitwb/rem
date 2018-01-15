@@ -27,21 +27,7 @@ export class DBEffects {
       return this.mongo.getOne(collection, id)
         .takeUntil(nextRequest$)
         .map(doc => new db.RequestOneSuccessAction({doc, collection}))
-        .catch(error => Observable.of(new db.RequestFailureAction({error, queryId, collection})));
-    });
-
-  @Effect()
-  create$ = this.actions$
-    .ofType(db.CREATE)
-    .switchMap((action: db.CreateAction) => {
-      const {collection, createId, model} = action.payload;
-
-      const nextRequest$ = this.actions$.ofType(db.CREATE).skip(1);
-
-      return this.mongo.create(collection, model)
-        .takeUntil(nextRequest$)
-        .map(doc => new db.CreateSuccessAction({collection, createId, doc}))
-        .catch(error => Observable.of(new db.CreateFailureAction({error, createId, collection})));
+        .catch(error => Observable.of(new db.RequestFailureAction({error: error.text(), queryId, collection})));
     });
 
   @Effect()
@@ -55,7 +41,7 @@ export class DBEffects {
       return this.mongo.update(collection, id, etag, [update])
         .takeUntil(nextRequest$)
         .map(doc => new db.UpdateSuccessAction({collection, doc}))
-        .catch(error => Observable.of(new db.UpdateFailureAction({error, collection, id})));
+        .catch(error => Observable.of(new db.UpdateFailureAction({error: error.text(), collection, id})));
     });
 
   constructor(private actions$: Actions, private mongo: MongoClient) { }

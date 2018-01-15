@@ -16,5 +16,11 @@ spec:
       containers:
       - name: update-streamer
         image: quay.io/rem/update-streamer:dev
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
+        env:
+          - name: MONGO_HOSTNAME
+            value: mongodb
+          - name: MONGO_PORT
+            value: "27017"

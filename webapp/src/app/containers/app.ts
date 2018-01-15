@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { WatcherService } from 'app/services';
 
 @Component({
   selector: 'rem-app',
@@ -26,4 +27,14 @@ import { Component } from '@angular/core';
   `]
 })
 export class AppComponent {
+  constructor(private watcher: WatcherService) {}
+
+  ngOnInit() {
+    this.watcher.syncStoreFromChanges("properties");
+    this.watcher.syncStoreFromChanges("media.files");
+    this.watcher.syncStoreFromChanges("leases");
+    this.watcher.syncStoreFromChanges("parties");
+    this.watcher.syncStoreFromChanges("notes");
+    this.watcher.syncStoreFromChanges("user");
+  }
 }

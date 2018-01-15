@@ -1,15 +1,19 @@
 #!/bin/bash
 
-set -e
+set -ex
 # Resets the Mongo database and loads development fixtures
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $SCRIPT_DIR/../..
 
-kubectl="kubectl --context minikube"
+KUBE_CONTEXT=${KUBE_CONTEXT:-minikube}
+MINIKUBE_PROFILE=${MINIKUBE_PROFILE:-minikube}
+
+kubectl="kubectl --context $KUBE_CONTEXT"
 kubectl_run_flags="-i -t --rm --restart=Never --image quay.io/rem/mongodb-setup:dev"
 
-TAG=dev make mongodb-setup
+eval $(minikube --profile $MINIKUBE_PROFILE docker-env)
+TAG=dev make mongodb-setup-image
 
 $kubectl exec -it mongo -- mongo rem --eval 'db.dropDatabase();'
 $kubectl run db-setup $kubectl_run_flags

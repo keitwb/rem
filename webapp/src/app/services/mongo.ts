@@ -1,26 +1,28 @@
 import 'rxjs/add/observable/of';
 import 'rxjs/add/observable/throw';
-import 'rxjs/add/operator/do';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/reduce';
 import 'rxjs/add/observable/concat';
 import 'rxjs/add/observable/defer';
 import 'rxjs/add/observable/from';
 import 'rxjs/add/observable/empty';
+import 'rxjs/add/operator/do';
+import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/mapTo';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/reduce';
 import { Observable }                              from 'rxjs/Observable';
 import { Subject }                              from 'rxjs/Subject';
 import { Injectable, Inject }                              from '@angular/core';
 import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import * as _                                      from 'lodash';
+import { ObjectID } from 'bson';
 
-import {SortOrder}                                 from '.';
 import {ModelUpdate} from 'app/util/updates';
 import {APP_CONFIG, AppConfig}                                 from 'app/config';
 
 export type MongoID = { $oid: string };
 export type MongoDate = { $date: number };
+export type SortOrder = "asc" | "desc";
 
 export interface MongoDoc {
   _id:          MongoID;
@@ -42,13 +44,6 @@ export interface GridFSDoc {
 interface MongoUpdate {
   'type': string;
   update: object;
-}
-
-export interface ListResult<T> {
-  _embedded:   T[];
-  _returned:   number;
-  _size:       number;
-  _total_pages: number;
 }
 
 interface Rel {
@@ -73,7 +68,6 @@ class LinkManager {
     if (!this._links) {
       this._links = this.http.get(this.baseUrl.href)
         .map(r => r.json())
-        .map(d => d["_embedded"])
         .map(arr => _.reduce(arr, (acc, colRels) => {
           acc[colRels["_id"]] = _.reduce(colRels["rels"], (acc2, r) => {
             acc2[r["rel"]] = <Rel>{
@@ -145,43 +139,35 @@ export class MongoClient {
       .map((r) => r.json())
   }
 
-  getAggregation<T>(collection: string, name: string, params: object): [Observable<number>, Observable<T>] {
+  getAggregation<T>(collection: string, name: string, params: object): Observable<T> {
     const url = this.getUrl(`${collection}/_aggrs/${name}`);
     url.searchParams.set("avars", JSON.stringify(params));
-    return this.streamEmbeddedDocs(url);
+    url.searchParams.set("np", "");
+    return this.streamDocs(url);
   }
 
-  getPage<T>(url: URL, {page, pageSize}: {page: number, pageSize: number}): Observable<ListResult<T>> {
-    const pageUrl = this.urlForPage(url, {page, pageSize});
-    return this.http.get(pageUrl.href)
-      .map(r => r.json());
-  }
-
-  streamEmbeddedDocs<T>(url: URL): [Observable<number>, Observable<T>] {
+  streamDocs<T>(url: URL): Observable<T> {
     const self = this;
-    const sizeObs = new Subject<number>();
 
     function fetchLazily({page, pageSize}: {page: number, pageSize: number}): Observable<T> {
       return Observable.defer(() => {
         const page$ = self.getPage<T>(url, {page, pageSize});
 
         return page$.mergeMap(resp => {
-          const doc$: Observable<T> = Observable.from(resp._embedded);
-          const nextPage = page + 1;
-          const next$ = resp._total_pages >= nextPage
-                          ? fetchLazily({page: nextPage, pageSize})
-                          : Observable.empty<T>();
-
-          if (page === 1) {
-            sizeObs.next(resp._size);
-            sizeObs.complete();
+          if (!resp.length) {
+            return Observable.empty<T>();
           }
+
+          const doc$: Observable<T> = Observable.from(resp);
+          const nextPage = page + 1;
+          const next$ = fetchLazily({page: nextPage, pageSize});
+
           return Observable.concat(doc$, next$);
         });
       });
     };
 
-    return [sizeObs, fetchLazily({page: 1, pageSize: 1})];
+    return fetchLazily({page: 1, pageSize: 1});
   }
 
   private urlForPage(url: URL, {page, pageSize}: {page: number, pageSize: number}): URL {
@@ -192,41 +178,64 @@ export class MongoClient {
     return pageUrl;
   }
 
-
-  private makeListURL(collection: string, params: {filter?: object, sortBy?: string, sortOrder?: SortOrder}): URL {
+  private makeListURL(collection: string,
+      params: {page?: number,
+               pageSize?: number,
+               filter: object,
+               sortBy: string,
+               sortOrder: SortOrder}): URL {
     const ordering_flag = params.sortOrder == "asc" ? "" : "-";
     const url = this.getUrl(collection);
 
-    // This makes it return pagination stats
-    url.searchParams.set("count", "");
-
+    url.searchParams.set("np", "");
     if (params.sortBy) url.searchParams.set("sort_by", `${ordering_flag}${params.sortBy}`);
     if (params.filter) url.searchParams.set("filter", JSON.stringify(params.filter));
+    if (params.pageSize) url.searchParams.set("pagesize", String(params.pageSize));
+    if (params.page) url.searchParams.set("page", String(params.page));
 
     return url;
   }
 
-  streamList<T extends MongoDoc>(collection: string, params: {filter?: object, sortBy?: string, sortOrder?: SortOrder}): [Observable<number>, Observable<T>] {
-    return this.streamEmbeddedDocs<T>(this.makeListURL(collection, params));
+  streamCollection<T extends MongoDoc>(collection: string,
+      params: {filter: object, sortBy: string, sortOrder: SortOrder}): Observable<T> {
+    return this.streamDocs<T>(this.makeListURL(collection, params));
+  }
+
+  getCollectionPage<T extends MongoDoc>(collection: string,
+      params: {page?: number,
+               pageSize?: number,
+               filter: object,
+               sortBy: string,
+               sortOrder: SortOrder}): Observable<T[]> {
+    return this.http.get(this.makeListURL(collection, params).href).map(r => r.json());
+  }
+
+  getPage<T>(url: URL, params: {page: number, pageSize: number}): Observable<T[]> {
+    const pageUrl = this.urlForPage(url, params);
+    return this.http.get(pageUrl.href)
+      .map(r => r.json());
   }
 
   // Simply grabs all of the pages of a query and concatenates all of the
   // embedded docs into a single list that is emitted from the returned
   // Observable.  Useful if you know the list is small.
-  getList<T extends MongoDoc>(collection: string, params: {filter?: object, sortBy?: string, sortOrder?: SortOrder}): Observable<T[]> {
-    const url = this.makeListURL(collection, params);
+  getFullList<T extends MongoDoc>(collection: string,
+      {filter, sortBy, sortOrder}: {
+        filter?: object, sortBy?: string, sortOrder?: SortOrder}): Observable<T[]> {
     const self = this;
+    const url = this.makeListURL(collection, {filter, sortBy, sortOrder});
 
     function fetchNextPages({page, pageSize}: {page: number, pageSize: number}): Observable<T[]> {
       const page$ = self.getPage(url, {page, pageSize});
 
       return page$.mergeMap(resp => {
+        if (!resp.length) {
+          return Observable.empty<T[]>();
+        }
+
         const nextPage = page + 1;
-        const hasMorePages = resp._total_pages >= nextPage;
-        const next$ = hasMorePages
-          ? fetchNextPages({page: nextPage, pageSize})
-          : Observable.empty<T>()
-        return Observable.concat(Observable.of<T[]>(<T[]>resp._embedded), next$);
+        const next$ = fetchNextPages({page: nextPage, pageSize});
+        return Observable.concat(Observable.of<T[]>(<T[]>resp), next$);
       });
     }
 
@@ -238,14 +247,16 @@ export class MongoClient {
     return this.http.get(url.href).map(r => r.json());
   }
 
-  create<T extends MongoDoc>(collection: string, obj: T): Observable<T> {
+  create<T extends MongoDoc>(collection: string, obj: T): Observable<MongoID> {
     const path = `${collection}`;
+    const newId = {$oid: new ObjectID().toHexString()};
     const bodyObj = {
-                      $set: _.merge({}, 
+                      $set: _.merge({},
                         obj,
                         {
-                          "_createdDate": (new Date()).toJSON(),
-                          "_updates": [],
+                          _id: newId,
+                          _createdDate: (new Date()).toJSON(),
+                          _updates: [],
                         }
                       ),
                     };
@@ -253,7 +264,7 @@ export class MongoClient {
     const url = this.getUrl(path);
 
     return this.http.post(url.href, JSON.stringify(bodyObj), this.getRequestOptions())
-      .switchMap(r => this.fetchNew<T>(r))
+      .mapTo(newId);
   }
 
   createFile<T extends MongoDoc>(collection: string, file: File, metadata: object): Observable<T> {

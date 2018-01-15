@@ -19,7 +19,7 @@ export class SuggestorService {
   constructor(private mongo: MongoClient) { }
 
   suggestCounties(prefix: string): Observable<string[]> {
-    return this.mongo.getAggregation<SuggestResult>(Property.collection, "counties", {"re": `^${_.escapeRegExp(prefix)}`})[1]
+    return this.mongo.getAggregation<SuggestResult>(Property.collection, "counties", {"re": `^${_.escapeRegExp(prefix)}`})
       .map(o => o.values)
       .defaultIfEmpty([])
       .take(1)

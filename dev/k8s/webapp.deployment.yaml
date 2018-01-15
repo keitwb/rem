@@ -20,9 +20,9 @@ spec:
         - containerPort: 80
         volumeMounts:
         - mountPath: /build/dist
-          name: test-volume
+          name: dev
       volumes:
-      - name: test-volume
+      - name: dev
         hostPath:
           path: /code/webapp/tmp/dist
           type: Directory

@@ -11,15 +11,15 @@ import { patchWithObject } from 'app/util/updates';
 export class FileService {
   constructor(private mongo: MongoClient) { }
 
-  getFilesForIds(idsToInclude: {[index: string]: MongoID[]}) {
+  getFilesForIds(idsToInclude: {[index: string]: MongoID[]}): Observable<Media[]> {
     const filter = {'$or': _.map(_.toPairs(idsToInclude), ([coll, ids]) => ({[coll]: ids}))};
-    return this.mongo.getList<Media>(Media.collection, {filter});
+    return this.mongo.getFullList<Media>(Media.collection, {filter});
   }
 
   uploadFile(file: File, metadata: object): Observable<Media> {
     return readFileContent(file).switchMap(content => {
       const checksum = md5(content);
-      const existing$ = this.mongo.getList<Media>(Media.collection, {filter: {
+      const existing$ = this.mongo.getFullList<Media>(Media.collection, {filter: {
         '$and': [
           {md5: checksum},
           {length: content.byteLength},
