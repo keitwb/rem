@@ -1,7 +1,3 @@
-import { Injectable, Inject, InjectionToken }        from '@angular/core';
-import { Subject }           from 'rxjs/Subject';
-import { Observable }           from 'rxjs/Observable';
-
 export type LogLevel = "error" | "warning" | "info" | "debug";
 
 export interface LogEntry {
@@ -14,27 +10,19 @@ export interface LogHandler {
   receive(LogEntry);
 }
 
-const LOG_HANDLERS = new InjectionToken<LogHandler>('LogHandlers');
-
 export class Logger {
-  private _entry$ = new Subject<LogEntry>();
+  private handlers: LogHandler[];
 
-  constructor(@Inject(LOG_HANDLERS) handlers: LogHandler[]) {
-    this._entry$
-      .do(en => { handlers.forEach(h => { h.receive(en); }); })
-      .subscribe();
-  }
-
-  get entry$(): Observable<LogEntry> {
-    return this._entry$;
+  addHandler(handler: LogHandler) {
+    this.handlers.push(handler);
   }
 
   entryForLevel(level: LogLevel, msg: string) {
-    this._entry$.next({
+    this.handlers.forEach(h => { h.receive({
       message: msg,
       timestamp: new Date(),
       severity: level,
-    });
+    }); })
   }
 
   error(msg: string) { this.entryForLevel("error", msg); }
@@ -42,6 +30,8 @@ export class Logger {
   info(msg: string) { this.entryForLevel("info", msg); }
   debug(msg: string) { this.entryForLevel("debug", msg); }
 }
+
+export const logger = new Logger();
 
 class ConsoleLogHandler implements LogHandler {
   receive(en: LogEntry) {
@@ -53,6 +43,4 @@ class ConsoleLogHandler implements LogHandler {
   }
 }
 
-export const LogHandlersProvider = [
-  { provide: LOG_HANDLERS, useClass: ConsoleLogHandler, multi: true },
-];
+logger.addHandler(new ConsoleLogHandler());

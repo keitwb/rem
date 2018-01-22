@@ -1,5 +1,4 @@
-import { Observable } from "rxjs/Observable";
-import { MongoDoc, MongoDate, GridFSDoc, MongoID } from 'app/services/mongo';
+import { MongoDoc, MongoDate, GridFSDoc, MongoID } from '@/services/mongo';
 
 export type ID = { $oid: string };
 export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
@@ -112,4 +111,4 @@ export interface Media extends MongoDoc, GridFSDoc {
   tags:          string[];
 }
 
-export type CollectionName = string;
+export type CollectionName = Media.collection;

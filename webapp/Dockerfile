@@ -13,12 +13,15 @@ COPY package.json /app/package.json
 RUN npm install
 ENV PATH=$PATH:/app/node_modules/.bin
 
-COPY tsconfig.json .angular-cli.json /app/
+COPY vue-shim.d.ts /app/
+COPY index.html /app/
+COPY webpack.config.js tslint.json tsconfig.json /app/
 COPY src /app/src
 
-RUN ng build --output-path /build/dist --sourcemaps --deploy-url /static --prod --aot
+ENV NODE_ENV production
+RUN webpack
 
 FROM nginx:1.13.1
 
 COPY --from=builder /build/dist/ /build/dist
-COPY conf/nginx.conf /etc/nginx/nginx.conf
+COPY nginx/nginx.conf /etc/nginx/nginx.conf

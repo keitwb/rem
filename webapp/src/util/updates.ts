@@ -1,4 +1,5 @@
-import * as _ from 'lodash';
+import map from 'lodash/map';
+import toPairs from 'lodash/toPairs';
 
 export interface ModelUpdate {
   updateObj: object;
@@ -6,7 +7,7 @@ export interface ModelUpdate {
 }
 
 export function patchWithObject(obj: object): SetFieldUpdate[] {
-  return _.map(_.toPairs(obj), ([k, v]) => set(k, v));
+  return map(toPairs(obj), ([k, v]) => set(k, v));
 }
 
 export function set(fieldName: string, value: string): SetFieldUpdate {
@@ -18,19 +19,19 @@ export function push(fieldName: string, value: string): PushArrayUpdate {
 }
 
 class SetFieldUpdate implements ModelUpdate {
-  readonly type = "set";
+  public readonly type = 'set';
   constructor(readonly fieldName: string, readonly value: string) { }
 
   get updateObj() {
-    return {"$set": {[this.fieldName]: this.value}};
+    return {$set: {[this.fieldName]: this.value}};
   }
 }
 
 class PushArrayUpdate implements ModelUpdate {
-  readonly type = "push";
+  public readonly type = 'push';
   constructor(readonly fieldName: string, readonly value: string) { }
 
   get updateObj() {
-    return {"$push": {[this.fieldName]: this.value}};
+    return {$push: {[this.fieldName]: this.value}};
   }
 }
