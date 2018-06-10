@@ -1,17 +1,15 @@
 import { MongoDoc, MongoDate, GridFSDoc, MongoID } from '@/services/mongo';
 
 export type ID = { $oid: string };
-export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
-export type TimeUnit = "months" | "years" | "quarters";
-export type PropertyType = "land" | "commercial" | "residential";
-export type PartyType = "person" | "business";
-export type State = "NC" | "SC";
+export type LeaseType = 'gross' | 'N' | 'NN' | 'NNN' | 'option';
+export type TimeUnit = 'months' | 'years' | 'quarters';
+export type PropertyType = 'land' | 'commercial' | 'residential';
+export type PartyType = 'person' | 'business';
+export type State = 'NC' | 'SC';
 
 export interface Model {}
 
-export module User {
-  export const collection = "users";
-}
+export enum CollectionName { User = 'user' }
 
 export interface User extends MongoDoc {
   username:      string;
@@ -21,9 +19,7 @@ export interface User extends MongoDoc {
   createdDate:   MongoDate;
 }
 
-export module Note {
-  export const collection = "notes";
-}
+export enum CollectionName { Note = 'notes' }
 
 export interface Note extends MongoDoc {
   note:          string;
@@ -32,9 +28,7 @@ export interface Note extends MongoDoc {
   createdBy:     ID;
 }
 
-export module Lease {
-  export const collection = "leases";
-}
+export enum CollectionName { Lease = 'leases' }
 
 export interface Lease extends MongoDoc {
   leaseType:     LeaseType;
@@ -52,9 +46,7 @@ export interface Lease extends MongoDoc {
   createdBy:     ID;
 }
 
-export module Property {
-  export const collection = "properties";
-}
+export enum CollectionName { Property = 'properties' }
 
 export interface Property extends MongoDoc {
   //static collection = "properties";
@@ -82,9 +74,7 @@ export interface Property extends MongoDoc {
 
 }
 
-export module Party {
-  export const collection = "parties";
-}
+export enum CollectionName { Party = 'parties' }
 
 export interface Party extends MongoDoc {
   //static collection = "parties";
@@ -102,13 +92,9 @@ export interface Party extends MongoDoc {
   modifiedBy?:   User;
 }
 
-export module Media {
-  export const collection = "media.files";
-}
+export enum CollectionName { Media = 'media.files' }
 
 export interface Media extends MongoDoc, GridFSDoc {
   description:   string;
   tags:          string[];
 }
-
-export type CollectionName = Media.collection;

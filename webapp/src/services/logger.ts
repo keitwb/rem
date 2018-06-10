@@ -1,4 +1,4 @@
-export type LogLevel = "error" | "warning" | "info" | "debug";
+export type LogLevel = 'error' | 'warning' | 'info' | 'debug';
 
 export interface LogEntry {
   message: string;
@@ -7,7 +7,7 @@ export interface LogEntry {
 }
 
 export interface LogHandler {
-  receive(LogEntry);
+  receive(e: LogEntry): void;
 }
 
 export class Logger {
@@ -25,17 +25,18 @@ export class Logger {
     }); })
   }
 
-  error(msg: string) { this.entryForLevel("error", msg); }
-  warning(msg: string) { this.entryForLevel("warning", msg); }
-  info(msg: string) { this.entryForLevel("info", msg); }
-  debug(msg: string) { this.entryForLevel("debug", msg); }
+  error(msg: string) { this.entryForLevel('error', msg); }
+  warning(msg: string) { this.entryForLevel('warning', msg); }
+  info(msg: string) { this.entryForLevel('info', msg); }
+  debug(msg: string) { this.entryForLevel('debug', msg); }
 }
 
 export const logger = new Logger();
+export const log = logger;
 
 class ConsoleLogHandler implements LogHandler {
   receive(en: LogEntry) {
-    if (en.severity === "error") {
+    if (en.severity === 'error') {
       console.error(en.message);
     } else {
       console.log(`[${en.severity}] ${en.message}`);

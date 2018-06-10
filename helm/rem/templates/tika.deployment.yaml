@@ -1,0 +1,20 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: tika
+spec:
+  replicas: {{ .Values.tika.replicas }}
+  selector:
+    matchLabels:
+      app: tika
+  template:
+    metadata:
+      labels:
+        app: tika
+    spec:
+      containers:
+      - name: tika
+        image: logicalspark/docker-tikaserver:1.18
+        imagePullPolicy: {{ .Values.tika.image.pullPolicy | default "IfNotPresent" }}
+        ports:
+        - containerPort: 9998

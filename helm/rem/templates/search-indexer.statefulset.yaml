@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: search-indexer
+spec:
+  replicas: {{ .Values.searchIndexer.replicas | default "2" }}
+  selector:
+    matchLabels:
+      app: search-indexer
+  template:
+    metadata:
+      labels:
+        app: search-indexer
+    spec:
+      containers:
+      - name: search-indexer
+        image: quay.io/rem/search-indexer:{{ .Values.searchIndexer.image.tag }}
+        imagePullPolicy: {{ .Values.searchIndexer.image.pullPolicy | default "IfNotPresent" }}
+        env:
+        - name: INSTANCE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name

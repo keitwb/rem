@@ -19,7 +19,7 @@ def load_shapefile(path):
     return ds
 
 
-def get_feature_by_field(data_source, field_name, field_value):
+def get_features_by_field(data_source, field_name, field_value):
     layer = data_source.GetLayer()
 
     value = single_quote_if_string(field_value)
@@ -32,11 +32,8 @@ def get_feature_by_field(data_source, field_name, field_value):
     if not features:
         raise exceptions.NoFeatureError("%s = %s in data source %s" % (field_name, value,
                                                             data_source.GetName()))
-    if len(features) > 1:
-        raise exceptions.MultipleFeaturesError("%d found for %s = %s in data source %s" %
-                         (len(features), field_name, value, ds.GetName()))
 
-    return features[0]
+    return features
 
 
 def get_feature_fields_as_dict(feature):

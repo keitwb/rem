@@ -1,0 +1,63 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: es
+  labels:
+    app: "rem"
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  # This needs to be more advanced to support more than one instance
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rem-es
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: rem-es
+        release: "{{ .Release.Name }}"
+    spec:
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sysctl", "-w", "vm.max_map_count=262144"]
+        securityContext:
+          privileged: true
+      containers:
+      - name: es
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.2.3
+        environment:
+        - name: ES_JAVA_OPTS
+          value: "-Xms256m -Xmx256m"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9200
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: es-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: es
+spec:
+  selector:
+    app: es
+  clusterIP: None
+  ports:
+  - name: tcp
+    port: 9200
+    targetPort: 9200

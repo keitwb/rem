@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -euo pipefail
+
+eval $(minikube --profile rem docker-env)
+
+TAG=dev make images
+
+helm init
+helm upgrade --install --values dev/helm-dev.yaml remdev helm/rem

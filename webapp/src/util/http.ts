@@ -1,14 +1,15 @@
 import {Observable} from 'rxjs/Observable';
+import {Observer} from 'rxjs/Observer';
 
 export interface Response<T> {
   status: number;
-  json?: any;
+  json?: T;
   text?: string;
   headers: Headers;
 }
 
 function fetchObs<T>(url: string, method: string, data: any, headers: Headers): Observable<Response<T>> {
-  return Observable.create(obs => {
+  return Observable.create((obs: Observer<T>) => {
     // TODO: once more prevalent in browsers, implement abort on unsubscribe
     const respPromise = fetch(url, {
       method,
@@ -19,7 +20,7 @@ function fetchObs<T>(url: string, method: string, data: any, headers: Headers): 
     respPromise.then(
       resp => {
         if (!resp.ok) {
-          return resp.text().then(t => Promise.reject({
+          return resp.text().then(t => <any>Promise.reject({
             status: resp.status,
             text: t,
           }));
@@ -33,7 +34,7 @@ function fetchObs<T>(url: string, method: string, data: any, headers: Headers): 
       err => { obs.error(err); })
     .then(
       data => { 
-       obs.next(data);
+       obs.next(data.json);
        obs.complete();
       },
       err => { obs.error(err); });
@@ -43,22 +44,22 @@ function fetchObs<T>(url: string, method: string, data: any, headers: Headers): 
 }
 
 export function get<T>(url: string, headers?: Headers): Observable<Response<T>> {
-  return fetchObs<T>(url, "GET", undefined, headers);
+  return fetchObs<T>(url, 'GET', undefined, headers);
 }
 
 export function post<T>(url: string, data: any, headers: Headers): Observable<Response<T>> {
-  return fetchObs<T>(url, "POST", data, headers);
+  return fetchObs<T>(url, 'POST', data, headers);
 }
 
 export function put<T>(url: string, data: any, headers: Headers): Observable<Response<T>> {
-  return fetchObs<T>(url, "PUT", data, headers);
+  return fetchObs<T>(url, 'PUT', data, headers);
 }
 
 export function patch<T>(url: string, data: any, headers: Headers): Observable<Response<T>> {
-  return fetchObs<T>(url, "PATCH", data, headers);
+  return fetchObs<T>(url, 'PATCH', data, headers);
 }
 
 // Suffixed with underscore to avoid keyword clash.
 export function delete_<T>(url: string, headers: Headers): Observable<Response<T>> {
-  return fetchObs<T>(url, "DELETE", undefined, headers);
+  return fetchObs<T>(url, 'DELETE', undefined, headers);
 }

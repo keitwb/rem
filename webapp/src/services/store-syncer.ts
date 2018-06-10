@@ -8,7 +8,7 @@ import 'rxjs/add/operator/takeWhile';
 import map from 'lodash-es/map';
 import {Store} from 'vuex';
 import { ReplaySubject }           from 'rxjs/ReplaySubject';
-import { makeLoadManyCommit, DBState }        from '@/store/db';
+import { makeLoadCommit, DBState }        from '@/store/db';
 import { SortOrder, MongoDoc, MongoID, getCollectionPage }         from '@/services/mongo';
 import { logger }         from '@/services/logger';
 
@@ -28,7 +28,7 @@ export const getSyncedList =
     .takeWhile(docs => docs.length > 0).share();
 
   const selectors$ = docs$
-    .do(docs => store.commit(makeLoadManyCommit({collection, docs})))
+    .do(docs => store.commit(makeLoadCommit({collection, docs})))
     .scan((acc, docs) => acc.concat(map(docs, d => d._id)), <MongoID[]>[]);
 
   return {

@@ -8,7 +8,7 @@ class RobesonNCAdapter(metaclass=AdapterMeta):
     pin_field = 'PIN_NUMBER'
     
     @staticmethod
-    def cleanup_pin(pin):
+    def normalize_pin(pin):
         return pin.replace('-', '')
 
     @staticmethod

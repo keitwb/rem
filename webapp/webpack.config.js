@@ -57,7 +57,7 @@ module.exports = {
   },
   devtool: 'source-map',
   plugins: [
-    new CleanWebpackPlugin(['dist'], {root: __dirname, watch: true}),
+    new CleanWebpackPlugin(['dist/**/*'], {root: __dirname, watch: true}),
     new webpack.optimize.CommonsChunkPlugin({
       name: "vendor",
       minChunks: isVendor,
@@ -79,8 +79,8 @@ module.exports = {
     new CompressionPlugin({test: /\.css$|\.js$|\.html$/}),
     new webpack.optimize.ModuleConcatenationPlugin(),
     //new Visualizer(),
-    new UglifyJSPlugin({
-      sourceMap: true
-    }),
+    //new UglifyJSPlugin({
+      //sourceMap: true
+    //}),
   ]
 }

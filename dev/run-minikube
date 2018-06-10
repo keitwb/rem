@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -euo pipefail
+
+k8s_version="1.9.0"
+
+minikube start --vm-driver virtualbox --profile rem --cpus 4 --memory 4096 --kubernetes-version v$k8s_version
+minikube --profile rem addons enable ingress
+minikube --profile rem addons enable freshpod
+
+# minikube mounts are pretty flaky and don't seem to work on Linux with
+# VirtualBox, so just make a vbox shared folder directly
+VBoxManage sharedfolder add rem --name rem-code --readonly --hostpath $(pwd) --transient || true
+minikube --profile rem ssh -- sudo mkdir -p /code
+minikube --profile rem ssh -- sudo mount -t vboxsf rem-code /code || true
+
+kubectl config set-context rem
+

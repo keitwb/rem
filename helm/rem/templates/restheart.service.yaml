@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: restheart
+spec:
+  selector:
+    app: restheart
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

@@ -1,0 +1,25 @@
+tlsCert:
+tlsKey:
+
+tika:
+  replicas: 1
+  image:
+    pullPolicy: IfNotPresent
+
+searchIndexer:
+  replicas: 2
+  image:
+    pullPolicy: IfNotPresent
+
+updateStreamer:
+  replicas: 1
+  image:
+    pullPolicy: IfNotPresent
+
+webapp:
+  replicas: 1
+  image:
+    pullPolicy: IfNotPresent
+
+mongoSetup:
+  image:

@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  # This needs to be more advanced to support more than one instance
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: mongo
+        release: "{{ .Release.Name }}"
+    spec:
+      initContainers:
+      - name: db-setup
+        image: quay.io/rem/mongo-setup:{{ .Values.mongoSetup.image.tag }}
+        volumeMounts:
+          - mountPath: "/data/db"
+            name: mongo-data
+      containers:
+      - name: mongo
+        image: mongo:3.6
+        command:
+        - "mongod"
+        - "--bind_ip"
+        - "0.0.0.0"
+        - "--replSet"
+        - "rs0"
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+          - mountPath: "/data/db"
+            name: mongo-data
+  volumeClaimTemplates:
+  - metadata:
+      name: mongo-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  labels:
+    app: mongo
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  selector:
+    app: mongo
+  clusterIP: None
+  ports:
+  - name: tcp
+    port: 27017
+    targetPort: 27017
+

@@ -10,12 +10,12 @@ export interface SearchResults {
 }
 
 export function query(q: string): Observable<SearchResults> {
-  return http.post<SearchResults>(config.searchURL, JSON.stringify({
+  return http.post<SearchResults>(baseUrl.href, JSON.stringify({
       query: {
         multi_match: {
           query: q,
         },
       },
-    }), new Headers({accept: "application/json"}))
+    }), new Headers({accept: 'application/json'}))
   .map(r => r.json);
 }

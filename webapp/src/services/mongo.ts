@@ -12,7 +12,6 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/reduce';
 import 'rxjs/add/operator/switchMap';
 import { Observable }                              from 'rxjs/Observable';
-import { Subject }                              from 'rxjs/Subject';
 import * as _                                      from 'lodash';
 import { ObjectID } from 'bson';
 
@@ -22,14 +21,14 @@ import * as http from '@/util/http';
 
 export type MongoID = { $oid: string };
 export type MongoDate = { $date: number };
-export type SortOrder = "asc" | "desc";
+export type SortOrder = 'asc' | 'desc';
 
 export interface MongoDoc {
   _id:          MongoID;
   _links:       { [id:string]: { href: string } };
   _etag:        MongoID;
   _createdDate: { $date: number };
-  _updates:     MongoUpdate[],
+  _updates:     MongoUpdate[];
 }
 
 export interface GridFSDoc {
@@ -53,6 +52,7 @@ interface Rel {
   'type':     string;
 }
 
+// tslint:disable-next-line
 interface CollectionRels {
   [index: string /* Collection name */]: {[index: string /* relation name */]: Rel};
 }
@@ -62,8 +62,8 @@ export type ETag = {$oid: string};
 const baseUrl = new URL(config.dbURL);
 
 // Make sure the base url path ends in "/" for easier processing later
-if (!baseUrl.pathname.endsWith("/")) {
-  baseUrl.pathname += "/";
+if (!baseUrl.pathname.endsWith('/')) {
+  baseUrl.pathname += '/';
 }
 
 function getHeaders(etag: ETag = null): Headers {
@@ -72,7 +72,7 @@ function getHeaders(etag: ETag = null): Headers {
     'Accept': 'application/json',
   });
   if (etag) {
-    headers.set("If-Match", etag.$oid);
+    headers.set('If-Match', etag.$oid);
   }
   return headers;
 }
@@ -90,25 +90,26 @@ function fetchNew<T extends MongoDoc>(res: http.Response<T>): Observable<T> {
     return Observable.throw(`Document was not created: ${res.toString()}`);
   }
 
-  const url = new URL(res.headers.get("Location"));
-  const [id, collection] = url.pathname.split("/").reverse();
+  const url = new URL(res.headers.get('Location'));
+  const [id, collection] = url.pathname.split('/').reverse();
   return getOne(collection, {$oid: id});
 }
 
+// tslint:disable-next-line
 function fetchRelated<T extends MongoDoc, R extends MongoDoc>(doc: T, relName: string): Observable<R[]> {
   if (!doc._links[relName] || !doc._links[relName].href) {
     return Observable.of([]);
   }
 
   const rel = doc._links[relName];
-  return http.get(rel.href)
+  return http.get<R[]>(rel.href)
     .map(r => r.json)
 }
 
 export function getAggregation<T>(collection: string, name: string, params: object): Observable<T> {
   const url = getUrl(`${collection}/_aggrs/${name}`);
-  url.searchParams.set("avars", JSON.stringify(params));
-  url.searchParams.set("np", "");
+  url.searchParams.set('avars', JSON.stringify(params));
+  url.searchParams.set('np', '');
   return streamDocs(url);
 }
 
@@ -137,8 +138,8 @@ export function streamDocs<T>(url: URL): Observable<T> {
 function urlForPage(url: URL, {page, pageSize}: {page: number, pageSize: number}): URL {
   const pageUrl = new URL(url.href);
 
-  pageUrl.searchParams.set("page", String(page));
-  pageUrl.searchParams.set("pagesize", String(pageSize));
+  pageUrl.searchParams.set('page', String(page));
+  pageUrl.searchParams.set('pagesize', String(pageSize));
   return pageUrl;
 }
 
@@ -148,14 +149,14 @@ function makeListURL(collection: string,
              filter: object,
              sortBy: string,
              sortOrder: SortOrder}): URL {
-  const ordering_flag = params.sortOrder == "asc" ? "" : "-";
+  const ordering_flag = params.sortOrder == 'asc' ? '' : '-';
   const url = getUrl(collection);
 
-  url.searchParams.set("np", "");
-  if (params.sortBy) url.searchParams.set("sort_by", `${ordering_flag}${params.sortBy}`);
-  if (params.filter) url.searchParams.set("filter", JSON.stringify(params.filter));
-  if (params.pageSize) url.searchParams.set("pagesize", String(params.pageSize));
-  if (params.page) url.searchParams.set("page", String(params.page));
+  url.searchParams.set('np', '');
+  if (params.sortBy) url.searchParams.set('sort_by', `${ordering_flag}${params.sortBy}`);
+  if (params.filter) url.searchParams.set('filter', JSON.stringify(params.filter));
+  if (params.pageSize) url.searchParams.set('pagesize', String(params.pageSize));
+  if (params.page) url.searchParams.set('page', String(params.page));
 
   return url;
 }
@@ -171,12 +172,12 @@ export function getCollectionPage<T extends MongoDoc>(collection: string,
              filter: object,
              sortBy: string,
              sortOrder: SortOrder}): Observable<T[]> {
-  return http.get(makeListURL(collection, params).href).map(r => r.json);
+  return http.get<T[]>(makeListURL(collection, params).href).map(r => r.json);
 }
 
 export function getPage<T>(url: URL, params: {page: number, pageSize: number}): Observable<T[]> {
   const pageUrl = urlForPage(url, params);
-  return http.get(pageUrl.href)
+  return http.get<T[]>(pageUrl.href)
     .map(r => r.json);
 }
 
@@ -207,7 +208,7 @@ export function getFullList<T extends MongoDoc>(collection: string,
 
 export function getOne<T extends MongoDoc>(collection: string, id: MongoID): Observable<T> {
   const url = getUrl(`${collection}/${id.$oid}`);
-  return http.get(url.href).map(r => r.json);
+  return http.get<T>(url.href).map(r => r.json);
 }
 
 export function create<T extends MongoDoc>(collection: string, obj: T): Observable<MongoID> {
@@ -233,8 +234,8 @@ export function create<T extends MongoDoc>(collection: string, obj: T): Observab
 export function createFile<T extends MongoDoc>(collection: string, file: File, metadata: object): Observable<T> {
   const url = getUrl(collection);
   const fd = new FormData();
-  fd.append("properties", JSON.stringify(metadata));
-  fd.append("file", file);
+  fd.append('properties', JSON.stringify(metadata));
+  fd.append('file', file);
   const headers = new Headers({
     'Content-Type': 'multipart/form',
     'Accept': 'application/json',
@@ -248,7 +249,7 @@ export function update<T extends MongoDoc>(collection: string, id: MongoID, etag
   const bodyObj = _.merge({}, ..._.map(updates, u => u.updateObj));
 
   const url = getUrl(path);
-  url.search = "checkEtag";
+  url.search = 'checkEtag';
 
   return http.patch(url.href, JSON.stringify(bodyObj), getHeaders(etag))
     .switchMap((r) => getOne<T>(collection, id))

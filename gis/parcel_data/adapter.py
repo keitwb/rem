@@ -2,11 +2,11 @@ import os
 
 from .shapefile import (
     get_feature_fields_as_dict,
-    get_feature_by_field,
+    get_features_by_field,
     get_geometry_as_wgs84_wkt,
     load_shapefile,
 )
-from . import exceptions
+from . import exceptions, util
 
 import gis_pb2
 
@@ -32,7 +32,7 @@ def shapefile_path(county, state, shapefile_name):
     return os.path.join(county_shapefile_dir(county, state), shapefile_name)
 
 def get_county_adapter(county, state):
-    adapter = registered_adapters.get((county, state)) 
+    adapter = registered_adapters.get((county, state))
     if not adapter:
         raise exceptions.NoAdapterError("%s County, %s not registered" % (county, state))
 
@@ -44,17 +44,23 @@ def get_parcel_data_by_pin(county, state, pin_number):
     data_source = load_shapefile(shapefile_path(
         adapter.county, adapter.state, adapter.parcel_shapefile))
 
-    clean_pin = adapter.cleanup_pin(pin_number)
-    feature = get_feature_by_field(data_source, adapter.pin_field, clean_pin)
+    clean_pin = adapter.normalize_pin(pin_number)
 
-    fields = get_feature_fields_as_dict(feature)
+    pd = gis_pb2.ParcelData()
 
-    parcel_data = gis_pb2.ParcelData()
+    features = get_features_by_field(data_source, adapter.pin_field, clean_pin)
 
-    parcel_data.pin_number = clean_pin
-    parcel_data.owner_name = adapter.owner_name_from_parcel_fields(fields)
-    parcel_data.acreage = adapter.acreage_from_parcel_fields(fields)
-    parcel_data.street_address = adapter.street_address_from_parcel_fields(fields)
-    parcel_data.boundary_polygon_wkt = get_geometry_as_wgs84_wkt(feature)
+    wkts = []
+    for feature in features:
+        fields = get_feature_fields_as_dict(feature)
 
-    return parcel_data
+        pd.pin_number = clean_pin
+        pd.owner_name = adapter.owner_name_from_parcel_fields(fields)
+        pd.acreage = adapter.acreage_from_parcel_fields(fields)
+        pd.street_address = adapter.street_address_from_parcel_fields(fields)
+
+        wkts.append(get_geometry_as_wgs84_wkt(feature))
+
+    pd.boundary_wkt = util.merge_wkts(wkts)
+    return pd
+

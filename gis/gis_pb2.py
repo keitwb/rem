@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   name='gis.proto',
   package='gis',
   syntax='proto3',
-  serialized_pb=_b('\n\tgis.proto\x12\x03gis\"B\n\rParcelRequest\x12\x12\n\npin_number\x18\x01 \x01(\t\x12\x0e\n\x06\x63ounty\x18\x02 \x01(\t\x12\r\n\x05state\x18\x03 \x01(\t\"{\n\nParcelData\x12\x12\n\npin_number\x18\x01 \x01(\t\x12\x12\n\nowner_name\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x63reage\x18\x03 \x01(\x01\x12\x16\n\x0estreet_address\x18\x04 \x01(\t\x12\x1c\n\x14\x62oundary_polygon_wkt\x18\x05 \x01(\t2=\n\x03GIS\x12\x36\n\rGetParcelInfo\x12\x12.gis.ParcelRequest\x1a\x0f.gis.ParcelData\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\tgis.proto\x12\x03gis\"B\n\rParcelRequest\x12\x12\n\npin_number\x18\x01 \x01(\t\x12\x0e\n\x06\x63ounty\x18\x02 \x01(\t\x12\r\n\x05state\x18\x03 \x01(\t\"s\n\nParcelData\x12\x12\n\npin_number\x18\x01 \x01(\t\x12\x12\n\nowner_name\x18\x02 \x01(\t\x12\x0f\n\x07\x61\x63reage\x18\x03 \x01(\x01\x12\x16\n\x0estreet_address\x18\x04 \x01(\t\x12\x14\n\x0c\x62oundary_wkt\x18\x05 \x01(\t2=\n\x03GIS\x12\x36\n\rGetParcelInfo\x12\x12.gis.ParcelRequest\x1a\x0f.gis.ParcelData\"\x00\x62\x06proto3')
 )
 
 
@@ -106,7 +106,7 @@ _PARCELDATA = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='boundary_polygon_wkt', full_name='gis.ParcelData.boundary_polygon_wkt', index=4,
+      name='boundary_wkt', full_name='gis.ParcelData.boundary_wkt', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -125,7 +125,7 @@ _PARCELDATA = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=86,
-  serialized_end=209,
+  serialized_end=201,
 )
 
 DESCRIPTOR.message_types_by_name['ParcelRequest'] = _PARCELREQUEST
@@ -154,8 +154,8 @@ _GIS = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   options=None,
-  serialized_start=211,
-  serialized_end=272,
+  serialized_start=203,
+  serialized_end=264,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetParcelInfo',

@@ -1,0 +1,4 @@
+# Requires gdal too but this is installed as an apt package
+shapely==1.6.4
+grpcio==1.8.4
+protobuf==3.5.1

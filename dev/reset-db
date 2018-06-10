@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -exuo pipefail
+# Resets the Mongo database and loads development fixtures
+
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $SCRIPT_DIR/..
+
+KUBE_CONTEXT=${KUBE_CONTEXT:-rem}
+MINIKUBE_PROFILE=${MINIKUBE_PROFILE:-rem}
+
+kubectl="kubectl --context $KUBE_CONTEXT"
+kubectl_run_flags="-i -t --rm --restart=Never"
+
+eval $(minikube --profile $MINIKUBE_PROFILE docker-env)
+TAG=dev make mongo-dev-fixtures-image mongo-setup-image
+
+$kubectl exec -it mongo -- mongo rem --eval 'db.dropDatabase();'
+$kubectl run db-setup $kubectl_run_flags --image quay.io/rem/mongo-setup:dev
+$kubectl run dev-fixtures $kubectl_run_flags --image quay.io/rem/mongo-dev-fixtures -- /opt/dev/load-fixtures.sh

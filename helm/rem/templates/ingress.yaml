@@ -1,0 +1,31 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: frontend-ingress
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.allow-http: "true"
+    # Set to one hour for websocket connections
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+spec:
+  tls:
+    - hosts:
+      - {{ .Values.ingressHost }}
+      secretName: ingress-tls
+  rules:
+  - host: {{ .Values.ingressHost }}
+    http:
+      paths:
+      - path: /db
+        backend:
+          serviceName: restheart
+          servicePort: 8080
+      - path: /updates
+        backend:
+          serviceName: update-streamer
+          servicePort: 8080
+      - path: /
+        backend:
+          serviceName: webapp
+          servicePort: 80
