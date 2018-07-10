@@ -1,4 +1,5 @@
-ingressHost: rem.dev
+ingressHost: rem.localdomain
+devMode: true
 
 updateStreamer:
   image:
@@ -16,7 +17,11 @@ restheart:
   image:
     tag: dev
 
-mongoSetup:
+mongo:
+  image:
+    tag: dev
+
+es:
   image:
     tag: dev
 

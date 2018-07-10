@@ -1,34 +1,38 @@
 TAG ?= dev
 
-.PHONY: restheart-image
-restheart-image:
-	docker build --rm -t quay.io/rem/restheart:$(TAG) mongo/restheart
+.PHONY: restheart
+restheart:
+	docker build --rm -t quay.io/rem/restheart:$(TAG) datastores/mongo/restheart
 
-.PHONY: search-indexer-image
-search-indexer-image:
+.PHONY: search-indexer
+search-indexer:
 	docker build --rm -t quay.io/rem/search-indexer:$(TAG) search
 
-.PHONY: update-streamer-image
-update-streamer-image:
+.PHONY: update-streamer
+update-streamer:
 	docker build --rm -t quay.io/rem/update-streamer:$(TAG) update-streamer
 
-.PHONY: webapp-image
-webapp-image:
+.PHONY: webapp
+webapp:
 	docker build --rm -t quay.io/rem/webapp:$(TAG) webapp
 
-.PHONY: mongo-setup-image
-mongo-setup-image:
-	docker build --rm -t quay.io/rem/mongo-setup:$(TAG) mongo/migrations
+.PHONY: es
+es:
+	docker build --pull --rm -t quay.io/rem/es:$(TAG) datastores/es
 
-.PHONY: mongo-dev-fixtures-image
-mongo-dev-fixtures-image:
+.PHONY: mongo
+mongo:
+	docker build --rm -t quay.io/rem/mongo:$(TAG) datastores/mongo
+
+.PHONY: mongo-dev-fixtures
+mongo-dev-fixtures:
 	docker build --rm -t quay.io/rem/mongo-dev-fixtures dev/fixtures
 
-.PHONY: gis-parcel-data-image
-gis-parcel-data-image:
+.PHONY: gis-parcel-data
+gis-parcel-data:
 	docker build --rm -t quay.io/rem/gis-parcel-data:$(TAG) -f gis/Dockerfile --target parcel-data gis
 
-images: restheart-image update-streamer-image mongo-setup-image gis-parcel-data-image search-indexer-image #webapp-image
+images: restheart update-streamer mongo es gis-parcel-data search-indexer #webapp
 	true
 
 .PHONY: minikube-kvm
