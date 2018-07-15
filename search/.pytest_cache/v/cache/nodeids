@@ -1,6 +1,0 @@
-[
-  "remsearch/inttest/test_indexer.py::test_changes_get_indexed_in_es",
-  "remsearch/inttest/test_indexer.py::test_resumes_from_last_change_on_restart",
-  "remsearch/inttest/test_indexer.py::test_multiple_instances_coordinate",
-  "remsearch/inttest/test_indexer.py::test_preexisting_docs_get_indexed_once_if_no_prior_claims"
-]
