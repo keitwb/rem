@@ -42,11 +42,7 @@ COLLECTIONS_TO_INDEX = [
 MAX_ES_INDEX_TASKS = 10
 
 
-async def watch_indexed_collections(instance_name,
-                                    mongo_loc,
-                                    es_hosts,
-                                    tika_loc,
-                                    mongo_database="rem"):
+async def watch_indexed_collections(instance_name, mongo_loc, es_hosts, tika_loc, mongo_database="rem"):
     """
     Watches all of the configured collections for changes.  Blocks indefinitely
     """
@@ -64,13 +60,9 @@ async def watch_indexed_collections(instance_name,
     # This is used for mapping files to text through Tika
     async with aiohttp.ClientSession() as http_session:
         esclient = elasticsearch_async.AsyncElasticsearch(
-            es_hosts,
-            sniff_on_start=True,
-            sniff_on_connection_fail=True,
-            sniffer_timeout=20)
+            es_hosts, sniff_on_start=True, sniff_on_connection_fail=True, sniffer_timeout=20)
 
-        tika_client = TikaClient(
-            http_session, host=tika_loc[0], port=tika_loc[1])
+        tika_client = TikaClient(http_session, host=tika_loc[0], port=tika_loc[1])
 
         try:
             await asyncio.gather(*[
@@ -84,8 +76,7 @@ async def watch_indexed_collections(instance_name,
             await esclient.transport.close()
 
 
-async def watch_collection_with_retry(mongo_db, tika_client, esclient,
-                                      collection, instance_name):
+async def watch_collection_with_retry(mongo_db, tika_client, esclient, collection, instance_name):
     """
     Watches the given collection, resetting the watch in the face of Mongo
     exceptions
@@ -93,23 +84,20 @@ async def watch_collection_with_retry(mongo_db, tika_client, esclient,
     while True:
         try:
             logger.info("Watching collection %s", collection)
-            await watch_collection(mongo_db, tika_client, esclient, collection,
-                                   instance_name)
+            await watch_collection(mongo_db, tika_client, esclient, collection, instance_name)
         except pymongo.errors.PyMongoError as e:
             logger.error("Error watching collection '%s': %s", collection, e)
             await asyncio.sleep(10)
 
 
-async def watch_collection(mongo_db, tika_client, esclient, collection,
-                           instance_name):
+async def watch_collection(mongo_db, tika_client, esclient, collection, instance_name):
     """
     Watch a single collection for changes using the Mongo change stream.  It
     first checks for a previous claim for this instance so that it can get the
     resume token to use if picking back up from a previous run.  It also
     completes the previously claimed change if the previous watcher crashed.
     """
-    last_claim = await claims.get_previous_claim(mongo_db, collection,
-                                                 instance_name)
+    last_claim = await claims.get_previous_claim(mongo_db, collection, instance_name)
 
     last_was_completed = False
     if last_claim:
@@ -120,14 +108,11 @@ async def watch_collection(mongo_db, tika_client, esclient, collection,
         logger.info("No previous state found for collection %s", collection)
         resume_token = None
 
-    async with mongo_db[collection].watch(
-            resume_after=resume_token, full_document="updateLookup") as stream:
+    async with mongo_db[collection].watch(resume_after=resume_token, full_document="updateLookup") as stream:
         # This means the last job run didn't finish successfully before this
         # instance shutdown, so rerun it.
         if resume_token and not last_was_completed:
-            logger.info(
-                "Last change to collection '%s' did not complete before shutdown, reindexing",
-                collection)
+            logger.info("Last change to collection '%s' did not complete before shutdown, reindexing", collection)
             last_change = last_claim[claims.CHANGE_FIELD]
             assert last_change["_id"] == resume_token
 
@@ -137,33 +122,27 @@ async def watch_collection(mongo_db, tika_client, esclient, collection,
         # claims or the last claim didn't have a resume token because it is an initial indexing
         # claim that didn't complete.
         elif (not resume_token or not last_claim) and not last_was_completed:
-            claim_id = await claims.attempt_to_claim_initial_indexing(
-                mongo_db, collection, instance_name)
+            claim_id = await claims.attempt_to_claim_initial_indexing(mongo_db, collection, instance_name)
             if claim_id:
                 logger.info("got claim, reindexing all docs in %s", collection)
-                await index_collection(mongo_db, tika_client, esclient,
-                                       collection)
+                await index_collection(mongo_db, tika_client, esclient, collection)
                 await claims.mark_claim_completed(mongo_db, claim_id)
             else:
-                logger.info(
-                    "Waiting for another instance to reindex everything")
-                await claims.wait_for_initial_indexing_complete(
-                    mongo_db, collection)
+                logger.info("Waiting for another instance to reindex everything")
+                await claims.wait_for_initial_indexing_complete(mongo_db, collection)
 
-        await process_stream(mongo_db, collection, tika_client, esclient,
-                             stream, instance_name)
+        await process_stream(mongo_db, collection, tika_client, esclient, stream, instance_name)
 
 
-async def process_stream(mongo_db, collection, tika_client, esclient, stream,
-                         instance_name):
+# pylint: disable=too-many-arguments
+async def process_stream(mongo_db, collection, tika_client, esclient, stream, instance_name):
     """
     Process each change in the given stream, trying to claim the change first
     and moving on to the next change immediately if a change cannot be claimed.
     """
     logger.info("Starting to watch change stream for %s", collection)
     async for change in stream:
-        assert collection == change["ns"][
-            "coll"], 'collections did not match up'
+        assert collection == change["ns"]["coll"], 'collections did not match up'
 
         if change["operationType"] == "invalidate":
             logger.info("Collection %s was invalidated", collection)
@@ -172,23 +151,18 @@ async def process_stream(mongo_db, collection, tika_client, esclient, stream,
             await claims.delete_claims_for_instance(mongo_db, instance_name)
             return
 
-        logger.info("Saw change on collection %s.%s", collection,
-                    change["documentKey"]["_id"])
+        logger.info("Saw change on collection %s.%s", collection, change["documentKey"]["_id"])
 
-        claim_id = await claims.attempt_to_claim_change(
-            mongo_db, change, instance_name)
+        claim_id = await claims.attempt_to_claim_change(mongo_db, change, instance_name)
         if claim_id:
-            logger.info("Claimed change for doc %s.%s", collection,
-                        change["documentKey"]["_id"])
+            logger.info("Claimed change for doc %s.%s", collection, change["documentKey"]["_id"])
 
             await index_change(esclient, tika_client, change, mongo_db)
-            logger.info("Document %s.%s indexed", collection,
-                        change["documentKey"]["_id"])
+            logger.info("Document %s.%s indexed", collection, change["documentKey"]["_id"])
 
             await claims.mark_claim_completed(mongo_db, claim_id)
         else:
-            logger.info("Unable to claim change for %s.%s", collection,
-                        change["documentKey"]["_id"])
+            logger.info("Unable to claim change for %s.%s", collection, change["documentKey"]["_id"])
 
 
 def is_gridfs_collection(collection):
@@ -211,8 +185,7 @@ async def index_change(esclient, tika_client, change, mongo_db):
     doc_id = change["documentKey"]["_id"]
 
     if op == "delete":
-        await es.delete_from_index_by_id(
-            esclient, index=collection, es_id=str(doc_id))
+        await es.delete_from_index_by_id(esclient, index=collection, es_id=str(doc_id))
     elif is_gridfs_collection(collection):
         await text.index_file_change(tika_client, esclient, change, mongo_db)
     else:

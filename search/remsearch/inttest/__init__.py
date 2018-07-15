@@ -1,3 +1,6 @@
+"""
+Integration tests for the search indexer service
+"""
 import os
 
 # This is essential for testing a large number of instances in parallel.  Each instance of the

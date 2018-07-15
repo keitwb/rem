@@ -12,8 +12,7 @@ from remtesting.es import run_elasticsearch
 from remtesting.mongo import run_mongo
 from remtesting.wait import wait_for_async
 
-from .util import (get_es_doc, get_es_indexing_stats, run_watchers,
-                   run_watchers_with_services)
+from .util import (get_es_doc, get_es_indexing_stats, run_watchers, run_watchers_with_services)
 
 
 # pylint: disable=missing-docstring

@@ -1,3 +1,6 @@
+"""
+Tests for the GridFS-based collections
+"""
 # pylint: disable=not-async-context-manager
 
 import os
