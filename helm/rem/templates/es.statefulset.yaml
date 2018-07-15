@@ -1,0 +1,58 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: es
+  labels:
+    app: es
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  # This needs to be more advanced to support more than one instance
+  replicas: 1
+  selector:
+    matchLabels:
+      app: es
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: es
+        release: "{{ .Release.Name }}"
+    spec:
+      initContainers:
+      - name: init-sysctl
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["sysctl", "-w", "vm.max_map_count=262144"]
+        securityContext:
+          privileged: true
+      - name: init-mount
+        image: busybox
+        imagePullPolicy: IfNotPresent
+        command: ["chown", "1000.1000", "-R", "/usr/share/elasticsearch/data"]
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+      containers:
+      - name: es
+        image: quay.io/rem/es:{{.Values.es.image.tag}}
+        environment:
+        - name: ES_JAVA_OPTS
+          value: "-Xms256m -Xmx256m"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9200
+        volumeMounts:
+        - name: es-data
+          mountPath: /usr/share/elasticsearch/data
+  volumeClaimTemplates:
+  - metadata:
+      name: es-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

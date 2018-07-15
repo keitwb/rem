@@ -19,5 +19,5 @@ message ParcelData {
     double acreage = 3;
     string street_address = 4;
     // This should be a WKT string in WGS84 (lat/long) projection
-    string boundary_polygon_wkt = 5;
+    string boundary_wkt = 5;
 }

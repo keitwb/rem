@@ -1,86 +1,87 @@
 const webpack = require('webpack'),
-    CompressionPlugin = require('compression-webpack-plugin'),
-    ExtractTextPlugin = require('extract-text-webpack-plugin'),
-    HtmlWebpackPlugin = require('html-webpack-plugin'),
-    UglifyJSPlugin = require('uglifyjs-webpack-plugin'),
-    ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin'),
-    CleanWebpackPlugin = require('clean-webpack-plugin'),
-    pkg = require('./package.json');
+      path = require('path'),
+      CompressionPlugin = require('compression-webpack-plugin'),
+      ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin'),
+      //ExtractTextPlugin = require('extract-text-webpack-plugin'),
+      HtmlWebpackPlugin = require('html-webpack-plugin'),
+      CleanWebpackPlugin = require('clean-webpack-plugin'),
+      pkg = require('./package.json');
 
 var Visualizer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-const isVendor = ({ resource }) => /node_modules/.test(resource);
 
-const publicPath = process.env.STATIC_URL || '/static/';
+const isDev = process.env.NODE_ENV !== "production",
+      publicPath = process.env.STATIC_URL || '/static/';
 
 module.exports = {
-  context: __dirname,
-  entry: __dirname + '/src/main.ts',
-  output: {
-    path: __dirname + '/dist',
-    filename: 'js/[name].[hash].js',
-    publicPath,
-    chunkFilename: 'js/[name].[hash].js',
-  },
-  resolve: {
-    extensions: ['.ts', '.vue', '.js'],
-    alias: {
-      'vue$': 'vue/dist/vue.esm.js',
-      '@': __dirname + "/src",
+    entry: "./src/index.tsx",
+    output: {
+        filename: "bundle.js",
+        path: __dirname + "/dist",
+        publicPath,
     },
-  },
 
-  module: {
-    rules: [
-      { test: /\.vue$/,
-        loader: 'vue-loader',
-        exclude: /node_modules/,
-        options: {
-          extractCSS: true,
-          loaders: {
-            ts: 'ts-loader'
+    mode: 'none',
+    devtool: "source-map",
+
+    resolve: {
+        extensions: [".ts", ".tsx", ".js", ".json"]
+    },
+
+    module: {
+        rules: [
+            { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
+        ]
+    },
+
+    devServer: {
+      contentBase: path.join(__dirname, 'dist'),
+      compress: true,
+      port: 9000,
+      publicPath,
+    },
+
+    optimization: {
+      splitChunks: {
+        maxAsyncRequests: 5,
+        maxInitialRequests: 3,
+        name: true,
+        cacheGroups: {
+          vendor: {
+            minChunks: 1,
+            test: /[\\/]node_modules[\\/]/,
+            priority: -10,
+            name: 'vendor',
+            chunks: 'all',
           },
-        }
+          default: {
+            name: 'app',
+            minChunks: 1,
+            priority: -20,
+            reuseExistingChunk: true,
+          }
+        },
       },
-      { test: /\.ts$/,
-        loader: 'ts-loader',
-        include: [__dirname + "/src"],
-        options: {
-          appendTsSuffixTo: [/\.vue$/],
-          transpileOnly: true
-        }
-      },
-      {
-        test: /\.(jpg|png|gif|eot|svg|ttf|woff|woff2)$/,
-        loader: 'file-loader'
-      }
-    ]
-  },
-  devtool: 'source-map',
-  plugins: [
-    new CleanWebpackPlugin(['dist'], {root: __dirname, watch: true}),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: "vendor",
-      minChunks: isVendor,
-    }),
-    new HtmlWebpackPlugin({
-      inject: true,
-      template: './index.html',
-      //favicon: helpers.root('./src/favicon.ico')
-    }),
-    new ExtractTextPlugin("style.css"),
-    new webpack.NoEmitOnErrorsPlugin(),
-    new webpack.EnvironmentPlugin({
-      "NODE_ENV": "development",
-    }),
-    new ForkTsCheckerWebpackPlugin({
-      tslint: true,
-      vue: true,
-    }),
-    new CompressionPlugin({test: /\.css$|\.js$|\.html$/}),
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    //new Visualizer(),
-    new UglifyJSPlugin({
-      sourceMap: true
-    }),
-  ]
-}
+      concatenateModules: true,
+      noEmitOnErrors: true,
+      minimize: !isDev,
+    },
+
+    plugins: [
+      //new CleanWebpackPlugin(['dist/**/*'], {root: __dirname, watch: true}),
+      new HtmlWebpackPlugin({
+        inject: true,
+        template: './index.html',
+        //favicon: helpers.root('./src/favicon.ico')
+      }),
+      new ForkTsCheckerWebpackPlugin({
+        tslint: true,
+      }),
+      //new ExtractTextPlugin("style.css"),
+      new webpack.EnvironmentPlugin({
+        "NODE_ENV": "development",
+      }),
+      isDev ? null : new CompressionPlugin({test: /\.css$|\.js$|\.html$/}),
+      //new Visualizer(),
+    ].filter(p => p !== null),
+};

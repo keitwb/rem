@@ -1,0 +1,37 @@
+# Set to true to enable certain development conveniences that should not be present in an actual
+# deployment
+devMode: false
+
+tlsCert:
+tlsKey:
+
+tika:
+  replicas: 1
+  image:
+    tag: latest
+
+mongo:
+  replicas: 1
+  image:
+    tag: latest
+
+searchIndexer:
+  replicas: 2
+  image:
+    tag: latest
+
+updateStreamer:
+  replicas: 1
+  image:
+    tag: latest
+
+webapp:
+  replicas: 1
+  image:
+    tag: latest
+
+es:
+  replicas: 1
+  image:
+    tag: latest
+

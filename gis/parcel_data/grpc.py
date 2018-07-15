@@ -12,7 +12,7 @@ class GISService(gis_pb2_grpc.GISServicer):
     def GetParcelInfo(self, request, context):
         return get_parcel_data_by_pin(request.county, request.state, request.pin_number)
 
-        
+
 def serve():
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
   gis_pb2_grpc.add_GISServicer_to_server(GISService(), server)

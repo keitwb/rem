@@ -1,28 +1,50 @@
 TAG ?= dev
 
-.PHONY: restheart-image
-restheart-image:
-	docker build --rm -t quay.io/rem/restheart:$(TAG) mongodb/restheart
+.PHONY: restheart
+restheart:
+	docker build --rm -t quay.io/rem/restheart:$(TAG) datastores/mongo/restheart
 
-.PHONY: update-streamer-image
-update-streamer-image:
+.PHONY: search-indexer
+search-indexer:
+	docker build --rm -t quay.io/rem/search-indexer:$(TAG) search
+
+.PHONY: update-streamer
+update-streamer:
 	docker build --rm -t quay.io/rem/update-streamer:$(TAG) update-streamer
 
-.PHONY: webapp-image
-webapp-image:
+.PHONY: webapp
+webapp:
 	docker build --rm -t quay.io/rem/webapp:$(TAG) webapp
 
-.PHONY: mongodb-setup-image
-mongodb-setup-image:
-	docker build --rm -t quay.io/rem/mongodb-setup:$(TAG) mongodb
+.PHONY: es
+es:
+	docker build --pull --rm -t quay.io/rem/es:$(TAG) datastores/es
 
-images: restheart-image update-streamer-image mongodb-setup-image webapp-image
+.PHONY: mongo
+mongo:
+	docker build --rm -t quay.io/rem/mongo:$(TAG) datastores/mongo
+
+.PHONY: mongo-dev-fixtures
+mongo-dev-fixtures:
+	docker build --rm -t quay.io/rem/mongo-dev-fixtures dev/fixtures
+
+.PHONY: gis-parcel-data
+gis-parcel-data:
+	docker build --rm -t quay.io/rem/gis-parcel-data:$(TAG) -f gis/Dockerfile --target parcel-data gis
+
+images: restheart update-streamer mongo es gis-parcel-data search-indexer #webapp
 	true
 
 .PHONY: minikube-kvm
-minikube-kvm:
-	minikube start --vm-driver kvm2 --cpus 4 --mount --kubernetes-version v1.8.0 --bootstrapper kubeadm
-	kubectl config set-context minikube --namespace rem
+minikube:
+	dev/run-minikube
+
+.PHONY: helm-dev
+helm-dev:
+	dev/helm-dev
+
+minikube-etc-hosts:
+	sudo sed -i -e "s/.* rem.dev/$$(minikube ip --profile rem) rem.dev/" /etc/hosts
 
 .PHONY: reset-dev-db
 reset-dev-db:

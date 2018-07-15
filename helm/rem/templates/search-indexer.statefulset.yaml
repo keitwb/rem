@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: search-indexer
+  labels:
+    app: search-indexer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.searchIndexer.replicas | default "2" }}
+  selector:
+    matchLabels:
+      app: search-indexer
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: search-indexer
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: search-indexer
+        image: quay.io/rem/search-indexer:{{ .Values.searchIndexer.image.tag }}
+        imagePullPolicy: {{ .Values.searchIndexer.image.pullPolicy | default "IfNotPresent" }}
+        env:
+        - name: INSTANCE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name

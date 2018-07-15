@@ -1,10 +1,8 @@
-FROM ubuntu:16.04 as base
+FROM python:3.6
 
-ENTRYPOINT ["/code/main.py"]
+WORKDIR "/opt"
+ENTRYPOINT ["python", "-m", "remupdates"]
 
-RUN apt update &&\
-    apt install -y python3 python3-pip
-
-COPY requirements.txt /code/requirements.txt
-RUN pip3 install -r /code/requirements.txt
-COPY . /code
+COPY requirements.txt /opt/requirements.txt
+RUN pip install -r /opt/requirements.txt
+COPY ./remupdates/ /opt/remupdates/

@@ -1,0 +1,28 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: restheart
+  labels:
+    app: restheart
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: restheart
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: restheart
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: restheart
+        image: quay.io/rem/restheart:{{ .Values.restheart.image.tag }}
+        imagePullPolicy: {{ .Values.restheart.image.pullPolicy | default "IfNotPresent" }}
+        ports:
+        - containerPort: 8080
+

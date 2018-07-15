@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: update-streamer
+  labels:
+    app: update-streamer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.updateStreamer.replicas }}
+  selector:
+    matchLabels:
+      app: update-streamer
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: update-streamer
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: update-streamer
+        image: quay.io/rem/update-streamer:{{ .Values.updateStreamer.image.tag }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGO_HOSTNAME
+          value: mongodb
+        - name: MONGO_PORT
+          value: "27017"

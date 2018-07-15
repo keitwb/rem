@@ -6,9 +6,9 @@ class CumberlandNCAdapter(metaclass=AdapterMeta):
 
     parcel_shapefile = 'cc_parcels.shp'
     pin_field = 'NAD83_PIN'
-    
+
     @staticmethod
-    def cleanup_pin(pin):
+    def normalize_pin(pin):
         # Cumberland county pins have a trailing dash
         return pin + "-" if not pin.endswith("-") else pin
 

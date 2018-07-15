@@ -1,7 +1,6 @@
-keithvaluation/settings/local.py
 .vagrant
 
 *.pyc
 tmp/
-ansible/vault.pem
-ansible/playbook.retry
+virtualenv/
+**/.pytest_cache/

@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: tika
+  labels:
+    app: tika
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.tika.replicas }}
+  selector:
+    matchLabels:
+      app: tika
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: tika
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: tika
+        image: logicalspark/docker-tikaserver:1.18
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9998
