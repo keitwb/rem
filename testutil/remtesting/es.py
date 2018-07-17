@@ -1,3 +1,6 @@
+"""
+Logic for running a test ElasticSearch service.
+"""
 import os
 
 import elasticsearch_async
@@ -22,7 +25,7 @@ async def run_elasticsearch():
             "port": 9200,
         }])
 
-        await es_client.cluster.health(wait_for_status='green')
+        await es_client.cluster.health(wait_for_status='green')  #pylint: disable=unexpected-keyword-arg
 
         try:
             yield es_client
