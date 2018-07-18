@@ -4,11 +4,9 @@ Logic for running containers used for testing dependencies
 import asyncio
 import logging
 import socket
-from contextlib import contextmanager
 from functools import partial as p
 
 import docker
-
 from async_generator import asynccontextmanager
 
 from .util import asyncify
