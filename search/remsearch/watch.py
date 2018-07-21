@@ -19,6 +19,7 @@ successfully processed all the previous changes it has claimed.
 
 import asyncio
 import logging
+from concurrent.futures import CancelledError
 from functools import partial as p
 
 import aiohttp
@@ -157,8 +158,12 @@ async def process_stream(mongo_db, collection, tika_client, esclient, stream, in
         if claim_id:
             logger.info("Claimed change for doc %s.%s", collection, change["documentKey"]["_id"])
 
-            await index_change(esclient, tika_client, change, mongo_db)
-            logger.info("Document %s.%s indexed", collection, change["documentKey"]["_id"])
+            try:
+                await index_change(esclient, tika_client, change, mongo_db)
+                logger.info("Document %s.%s indexed", collection, change["documentKey"]["_id"])
+            except CancelledError:
+                await claims.mark_claim_completed(mongo_db, claim_id)
+                raise
 
             await claims.mark_claim_completed(mongo_db, claim_id)
         else:
