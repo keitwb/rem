@@ -1,9 +1,9 @@
-import { log, LogEntry, LogHandler } from "./logger";
+import { LogEntry, logger, LogHandler, LogLevel } from "./logger";
 
 class ConsoleLogHandler implements LogHandler {
   // tslint:disable:no-console
   public receive(en: LogEntry) {
-    if (en.severity === "error") {
+    if (en.severity === LogLevel.Error) {
       console.error(en.message);
     } else {
       console.log(`[${en.severity}] ${en.message}`);
@@ -11,4 +11,4 @@ class ConsoleLogHandler implements LogHandler {
   }
 }
 
-log.addHandler(new ConsoleLogHandler());
+logger.addHandler(new ConsoleLogHandler());

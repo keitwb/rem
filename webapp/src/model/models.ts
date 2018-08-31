@@ -1,7 +1,31 @@
-import { GridFSDoc, MongoDate, MongoDoc, MongoID } from "@/backend/mongo";
+export interface MongoDate {
+  $date: number;
+}
 
-export interface ID {
+export interface MongoID {
   $oid: string;
+}
+
+export interface MongoDoc {
+  _id: MongoID;
+  _links?: { [id: string]: { href: string } };
+  _etag?: MongoID;
+  _createdDate?: { $date: number };
+  _updates?: MongoUpdate[];
+}
+
+export interface GridFSDoc {
+  md5: string;
+  length: number;
+  chunkSize: number;
+  filename: string;
+  contentType: string;
+  uploadDate: MongoDate;
+}
+
+interface MongoUpdate {
+  type: string;
+  update: object;
 }
 
 export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
@@ -30,7 +54,7 @@ export interface Note extends MongoDoc {
   note: string;
   media: Media[];
   createdDate: MongoDate;
-  createdBy: ID;
+  createdBy: MongoID;
 }
 
 export enum CollectionName {
@@ -50,7 +74,7 @@ export interface Lease extends MongoDoc {
   media: Media[];
   notes: Note[];
   createdDate: MongoDate;
-  createdBy: ID;
+  createdBy: MongoID;
 }
 
 export enum CollectionName {

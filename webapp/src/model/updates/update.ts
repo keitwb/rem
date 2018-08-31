@@ -1,6 +1,3 @@
-import map from "lodash/map";
-import toPairs from "lodash/toPairs";
-
 import { ModelUpdate } from "./common";
 
 class SetFieldUpdate implements ModelUpdate {

@@ -28,11 +28,11 @@ mongo:
 mongo-dev-fixtures:
 	docker build --rm -t quay.io/rem/mongo-dev-fixtures dev/fixtures
 
-.PHONY: gis-parcel-data
-gis-parcel-data:
-	docker build --rm -t quay.io/rem/gis-parcel-data:$(TAG) -f gis/Dockerfile --target parcel-data gis
+.PHONY: parceldata
+parceldata:
+	docker build --rm -t quay.io/rem/parceldata:$(TAG) -f Dockerfile.parceldata .
 
-images: restheart update-streamer mongo es gis-parcel-data search-indexer #webapp
+images: restheart update-streamer mongo es parceldata search-indexer #webapp
 	true
 
 .PHONY: minikube-kvm

@@ -9,36 +9,73 @@ const webpack = require('webpack'),
 
 var Visualizer = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-const isDev = process.env.NODE_ENV !== "production",
-      publicPath = process.env.STATIC_URL || '/static/';
+module.exports = (env, argv) => {
+  const isDev = argv.mode !== "production",
+        publicPath = process.env.STATIC_URL || '/static/';
 
-module.exports = {
+  console.log(`Mode is ${argv.mode}`);
+  console.log(`Public path is ${publicPath}`);
+  return {
+    context: __dirname,
     entry: "./src/index.tsx",
     output: {
-        filename: "bundle.js",
-        path: __dirname + "/dist",
+        filename: "app.js",
+        path: path.resolve(__dirname, "dist"),
         publicPath,
     },
 
-    mode: 'none',
     devtool: "source-map",
 
     resolve: {
-        extensions: [".ts", ".tsx", ".js", ".json"]
+        extensions: [".ts", ".tsx", ".js", ".json"],
+        alias: {
+          "@": path.resolve(__dirname, "src"),
+        },
     },
 
     module: {
         rules: [
             { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
-            { enforce: "pre", test: /\.js$/, loader: "source-map-loader" }
+          { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
+          {
+            test: /\.(css)$/,
+            use: [{
+              loader: 'style-loader', // inject CSS to page
+            }, {
+              loader: 'css-loader', // translates CSS into CommonJS modules
+            }],
+          },
+          {
+            test: /\.(scss)$/,
+            use: [{
+              loader: 'style-loader', // inject CSS to page
+            }, {
+              loader: 'css-loader', // translates CSS into CommonJS modules
+            }, {
+              loader: 'postcss-loader', // Run post css actions
+              options: {
+                plugins: function () { // post css plugins, can be exported to postcss.config.js
+                  return [
+                    require('precss'),
+                    require('autoprefixer')
+                  ];
+                }
+              }
+            }, {
+              loader: 'sass-loader' // compiles Sass to CSS
+            }]
+          },
         ]
     },
 
     devServer: {
-      contentBase: path.join(__dirname, 'dist'),
+      contentBase: path.resolve(__dirname, 'dist'),
       compress: true,
       port: 9000,
+      historyApiFallback: true,
       publicPath,
+      hot: false,
+      overlay: true,
     },
 
     optimization: {
@@ -62,7 +99,7 @@ module.exports = {
           }
         },
       },
-      concatenateModules: true,
+      concatenateModules: !isDev,
       noEmitOnErrors: true,
       minimize: !isDev,
     },
@@ -71,17 +108,15 @@ module.exports = {
       //new CleanWebpackPlugin(['dist/**/*'], {root: __dirname, watch: true}),
       new HtmlWebpackPlugin({
         inject: true,
-        template: './index.html',
+        template: path.resolve(__dirname, 'index.html'),
         //favicon: helpers.root('./src/favicon.ico')
       }),
       new ForkTsCheckerWebpackPlugin({
         tslint: true,
       }),
       //new ExtractTextPlugin("style.css"),
-      new webpack.EnvironmentPlugin({
-        "NODE_ENV": "development",
-      }),
       isDev ? null : new CompressionPlugin({test: /\.css$|\.js$|\.html$/}),
       //new Visualizer(),
     ].filter(p => p !== null),
-};
+  };
+}

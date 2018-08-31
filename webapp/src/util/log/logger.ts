@@ -16,7 +16,7 @@ export interface LogHandler {
 }
 
 export class Logger {
-  private handlers: LogHandler[];
+  private handlers: LogHandler[] = [];
   private level: LogLevel = LogLevel.Info;
 
   public addHandler(handler: LogHandler) {
@@ -58,4 +58,4 @@ export class Logger {
   }
 }
 
-export const log = new Logger();
+export const logger = new Logger();

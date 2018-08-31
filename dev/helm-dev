@@ -6,4 +6,4 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 TAG=dev make images
 
-helm upgrade --install --set webapp.distDir=$(cd ${SCRIPT_DIR}/../webapp/dist; pwd) --values dev/helm-dev.yaml remdev helm/rem
+helm upgrade --install --values dev/helm-dev.yaml remdev helm/rem

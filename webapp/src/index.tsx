@@ -1,11 +1,15 @@
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faStroopwafel } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import * as ReactDOM from "react-dom";
+import { Provider } from "react-redux";
 
-import App from "./components/App";
+import App from "@/components/App";
+import { initStore } from "@/store";
 
-library.add(faStroopwafel);
+import "./style.scss";
 
-ReactDOM.render(<App />, document.getElementById("app"));
+ReactDOM.render(
+  <Provider store={initStore()}>
+    <App />
+  </Provider>,
+  document.getElementById("app")
+);

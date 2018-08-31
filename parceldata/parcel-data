@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+"""
+A simple script to pull out basic parcel data, along with its boundary points to the console.
+"""
+
+import argparse
+
+from shapely.wkt import loads
+
+from remparceldata import adapter
+
+
+def get_args():
+    """
+    Return the args object for this invocation
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("county")
+    parser.add_argument("state")
+    parser.add_argument("pin_number")
+    args = parser.parse_args()
+
+
+def run():
+    args = get_args()
+    parcel = adapter.get_parcel_data_by_pin(args.county, args.state,
+                                            args.pin_number)
+
+    print("Owner: %s" % parcel.owner_name)
+    print("Acreage: %s" % parcel.acreage)
+
+    def coords_to_str(coords):
+        return "\n".join("%s, %s" % (t[1], t[0]) for t in coords)
+
+    boundaries = []
+    geom = loads(parcel.boundary_wkt)
+    if geom.type == 'MultiPolygon':
+        for g in geom.geoms:
+            boundaries.append(coords_to_str(g.exterior.coords))
+    else:
+        boundaries.append(coords_to_str(geom.exterior.coords))
+
+    print("Boundary Points:\n%s" % "\n\n".join(boundaries))
+
+
+if __name__ == "__main__":
+    run()

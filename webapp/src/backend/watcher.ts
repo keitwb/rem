@@ -1,13 +1,14 @@
-import delay from "lodash-es/delay";
+import { MongoDoc, MongoID } from "@/model/models";
 
-import { MongoDoc, MongoID } from "./mongo";
-
-import * as config from "@/config";
-import { log } from "@/util/log";
+import Config from "@/config/config";
+import { logger } from "@/util/log";
+import sleep from "@/util/sleep";
 
 const RECONNECT_DELAY_MS = 2000;
 
 type OperationType = "update" | "insert" | "delete" | "replace";
+
+type Canceller = () => void;
 
 // A response sent by the update streamer when the watch has been fully started.
 interface StartedResponse {
@@ -38,15 +39,15 @@ interface UpdateChangeDoc extends NonDeleteChangeDoc {
 type InsertChangeDoc = NonDeleteChangeDoc;
 type DeleteChangeDoc = ChangeDoc;
 
-function isUpdate(change: ChangeDoc): change is UpdateChangeDoc {
+export function isUpdate(change: ChangeDoc): change is UpdateChangeDoc {
   return change.operationType === "update";
 }
 
-function isInsert(change: ChangeDoc): change is InsertChangeDoc {
+export function isInsert(change: ChangeDoc): change is InsertChangeDoc {
   return change.operationType === "insert";
 }
 
-function isDelete(change: ChangeDoc): change is DeleteChangeDoc {
+export function isDelete(change: ChangeDoc): change is DeleteChangeDoc {
   return change.operationType === "delete";
 }
 
@@ -60,51 +61,105 @@ function isError(change: any): change is ErrorResponse {
 
 type ChangeDocTypes = UpdateChangeDoc | InsertChangeDoc | DeleteChangeDoc;
 
-function watchCollection(collection: string, cb: (_: ChangeDocTypes) => void): Promise<null> {
-  return new Promise<null>((resolve, reject) => createWebSocket(collection, null, cb, () => resolve(null)));
+class ResumeContext {
+  private resumeAfter: any;
+
+  public set(val: any) {
+    this.resumeAfter = val;
+  }
+
+  public get(): any {
+    return this.resumeAfter;
+  }
 }
 
-function createWebSocket(collection: string, resumeAfter: any, cb: (_: ChangeDocTypes) => void, started: () => void) {
-  const ws = new WebSocket(config.updateStreamURL);
+export async function watchCollection(
+  collection: string,
+  updateStreamerURL: string,
+  cb: (_: ChangeDocTypes) => void
+): Promise<Canceller> {
+  const resumeContext = new ResumeContext();
+  const config = Config.fromLocalStorage();
+  let ws = await createWebSocket(collection, config.updateStreamerURL, resumeContext, cb);
 
-  ws.onclose = () => {
-    log.warning(`Watch socket closed for ${collection} collection, resuming..`);
-    delay(() => createWebSocket(collection, resumeAfter, cb, started), RECONNECT_DELAY_MS);
+  let cancelled = false;
+  const canceller = () => {
+    cancelled = true;
+    ws.close(1000);
   };
 
-  ws.onerror = e => {
-    log.error(`Error with websocket: ${e}`);
-  };
-
-  ws.onmessage = msg => {
-    let data: ChangeDocTypes | ErrorResponse;
-    try {
-      data = JSON.parse(msg.data);
-    } catch (e) {
-      log.error(`Could not parse websocket message: ${e}`);
-      return;
+  ws.onclose = async () => {
+    logger.warning(`Change stream socket closed for ${collection} collection, resuming..`);
+    if (!cancelled) {
+      while (true) {
+        sleep(RECONNECT_DELAY_MS);
+        try {
+          ws = await createWebSocket(collection, updateStreamerURL, resumeContext, cb);
+          break;
+        } catch (e) {
+          logger.error(`Could not reconnect change stream websocket for collection ${collection}: ${e.toString()}`);
+          continue;
+        }
+      }
     }
-
-    if (isStarted(data)) {
-      started();
-    }
-
-    if (isError(data)) {
-      log.error(`Received error from update stream: ${data.error}`);
-      return;
-    }
-
-    cb(data);
-
-    resumeAfter = data._id;
   };
+  return canceller;
+}
 
-  ws.onopen = () => {
-    ws.send(
-      JSON.stringify({
-        collection,
-        resumeAfter,
-      })
-    );
-  };
+function createWebSocket(
+  collection: string,
+  updateStreamerURL: string,
+  resumeContext: ResumeContext,
+  cb: (_: ChangeDocTypes) => void
+): Promise<WebSocket> {
+  return new Promise<WebSocket>((resolve, reject) => {
+    let started = false;
+    const ws = new WebSocket(updateStreamerURL);
+
+    ws.onerror = e => {
+      logger.error(`Error with websocket: ${e}`);
+      if (!started) {
+        reject(e);
+      }
+    };
+
+    ws.onmessage = msg => {
+      let data: ChangeDocTypes | ErrorResponse;
+      try {
+        data = JSON.parse(msg.data);
+      } catch (e) {
+        logger.error(`Could not parse websocket message: ${e}`);
+        if (!started) {
+          reject(e);
+        }
+        return;
+      }
+
+      if (isStarted(data)) {
+        started = true;
+        resolve(ws);
+      }
+
+      if (isError(data)) {
+        logger.error(`Received error from update stream: ${data.error}`);
+        if (!started) {
+          reject(data.error);
+        }
+        return;
+      }
+
+      cb(data);
+
+      resumeContext.set(data._id);
+    };
+
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          collection,
+          resumeAfter: resumeContext.get(),
+        })
+      );
+    };
+  });
 }

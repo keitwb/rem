@@ -3,7 +3,18 @@ import * as axios from "axios";
 import { ValOrErr, withErr } from "@/util/errors";
 
 export interface SearchResults {
-  hits: object;
+  readonly hits: object;
+}
+
+export interface CompletionResult {
+  readonly suggest: {
+    [index: string]: {
+      options: Array<{
+        text: string;
+        _id: string;
+      }>;
+    };
+  };
 }
 
 export class SearchClient {
@@ -36,11 +47,23 @@ export class SearchClient {
     return [resp.data, null];
   }
 
-  public suggestCounties(prefix: string): Promise<string[]> {
-    const body = JSON.stringify({
-      (CollectionName.Property, "counties", { re: `^${escapeRegExp(prefix)}` })
-      .map(o => o.values)
-      .defaultIfEmpty([])
-      .take(1);
+  public async suggest(field: string, index: string, prefix: string): Promise<ValOrErr<string[]>> {
+    const reqBody = JSON.stringify({
+      suggest: {
+        current: {
+          completion: {
+            field: `${field}.completion`,
+          },
+          prefix,
+        },
+      },
+    });
+
+    const [resp, err] = await withErr(this.http.post<CompletionResult>(`/${index}/_search`, reqBody));
+    if (err) {
+      return [null, err];
+    }
+
+    return [resp.data.suggest.current.options.map(o => o.text), null];
   }
 }

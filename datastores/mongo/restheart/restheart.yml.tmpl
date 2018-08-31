@@ -47,12 +47,12 @@ use-embedded-keystore: true
 #
 # More information at http://api.mongodb.org/java/current/com/mongodb/MongoClientURI.html
 
-mongo-uri: mongodb://mongo
+mongo-uri: mongodb://{{ getenv "MONGO_HOST_PORT" "mongo" }}
 
 # Use mongo-mounts to bind URls to mongodb resources using the out-of-the-box URL rewrite feature.
 mongo-mounts:
     - what: "*"
-      where: /db
+      where: {{ getenv "BASE_PATH" "/db" }}
 
 #### Static Web Resources
 
