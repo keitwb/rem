@@ -1,11 +1,9 @@
 import asyncio
 import os
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from functools import partial as p
 
 import docker
-
-from async_generator import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from .containers import build_async, container_ip, run_container

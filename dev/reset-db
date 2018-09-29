@@ -14,4 +14,4 @@ TAG=dev make mongo-dev-fixtures
 
 kubectl exec -it mongo-0 -- mongo rem --eval 'db.dropDatabase();'
 kubectl exec mongo-0 -- /opt/setup/run.sh
-kubectl run dev-fixtures $kubectl_run_flags --image quay.io/rem/mongo-dev-fixtures -- /opt/dev/load-fixtures.sh
+kubectl run dev-fixtures $kubectl_run_flags --image quay.io/rem/mongo-dev-fixtures:dev -- /opt/dev/load-fixtures.sh

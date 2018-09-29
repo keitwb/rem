@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "./node_modules/.bin/webpack",
-    "dev": "./node_modules/.bin/webpack-dev-server --mode development"
+    "dev": "./node_modules/.bin/webpack-dev-server --mode development --watch --progress"
   },
   "prettier": {
     "printWidth": 120,
@@ -40,13 +40,16 @@
     "bson": "^3.0.2",
     "js-md5": "^0.7.3",
     "lodash-es": "^4.17.10",
+    "mongodb-extended-json": "^1.10.0",
+    "mongodb-extjson": "^3.0.3",
     "ol": "^4.6.5",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
     "react-redux": "^5.0.7",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.0",
-    "reselect": "^3.0.1"
+    "reselect": "^3.0.1",
+    "typesafe-actions": "^2.0.4"
   },
   "devDependencies": {
     "@types/websocket": "0.0.39",
@@ -70,6 +73,7 @@
     "webpack": "^4.16.5",
     "webpack-bundle-analyzer": "^2.13.1",
     "webpack-cli": "^3.1.0",
+    "webpack-dev-middleware": "^3.3.0",
     "webpack-dev-server": "^3.1.5"
   }
 }

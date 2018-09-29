@@ -1,9 +1,0 @@
-remprotobuf/__init__.py
-remprotobuf/gis_pb2.py
-remprotobuf/gis_pb2_grpc.py
-remprotobuf/tax_pb2.py
-remprotobuf/tax_pb2_grpc.py
-remprotobuf.egg-info/PKG-INFO
-remprotobuf.egg-info/SOURCES.txt
-remprotobuf.egg-info/dependency_links.txt
-remprotobuf.egg-info/top_level.txt

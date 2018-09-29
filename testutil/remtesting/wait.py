@@ -6,7 +6,7 @@ import asyncio
 import time
 
 
-def wait_for(test_func, timeout_seconds=20):
+def wait_for(test_func, timeout_seconds=30):
     """
     Repeatedly call the given test_func and wait for it to return a truish value, at which point
     this function returns that value.  if the test_func doesn't return a truish value by the time
@@ -21,7 +21,7 @@ def wait_for(test_func, timeout_seconds=20):
         time.sleep(0.2)
 
 
-async def wait_for_async(test_func, timeout_seconds=20):
+async def wait_for_async(test_func, timeout_seconds=30):
     """
     This is the same as `wait_for` above except that it uses an asyncio sleep to avoid blocking the
     main event loop. test_func can be either a coroutine object or a plain func, in which case it

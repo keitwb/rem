@@ -1,10 +1,11 @@
-import { MongoDoc, MongoID } from "@/model/models";
+import { ObjectId } from "bson";
+import * as EJSON from "mongodb-extended-json";
 
-import Config from "@/config/config";
+import { MongoDoc } from "@/model/models";
 import { logger } from "@/util/log";
-import sleep from "@/util/sleep";
-
-const RECONNECT_DELAY_MS = 2000;
+import WebSocketProvider from "./websocket/provider";
+import RobustWebSocket from "./websocket/robust";
+import streamWebSocket from "./websocket/stream";
 
 type OperationType = "update" | "insert" | "delete" | "replace";
 
@@ -20,10 +21,17 @@ interface ErrorResponse {
   error: string;
 }
 
+interface ChangeResp {
+  doc: ChangeDocTypes;
+  hasMore: boolean;
+  reqID: string;
+  error?: string;
+}
+
 interface ChangeDoc {
   // The id of the change itself.  Can be used to resume the change stream.
   _id: any;
-  documentKey: { _id: MongoID };
+  documentKey: { _id: ObjectId };
   operationType: OperationType;
   ns: { coll: string; db: string };
 }
@@ -38,9 +46,14 @@ interface UpdateChangeDoc extends NonDeleteChangeDoc {
 
 type InsertChangeDoc = NonDeleteChangeDoc;
 type DeleteChangeDoc = ChangeDoc;
+type ReplaceChangeDoc = NonDeleteChangeDoc;
 
 export function isUpdate(change: ChangeDoc): change is UpdateChangeDoc {
   return change.operationType === "update";
+}
+
+export function isReplace(change: ChangeDoc): change is ReplaceChangeDoc {
+  return change.operationType === "replace";
 }
 
 export function isInsert(change: ChangeDoc): change is InsertChangeDoc {
@@ -59,7 +72,7 @@ function isError(change: any): change is ErrorResponse {
   return !!change.error;
 }
 
-type ChangeDocTypes = UpdateChangeDoc | InsertChangeDoc | DeleteChangeDoc;
+type ChangeDocTypes = UpdateChangeDoc | ReplaceChangeDoc | InsertChangeDoc | DeleteChangeDoc;
 
 class ResumeContext {
   private resumeAfter: any;
@@ -75,91 +88,65 @@ class ResumeContext {
 
 export async function watchCollection(
   collection: string,
-  updateStreamerURL: string,
-  cb: (_: ChangeDocTypes) => void
-): Promise<Canceller> {
+  changeStreamerURL: string
+): Promise<[AsyncIterableIterator<ChangeDocTypes>, Canceller]> {
+  const provider = new RobustWebSocket(changeStreamerURL);
   const resumeContext = new ResumeContext();
-  const config = Config.fromLocalStorage();
-  let ws = await createWebSocket(collection, config.updateStreamerURL, resumeContext, cb);
 
-  let cancelled = false;
-  const canceller = () => {
-    cancelled = true;
-    ws.close(1000);
-  };
+  initStreamer(collection, provider, resumeContext);
 
-  ws.onclose = async () => {
-    logger.warning(`Change stream socket closed for ${collection} collection, resuming..`);
-    if (!cancelled) {
-      while (true) {
-        sleep(RECONNECT_DELAY_MS);
-        try {
-          ws = await createWebSocket(collection, updateStreamerURL, resumeContext, cb);
-          break;
-        } catch (e) {
-          logger.error(`Could not reconnect change stream websocket for collection ${collection}: ${e.toString()}`);
-          continue;
-        }
-      }
-    }
-  };
-  return canceller;
+  const streamer = await createStreamer(provider, resumeContext);
+
+  return [streamer, provider.stop];
 }
 
-function createWebSocket(
-  collection: string,
-  updateStreamerURL: string,
-  resumeContext: ResumeContext,
-  cb: (_: ChangeDocTypes) => void
-): Promise<WebSocket> {
-  return new Promise<WebSocket>((resolve, reject) => {
-    let started = false;
-    const ws = new WebSocket(updateStreamerURL);
-
-    ws.onerror = e => {
-      logger.error(`Error with websocket: ${e}`);
-      if (!started) {
-        reject(e);
-      }
-    };
-
-    ws.onmessage = msg => {
-      let data: ChangeDocTypes | ErrorResponse;
-      try {
-        data = JSON.parse(msg.data);
-      } catch (e) {
-        logger.error(`Could not parse websocket message: ${e}`);
-        if (!started) {
-          reject(e);
-        }
-        return;
-      }
-
-      if (isStarted(data)) {
-        started = true;
-        resolve(ws);
-      }
-
-      if (isError(data)) {
-        logger.error(`Received error from update stream: ${data.error}`);
-        if (!started) {
-          reject(data.error);
-        }
-        return;
-      }
-
-      cb(data);
-
-      resumeContext.set(data._id);
-    };
-
-    ws.onopen = () => {
-      ws.send(
+async function initStreamer(collection: string, provider: WebSocketProvider, resumeContext: ResumeContext) {
+  provider.openPromise
+    .then(async () => {
+      provider.ws.send(
         JSON.stringify({
           collection,
           resumeAfter: resumeContext.get(),
         })
       );
-    };
+    })
+    .catch(err => {
+      logger.error("Could not establish watcher connection", err);
+    });
+
+  provider.closePromise.then(_ => {
+    initStreamer(collection, provider, resumeContext);
   });
+}
+
+async function* createStreamer(
+  provider: WebSocketProvider,
+  resumeContext: ResumeContext
+): AsyncIterableIterator<ChangeDocTypes> {
+  const streamer = streamWebSocket(provider);
+
+  for await (const msg of streamer) {
+    let resp: ChangeResp | ErrorResponse;
+    try {
+      resp = EJSON.parse(msg.data);
+    } catch (e) {
+      logger.error("Could not parse websocket message: ", e);
+      continue;
+    }
+
+    if (isError(resp)) {
+      logger.error(`Received error from update stream: ${resp.error}`);
+      continue;
+    }
+
+    const doc = resp.doc;
+    // Maybe do something better with start messages.
+    if (isStarted(resp)) {
+      continue;
+    }
+
+    yield doc;
+
+    resumeContext.set(doc._id);
+  }
 }

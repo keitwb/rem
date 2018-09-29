@@ -7,79 +7,85 @@ pipeline {
                 stage('search-pylint') {
                     agent {
                         docker {
-                            image 'python:3.6'
+                            image 'python:3.7'
                             args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('search') {
-                        sh 'pip install -r requirements.txt -r test_requirements.txt'
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
 
-                        sh 'pylint remsearch'
+                        sh 'pipenv run pylint remsearch'
                     }}
                 }
                 stage('search-yapf-formatting') {
                     agent {
                         docker {
-                            image 'python:3.6'
+                            image 'python:3.7'
                             args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('search') {
-                        sh 'pip install -r requirements.txt -r test_requirements.txt'
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
 
-                        sh 'yapf --diff --recursive --parallel remsearch'
+                        sh 'pipenv run yapf --diff --recursive --parallel remsearch'
                     }}
                 }
                 stage('search-test') {
                     agent {
                         docker {
-                            image 'python:3.6'
+                            image 'python:3.7'
                             args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('search') {
-                        sh 'pip install -r requirements.txt -r test_requirements.txt'
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
 
-                        sh 'pytest -n3 remsearch/inttest'
+                        sh 'pipenv run pytest -n2 remsearch/inttest'
                     }}
                 }
-                stage('update-streamer-test') {
+                stage('data-streamer-test') {
                     agent {
                         docker {
-                            image 'python:3.6'
+                            image 'python:3.7'
                             args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
-                    steps { dir('update-streamer') {
-                        sh 'pip install -r requirements.txt -r test_requirements.txt'
+                    steps { dir('data-streamer') {
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
 
-                        sh 'pytest -n3 remupdates/inttest'
+                        sh 'pipenv run pytest -n2 remdata/inttest'
                     }}
                 }
-                stage('update-streamer-pylint') {
+                stage('data-streamer-pylint') {
                     agent {
                         docker {
-                            image 'python:3.6'
+                            image 'python:3.7'
                             args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
-                    steps { dir('update-streamer') {
-                        sh 'pip install -r requirements.txt -r test_requirements.txt'
+                    steps { dir('data-streamer') {
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
 
-                        sh 'pylint remupdates'
+                        sh 'pipenv run pylint remdata'
                     }}
                 }
-                stage('update-streamer-yapf-formatting') {
+                stage('data-streamer-yapf-formatting') {
                     agent {
                         docker {
-                            image 'python:3.6'
+                            image 'python:3.7'
                             args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
-                    steps { dir('update-streamer') {
-                        sh 'pip install -r requirements.txt -r test_requirements.txt'
+                    steps { dir('data-streamer') {
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
 
-                        sh 'yapf --diff --recursive --parallel remupdates'
+                        sh 'pipenv run yapf --diff --recursive --parallel remdata'
                     }}
                 }
             }

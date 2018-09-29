@@ -1,14 +1,14 @@
 import { ModelUpdate } from "./common";
 
-class PushArrayUpdate implements ModelUpdate {
+class PushArrayUpdate<T, K extends keyof T> implements ModelUpdate<T> {
   public readonly type = "push";
-  constructor(readonly fieldName: string, readonly value: string) {}
+  constructor(readonly fieldName: K, readonly value: T[K]) {}
 
   get updateObj() {
     return { $push: { [this.fieldName]: this.value } };
   }
 }
 
-export function push(fieldName: string, value: string): PushArrayUpdate {
+export function push<T, K extends keyof T>(fieldName: K, value: T[K]): PushArrayUpdate<T, K> {
   return new PushArrayUpdate(fieldName, value);
 }

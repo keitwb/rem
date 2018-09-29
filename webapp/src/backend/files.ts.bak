@@ -1,0 +1,53 @@
+class FileUploader {
+  public async uploadFile(file: File, metadata: object): Promise<ValOrErr<Media>> {
+    const [content, err] = await readFileContent(file);
+    if (err) {
+      return [null, err];
+    }
+    const checksum = md5(content);
+    const existingDocs = await this.getFullList<Media>(CollectionName.Media, {
+      filter: {
+        $and: [{ md5: checksum }, { length: content.byteLength }],
+      },
+    });
+
+    // Ignore extra docs if more than one matched.  This shouldn't
+    // happen anyway if we are uploading properly.
+    if (existingDocs.length > 0) {
+      return this.patchFileMetadata(existingDocs[0], metadata);
+    } else {
+      return this.createFile<Media>(CollectionName.Media, file, metadata);
+    }
+  }
+
+  public patchFileMetadata(media: Media, metadata: object): Promise<ValOrErr<Media>> {
+    return this.update(CollectionName.Media, media._id, patchWithObject(metadata));
+  }
+
+  protected async createFile<T extends MongoDoc>(
+    collection: string,
+    file: File,
+    metadata: object
+  ): Promise<ValOrErr<T>> {
+    const fd = new FormData();
+    fd.append("properties", JSON.stringify(metadata));
+    fd.append("file", file);
+
+    const headers = {
+      "Content-Type": "multipart/form",
+    };
+    const resp = await this.http.post<T>(collection, fd, { headers });
+    return this.fetchNew<T>(resp);
+  }
+}
+
+async function readFileContent(file: File): Promise<ArrayBuffer> {
+  return new Promise<ArrayBuffer>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      resolve(reader.result as ArrayBuffer);
+    };
+    reader.onerror = error => reject(error);
+    reader.readAsArrayBuffer(file);
+  });
+}

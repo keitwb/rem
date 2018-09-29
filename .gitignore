@@ -4,3 +4,4 @@
 tmp/
 virtualenv/
 **/.pytest_cache/
+**/*.egg-info/

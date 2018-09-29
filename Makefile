@@ -1,16 +1,12 @@
 TAG ?= dev
 
-.PHONY: restheart
-restheart:
-	docker build --rm -t quay.io/rem/restheart:$(TAG) datastores/mongo/restheart
-
 .PHONY: search-indexer
 search-indexer:
 	docker build --rm -t quay.io/rem/search-indexer:$(TAG) search
 
-.PHONY: update-streamer
-update-streamer:
-	docker build --rm -t quay.io/rem/update-streamer:$(TAG) update-streamer
+.PHONY: data-streamer
+data-streamer:
+	docker build --rm -t quay.io/rem/data-streamer:$(TAG) data-streamer
 
 .PHONY: webapp
 webapp:
@@ -26,13 +22,13 @@ mongo:
 
 .PHONY: mongo-dev-fixtures
 mongo-dev-fixtures:
-	docker build --rm -t quay.io/rem/mongo-dev-fixtures dev/fixtures
+	docker build --rm -t quay.io/rem/mongo-dev-fixtures:$(TAG) dev/fixtures
 
 .PHONY: parceldata
 parceldata:
 	docker build --rm -t quay.io/rem/parceldata:$(TAG) -f Dockerfile.parceldata .
 
-images: restheart update-streamer mongo es parceldata search-indexer #webapp
+images: data-streamer mongo es parceldata search-indexer #webapp
 	true
 
 .PHONY: minikube-kvm

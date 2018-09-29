@@ -8,42 +8,17 @@ metadata:
 spec:
   tls:
     - hosts:
-      - {{ .Values.ingressHost }}
+      - "{{ .Values.ingressHost }}"
       secretName: ingress-tls
   rules:
-  - host: {{ .Values.ingressHost }}
+  - host: "{{ .Values.ingressHost }}"
     http:
       paths:
-      - path: /db/
-        backend:
-          serviceName: restheart
-          servicePort: 8080
       - path: /
         backend:
           serviceName: webapp
           servicePort: 80
 
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: search
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/rewrite-target: "/$1/_search break; #"
-spec:
-  tls:
-    - hosts:
-      - {{ .Values.ingressHost }}
-      secretName: ingress-tls
-  rules:
-  - host: {{ .Values.ingressHost }}
-    http:
-      paths:
-      - path: /es/([a-z]+)/_search
-        backend:
-          serviceName: es
-          servicePort: 9200
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -58,13 +33,13 @@ metadata:
 spec:
   tls:
     - hosts:
-      - {{ .Values.ingressHost }}
+      - "{{ .Values.ingressHost }}"
       secretName: ingress-tls
   rules:
-  - host: {{ .Values.ingressHost }}
+  - host: "{{ .Values.ingressHost }}"
     http:
       paths:
-      - path: /updates
+      - path: /stream
         backend:
-          serviceName: update-streamer
+          serviceName: data-streamer
           servicePort: 8080

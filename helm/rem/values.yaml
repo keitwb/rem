@@ -16,11 +16,11 @@ mongo:
     tag: latest
 
 searchIndexer:
-  replicas: 2
+  replicas: 1
   image:
     tag: latest
 
-updateStreamer:
+dataStreamer:
   replicas: 1
   image:
     tag: latest

@@ -47,21 +47,16 @@ async def watch_indexed_collections(instance_name, mongo_loc, es_hosts, tika_loc
     """
     Watches all of the configured collections for changes.  Blocks indefinitely
     """
-    mongo_client = AsyncIOMotorClient(
-        mongo_loc[0],
-        mongo_loc[1],
-        maxPoolSize=100,
-        maxIdleTimeMS=30 * 1000,
-        socketTimeoutMS=15 * 1000,
-        connectTimeoutMS=10 * 1000)
+    mongo_client = AsyncIOMotorClient(mongo_loc[0], mongo_loc[1], maxPoolSize=100, maxIdleTimeMS=30 * 1000,
+                                      socketTimeoutMS=15 * 1000, connectTimeoutMS=10 * 1000)
     mongo_db = mongo_client[mongo_database]
 
     await claims.ensure_unique_index(mongo_db)
 
     # This is used for mapping files to text through Tika
     async with aiohttp.ClientSession() as http_session:
-        esclient = elasticsearch_async.AsyncElasticsearch(
-            es_hosts, sniff_on_start=True, sniff_on_connection_fail=True, sniffer_timeout=20)
+        esclient = elasticsearch_async.AsyncElasticsearch(es_hosts, sniff_on_start=False,
+                                                          sniff_on_connection_fail=False)
 
         tika_client = TikaClient(http_session, host=tika_loc[0], port=tika_loc[1])
 
@@ -204,12 +199,8 @@ async def index_collection(mongo_db, tika_client, esclient, collection):
     changes are actually being processed, so that nothing is missed.
     """
     if is_gridfs_collection(collection):
-        index_func = p(
-            text.index_gridfs_file,
-            tika_client=tika_client,
-            esclient=esclient,
-            mongo_db=mongo_db,
-            collection=collection)
+        index_func = p(text.index_gridfs_file, tika_client=tika_client, esclient=esclient, mongo_db=mongo_db,
+                       collection=collection)
     else:
         index_func = p(es.index_document, esclient=esclient, index=collection)
 

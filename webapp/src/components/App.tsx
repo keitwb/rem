@@ -5,27 +5,35 @@ import Config from "@/config/config";
 import { logger } from "@/util/log";
 
 import ConfigEditor from "./ConfigEditor";
-import PropertyDetailRoute from "./PropertyDetailRoute";
+import connectModelById from "./connectModelById";
+import SearchContext from "./context/SearchContext";
+import PropertyDetail from "./PropertyDetail";
 import PropertyOverview from "./PropertyOverview";
+import SearchBar from "./SearchBar";
 
 export default class App extends React.Component {
   public componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    // TODO: Log this out and send it to an error collection service on the backend
-    logger.error(`${error}\n${info}`);
+    logger.error(error, info);
   }
 
   public render() {
     return (
-      <div className="container">
-        <BrowserRouter>
+      <BrowserRouter>
+        <div className="container">
+          <SearchContext.Consumer>{searchClient => <SearchBar searchClient={searchClient} />}</SearchContext.Consumer>
           <Switch>
             <Route path="/config" render={() => <ConfigEditor config={Config.fromLocalStorage()} />} />
-            {<Route path="/property/:id" component={PropertyDetailRoute} />}
-            {/* <Route path="/property-group/:id" component={PropertyGroupDetail} /> */}
+            <Route
+              path="/property/:id"
+              render={({ match }) => {
+                const Component = connectModelById("properties", match.params.id, PropertyDetail);
+                return <Component />;
+              }}
+            />
             <Route exact path="/" component={PropertyOverview} />
           </Switch>
-        </BrowserRouter>
-      </div>
+        </div>
+      </BrowserRouter>
     );
   }
 }

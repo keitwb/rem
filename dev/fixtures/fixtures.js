@@ -6,17 +6,20 @@ function upsert(collName, docs) {
   print("Loading " + collName);
   docs.forEach(function(d) {
     coll.updateOne({ _id: d._id }, { $set: d }, { upsert: true });
-    coll.updateOne({ _id: d._id }, { $set: {"_etag": new ObjectId() }});
   });
 }
 
-var ids = {};
-function ID(id) {
-  if (!ids[id]) {
-    ids[id] = new ObjectId();
-  }
+var baseID = new ObjectId("5baed558271a70141ba90000")
 
-  return ids[id];
+function incrementHex(hex, amount) {
+  return (parseInt("0x" + hex) + amount).toString(16);
+}
+
+function ID(offset) {
+  // We have to only increment that last 4 bytes because JS numbers can't handle > 53 bits of
+  // precision on integers.
+  var id = baseID.str.slice(0, 16) + incrementHex(baseID.str.slice(16, 24), offset)
+  return new ObjectId(id);
 }
 
 upsert("properties", [
@@ -34,6 +37,7 @@ upsert("properties", [
     notes:        [ID(1), ID(2)],
     leases:       [ID(1), ID(2)],
     contacts:     [ID(1)],
+    media:        [fileByFileName("doc1.pdf")._id],
     tags:         ["land", "for-sale", "for-lease"],
   },
   {
@@ -60,6 +64,7 @@ upsert("properties", [
     state:        "NC",
     pinNumbers:   ["123-45-678"],
     leases:       [],
+    media:        [ID(10)],
     tags:         ["commercial"],
   },
 ]);
@@ -76,7 +81,6 @@ upsert("leases", [
     rate:         100,
     lessees:      [ID(1)],
     notes:        [],
-    createdBy:   "1",
     _updates: [],
   },
   {
@@ -159,16 +163,20 @@ upsert("user", [
 var fileMetadata = [
   {
     filename: "doc1.pdf",
-    description: "2016 Tax Bill",
-    tags: ['taxes', 'bills'],
-    properties: [ID(1)],
+    metadata: {
+      description: "2016 Tax Bill",
+      tags: ['taxes', 'bills'],
+    },
   },
 ];
 
+function fileByFileName(filename) {
+  return rem.media.files.findOne({filename: filename});
+}
+
 fileMetadata.forEach(function(o) {
-  var fileDoc = rem.media.files.findOne({filename: o.filename});
+  var fileDoc = fileByFileName(o.filename);
   Object.assign(fileDoc, o);
-  fileDoc._etag = new ObjectId();
 
   print("Updating file metadata to " + JSON.stringify(fileDoc) + " for " + o.filename);
   if (rem.media.files.updateOne({ _id: fileDoc._id }, {$set: fileDoc}).modifiedCount != 1) {

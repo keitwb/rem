@@ -13,8 +13,8 @@ async def index_file_change(tika_client, esclient, change, mongo_db):
     """
     Index a change to a text file
     """
-    return await index_gridfs_file(
-        tika_client, esclient, mongo_db, mongo_doc=change["fullDocument"], collection=change["ns"]["coll"])
+    return await index_gridfs_file(tika_client, esclient, mongo_db, mongo_doc=change["fullDocument"],
+                                   collection=change["ns"]["coll"])
 
 
 async def index_gridfs_file(tika_client, esclient, mongo_db, mongo_doc, collection):
