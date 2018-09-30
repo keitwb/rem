@@ -33,7 +33,23 @@ All action requests can include the `reqID` field that will be repeated back in 
 responses relating to that request to allow correlation client-side.
 
 ### Searching
-For more complex queries, ElasticSearch should be used.  This service can only fetch by ids.
+
+Path: `/search`
+
+For more complex queries, ElasticSearch should be used.  This `/db` endpoint can only fetch by ids.
+
+``` 
+{
+  "index": "properties"  // Defaults to _all if not specified
+  "query": {
+     multi_match: {
+       query: "hello",
+     },
+  }
+}
+```
+
+The `query` field can be any ES query.
 
 
 ## Change Stream
