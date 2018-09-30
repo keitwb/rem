@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Initializes the indexes and their mappings in ES running in a local minikube cluster.
+
+kubectl exec es-0 -- /opt/setup/setup-indexes.sh

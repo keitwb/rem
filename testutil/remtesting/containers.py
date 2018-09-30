@@ -5,9 +5,9 @@ import asyncio
 import logging
 import socket
 from functools import partial as p
+from contextlib import asynccontextmanager
 
 import docker
-from async_generator import asynccontextmanager
 
 from .util import asyncify
 from .wait import wait_for_async
@@ -60,6 +60,8 @@ async def run_container(image, wait_for_port=None, **kwargs):
 
         yield cont
     finally:
-        print("Removing container %s" % image)
-        print("Container %s logs:\n%s" % (image, cont.logs().decode('utf-8')))
-        await asyncify(cont.remove, v=True, force=True)()
+        try:
+            print("Removing container %s" % image)
+            print("Container %s logs:\n%s" % (image, cont.logs().decode('utf-8')))
+        finally:
+            cont.remove(v=True, force=True)

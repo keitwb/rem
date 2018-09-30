@@ -3,4 +3,4 @@ ansible/
 tmp/
 /webapp/node_modules/**
 /webapp/tmp/**
-virtualenv/
+**/virtualenv/

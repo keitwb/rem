@@ -2,9 +2,9 @@
 Logic for running a test ElasticSearch service.
 """
 import os
+from contextlib import asynccontextmanager
 
 import elasticsearch_async
-from async_generator import asynccontextmanager
 
 from .containers import build_async, container_ip, run_container
 
@@ -18,7 +18,7 @@ async def run_elasticsearch():
     """
     image, _ = await build_async(path=ES_IMAGE_DIR, forcerm=True)
     async with run_container(\
-            image.id, environment={"discovery.type": "single-node"}, wait_for_port=9200) as es_cont:
+            image.id, environment={"discovery.type": "single-node", "ES_JAVA_OPTS": "-Xms128m -Xmx128m"}, wait_for_port=9200) as es_cont:
 
         es_client = elasticsearch_async.AsyncElasticsearch([{
             "host": container_ip(es_cont),

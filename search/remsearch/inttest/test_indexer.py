@@ -65,8 +65,7 @@ async def test_resumes_from_last_change_on_restart(event_loop):
 
         # Start the watchers back up and make sure they pick up the change that happened while they
         # were shut down.
-        async with run_watchers(
-            event_loop, mongo_client, es_client, instances=2):
+        async with run_watchers(event_loop, mongo_client, es_client, instances=2):
 
             async def has_new_field_in_es():
                 es_doc = await get_es_doc(es_client, index="properties", doc_id=res.inserted_id)

@@ -5,8 +5,15 @@ export enum LogLevel {
   Error,
 }
 
+export const LogLevelNames = new Map<LogLevel, string>([
+  [LogLevel.Debug, "DEBUG"],
+  [LogLevel.Info, "INFO"],
+  [LogLevel.Warning, "WARNING"],
+  [LogLevel.Error, "ERROR"],
+]);
+
 export interface LogEntry {
-  message: string;
+  message: any[];
   timestamp: Date;
   severity: LogLevel;
 }
@@ -16,7 +23,7 @@ export interface LogHandler {
 }
 
 export class Logger {
-  private handlers: LogHandler[];
+  private handlers: LogHandler[] = [];
   private level: LogLevel = LogLevel.Info;
 
   public addHandler(handler: LogHandler) {
@@ -27,23 +34,23 @@ export class Logger {
     this.level = level;
   }
 
-  public error(msg: string) {
+  public error(...msg: any[]) {
     this.entryForLevel(LogLevel.Error, msg);
   }
 
-  public warning(msg: string) {
+  public warning(...msg: any[]) {
     this.entryForLevel(LogLevel.Warning, msg);
   }
 
-  public info(msg: string) {
+  public info(...msg: any[]) {
     this.entryForLevel(LogLevel.Info, msg);
   }
 
-  public debug(msg: string) {
+  public debug(...msg: any[]) {
     this.entryForLevel(LogLevel.Debug, msg);
   }
 
-  private entryForLevel(level: LogLevel, msg: string) {
+  private entryForLevel(level: LogLevel, msg: any[]) {
     if (level < this.level) {
       return;
     }
@@ -58,4 +65,4 @@ export class Logger {
   }
 }
 
-export const log = new Logger();
+export const logger = new Logger();

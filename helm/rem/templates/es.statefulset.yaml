@@ -34,7 +34,7 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-        - name: es-data
+        - name: ephemeral
           mountPath: /usr/share/elasticsearch/data
       containers:
       - name: es
@@ -46,13 +46,12 @@ spec:
         ports:
         - containerPort: 9200
         volumeMounts:
-        - name: es-data
+        - name: ephemeral
           mountPath: /usr/share/elasticsearch/data
-  volumeClaimTemplates:
-  - metadata:
-      name: es-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 1Gi
+      volumes:
+        - name: ephemeral
+          # Run ES out of ephemeral memory since our indexer app automatically reindexes from Mongo
+          # if we lose things.  Probably change this to a persistent disk at some point for better
+          # availability.
+          emptyDir:
+            medium: Memory

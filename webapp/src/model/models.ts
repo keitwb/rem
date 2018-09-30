@@ -1,7 +1,29 @@
-import { GridFSDoc, MongoDate, MongoDoc, MongoID } from "@/backend/mongo";
+import { ObjectID } from "bson";
 
-export interface ID {
-  $oid: string;
+export interface MongoDate {
+  $date: number;
+}
+
+export interface MongoDoc {
+  _id: ObjectID;
+  _createdDate?: { $date: number };
+  _updates?: MongoUpdate[];
+}
+
+export type Model = MongoDoc;
+
+export interface GridFSDoc {
+  md5: string;
+  length: number;
+  chunkSize: number;
+  filename: string;
+  contentType: string;
+  uploadDate: MongoDate;
+}
+
+interface MongoUpdate {
+  type: string;
+  update: object;
 }
 
 export type LeaseType = "gross" | "N" | "NN" | "NNN" | "option";
@@ -11,7 +33,7 @@ export type PartyType = "person" | "business";
 export type State = "NC" | "SC";
 
 export enum CollectionName {
-  User = "user",
+  User = "users",
 }
 
 export interface User extends MongoDoc {
@@ -30,7 +52,7 @@ export interface Note extends MongoDoc {
   note: string;
   media: Media[];
   createdDate: MongoDate;
-  createdBy: ID;
+  createdBy: ObjectID;
 }
 
 export enum CollectionName {
@@ -50,7 +72,7 @@ export interface Lease extends MongoDoc {
   media: Media[];
   notes: Note[];
   createdDate: MongoDate;
-  createdBy: ID;
+  createdBy: ObjectID;
 }
 
 export enum CollectionName {
@@ -60,12 +82,12 @@ export enum CollectionName {
 export interface Property extends MongoDoc {
   name: string;
   description?: string;
-  leases?: MongoID[];
+  leases?: ObjectID[];
   county?: string;
   state?: string;
   acreage?: number;
   propType?: PropertyType;
-  owners?: MongoID[];
+  owners?: ObjectID[];
   pinNumbers?: string[];
   latitude?: string;
   longitude?: string;
@@ -73,9 +95,9 @@ export interface Property extends MongoDoc {
   desiredRent?: number;
   desiredSalesPrice?: number;
   tryingToSell?: boolean;
-  contacts?: MongoID[];
-  notes?: MongoID[];
-  media?: MongoID[];
+  contacts?: ObjectID[];
+  notes?: ObjectID[];
+  media?: ObjectID[];
   createdDate?: MongoDate;
   modifiedDate?: MongoDate;
   modifiedBy?: User;

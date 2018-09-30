@@ -1,0 +1,34 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: data-streamer
+  labels:
+    app: data-streamer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.dataStreamer.replicas }}
+  selector:
+    matchLabels:
+      app: data-streamer
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: data-streamer
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: data-streamer
+        image: quay.io/rem/data-streamer:{{ .Values.dataStreamer.image.tag }}
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGO_HOSTNAME
+          value: mongo
+        - name: MONGO_PORT
+          value: "27017"
+        - name: ES_HOST
+          value: es

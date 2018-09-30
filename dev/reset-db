@@ -10,8 +10,8 @@ cd $SCRIPT_DIR/..
 
 kubectl_run_flags="-i -t --rm --restart=Never"
 
-TAG=dev make mongo-dev-fixtures mongo-setup
+TAG=dev make mongo-dev-fixtures
 
 kubectl exec -it mongo-0 -- mongo rem --eval 'db.dropDatabase();'
-kubectl run db-setup $kubectl_run_flags --image quay.io/rem/mongo-setup:dev
-kubectl run dev-fixtures $kubectl_run_flags --image quay.io/rem/mongo-dev-fixtures -- /opt/dev/load-fixtures.sh
+kubectl exec mongo-0 -- /opt/setup/run.sh
+kubectl run dev-fixtures $kubectl_run_flags --image quay.io/rem/mongo-dev-fixtures:dev -- /opt/dev/load-fixtures.sh

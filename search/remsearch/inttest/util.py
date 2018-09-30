@@ -5,9 +5,9 @@ Utils for setting up tests and doing assertions
 
 import asyncio
 from functools import partial as p
+from contextlib import asynccontextmanager
 
 import elasticsearch
-from async_generator import asynccontextmanager
 
 from remsearch import watch
 from remtesting.containers import container_ip, run_container
@@ -61,11 +61,9 @@ async def run_watchers(event_loop, mongo_client, es_client, tika_container=None,
 
     watcher_tasks = [
         event_loop.create_task(
-            watch.watch_indexed_collections(
-                "test-%d" % i,
-                mongo_loc=mongo_client.address,
-                es_hosts=es_client.transport.hosts,
-                tika_loc=(tika_host, 9998))) for i in range(0, instances)
+            watch.watch_indexed_collections("test-%d" % i, mongo_loc=mongo_client.address,
+                                            es_hosts=es_client.transport.hosts, tika_loc=(tika_host, 9998)))
+        for i in range(0, instances)
     ]
 
     try:

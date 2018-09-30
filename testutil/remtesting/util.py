@@ -1,8 +1,6 @@
 import asyncio
 from functools import partial as p
 
-from async_generator import asynccontextmanager
-
 
 def asyncify(*args, **kwargs):
     """

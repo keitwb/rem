@@ -7,6 +7,7 @@ set -euo pipefail
 MONGO_HOST=${1-"127.0.0.1"}
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $SCRIPT_DIR
 
 max_tries=15
 

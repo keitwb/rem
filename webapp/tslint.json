@@ -7,6 +7,7 @@
 	"rules": {
 		"interface-name": false,
     "object-literal-key-quotes": [true, "as-needed"],
+    "cognitive-complexity": [true, 20],
     "trailing-comma": [
       true,
       {
@@ -17,6 +18,7 @@
         },
         "esSpecCompliant": true
       }],
-    "arrow-parens": [true, "ban-single-arg-parens"]
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"]
 	}
 }

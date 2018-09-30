@@ -4,21 +4,16 @@ kind: Ingress
 metadata:
   name: frontend
   annotations:
-    ingress.kubernetes.io/ssl-redirect: "false"
-    kubernetes.io/ingress.allow-http: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
   tls:
     - hosts:
-      - {{ .Values.ingressHost }}
+      - "{{ .Values.ingressHost }}"
       secretName: ingress-tls
   rules:
-  - host: {{ .Values.ingressHost }}
+  - host: "{{ .Values.ingressHost }}"
     http:
       paths:
-      - path: /db
-        backend:
-          serviceName: restheart
-          servicePort: 8080
       - path: /
         backend:
           serviceName: webapp
@@ -30,21 +25,21 @@ kind: Ingress
 metadata:
   name: frontend-websockets
   annotations:
-    ingress.kubernetes.io/ssl-redirect: "false"
-    kubernetes.io/ingress.allow-http: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/ingress.allow-http: "false"
     # Set to one hour for websocket connections
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
 spec:
   tls:
     - hosts:
-      - {{ .Values.ingressHost }}
+      - "{{ .Values.ingressHost }}"
       secretName: ingress-tls
   rules:
-  - host: {{ .Values.ingressHost }}
+  - host: "{{ .Values.ingressHost }}"
     http:
       paths:
-      - path: /updates
+      - path: /stream
         backend:
-          serviceName: update-streamer
+          serviceName: data-streamer
           servicePort: 8080

@@ -1,2 +1,32 @@
 {
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "county": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type":  "keyword",
+              "ignore_above": 256
+            },
+            "suggest": {
+              "type": "completion"
+            }
+          }
+        },
+        "city": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type":  "keyword",
+              "ignore_above": 256
+            },
+            "suggest": {
+              "type": "completion"
+            }
+          }
+        }
+      }
+    }
+  }
 }
