@@ -8,3 +8,12 @@ detailed documentation.
 
 The service is designed with the ability to run with multiple instances to provide fault tolerance
 and maybe quicker indexing speeds with large bursts of updates. 
+
+## Tests
+
+To run the integration tests, you must have a Docker engine configured in the test environment.
+Then run:
+
+`pipenv run pytest remsearch/inttest`
+
+to run all of the tests.
