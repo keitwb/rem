@@ -88,6 +88,18 @@ pipeline {
                         sh 'pipenv run yapf --diff --recursive --parallel remdata'
                     }}
                 }
+                stage('webapp-jest-tests') {
+                    agent {
+                        docker {
+                            image 'node:10.11-alpine'
+                            args '-v $HOME/.npm:/root/.npm'
+                        }
+                    }
+                    steps { dir('webapp') {
+                        sh 'npm install'
+                        sh './node_modules/.bin/jest --ci'
+                    }}
+                }
             }
         }
     }
