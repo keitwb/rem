@@ -1,5 +1,3 @@
-import clone from "lodash-es/clone";
-import defer from "lodash-es/defer";
 import * as EJSON from "mongodb-extended-json";
 
 import { logger } from "@/util/log";
@@ -19,9 +17,8 @@ let _currentId = 0;
 
 export type RequestID = string;
 
-export function newId(): RequestID {
-  _currentId++;
-  return `${_currentId}`;
+function newId(): RequestID {
+  return `${_currentId++}`;
 }
 
 /**
@@ -42,12 +39,12 @@ export default class RequestWebSocket {
     this.responseHandlers = new Map<RequestID, (resp: any) => void>();
     this.responseQueues = new Map<RequestID, MessageInfo[]>();
     // Run the message streamer in a separate stack.
-    defer(async () => {
+    setTimeout(async () => {
       for await (const msg of streamWebSocket(wsProvider)) {
         logger.debug("got repsonse message", msg);
         this.messageHandler(msg);
       }
-    });
+    }, 1);
   }
 
   /**
@@ -61,11 +58,13 @@ export default class RequestWebSocket {
   }
 
   public async *doRequest<T>(msg: object, timeoutMS: number = 10000): AsyncIterableIterator<T> {
-    const msgCopy = clone(msg) as MessageInfo;
+    const msgCopy = { ...msg } as MessageInfo;
     const reqId = newId();
     msgCopy.reqID = reqId;
 
-    this.provider.ws.send(EJSON.stringify(msgCopy));
+    setTimeout(() => {
+      this.provider.ws.send(EJSON.stringify(msgCopy));
+    }, 1);
 
     while (true) {
       const next = await this.nextMessage<T & MessageInfo>(reqId, timeoutMS);

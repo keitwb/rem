@@ -1,3 +1,5 @@
+import { logger } from "@/util/log";
+
 import WebSocketProvider from "./provider";
 
 export default async function* streamWebSocket(wsProvider: WebSocketProvider): AsyncIterableIterator<MessageEvent> {
@@ -8,15 +10,28 @@ export default async function* streamWebSocket(wsProvider: WebSocketProvider): A
   const handlerProvider = new HandlerProvider();
   init(wsProvider, handlerProvider, responseQueue);
 
+  let nextMessagePromise = nextMessage(responseQueue, handlerProvider);
   while (true) {
-    const next = await nextMessage(responseQueue, handlerProvider);
+    let next: MessageEvent;
+    try {
+      next = await Promise.race([
+        nextMessagePromise,
+        wsProvider.closePromise.then(e => {
+          throw e;
+        }),
+      ]);
+    } catch (e) {
+      logger.error("Underlying stream failure: ", e);
+      if (wsProvider.cancelled) {
+        return;
+      }
 
-    if (next) {
-      yield next;
+      continue;
     }
-    if (wsProvider.cancelled) {
-      break;
-    }
+
+    yield next;
+
+    nextMessagePromise = nextMessage(responseQueue, handlerProvider);
   }
 }
 
@@ -34,12 +49,14 @@ class HandlerProvider {
 }
 
 function init(wsProvider: WebSocketProvider, handlerProvider: HandlerProvider, responseQueue: MessageEvent[]) {
-  wsProvider.openPromise.then(async () => {
+  wsProvider.openPromise.then(() => {
     wsProvider.ws.onmessage = (msg: MessageEvent) => messageHandler(responseQueue, handlerProvider, msg);
   });
 
   wsProvider.closePromise.then(_ => {
-    init(wsProvider, handlerProvider, responseQueue);
+    if (!wsProvider.cancelled) {
+      init(wsProvider, handlerProvider, responseQueue);
+    }
   });
 }
 
