@@ -1,34 +1,42 @@
 TAG ?= dev
+PUSH ?= no
 
 .PHONY: search-indexer
 search-indexer:
-	docker build --rm -t quay.io/rem/search-indexer:$(TAG) search
+	docker build --rm -t quay.io/rem/$@:$(TAG) search
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
 .PHONY: data-streamer
 data-streamer:
-	docker build --rm -t quay.io/rem/data-streamer:$(TAG) data-streamer
+	docker build --rm -t quay.io/rem/$@:$(TAG) data-streamer
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
 .PHONY: webapp
 webapp:
-	docker build --rm -t quay.io/rem/webapp:$(TAG) webapp
+	docker build --rm -t quay.io/rem/$@:$(TAG) webapp
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
 .PHONY: es
 es:
-	docker build --pull --rm -t quay.io/rem/es:$(TAG) datastores/es
+	docker build --pull --rm -t quay.io/rem/$@:$(TAG) datastores/es
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
 .PHONY: mongo
 mongo:
-	docker build --rm -t quay.io/rem/mongo:$(TAG) datastores/mongo
+	docker build --rm -t quay.io/rem/$@:$(TAG) datastores/mongo
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
 .PHONY: mongo-dev-fixtures
 mongo-dev-fixtures:
-	docker build --rm -t quay.io/rem/mongo-dev-fixtures:$(TAG) dev/fixtures
+	docker build --rm -t quay.io/rem/$@:$(TAG) dev/fixtures
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
 .PHONY: parceldata
 parceldata:
-	docker build --rm -t quay.io/rem/parceldata:$(TAG) -f Dockerfile.parceldata .
+	docker build --rm -t quay.io/rem/$@:$(TAG) -f Dockerfile.parceldata .
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
-images: data-streamer mongo es parceldata search-indexer #webapp
+images: data-streamer mongo es parceldata search-indexer webapp mongo-dev-fixtures
 	true
 
 .PHONY: minikube-kvm

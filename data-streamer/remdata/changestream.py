@@ -16,12 +16,17 @@ async def stream_collection_updates(mongo_db, collection, resume_after, message)
     Send any changes that happen to the given collection to the socket
     """
     try:
-        if collection not in await mongo_db.list_collection_names():
-            await message.send_error(f"Unknown collection {collection}")
-            return
-
+        # TODO: Add restrictions on which collections can be watched
         coll = mongo_db[collection]
         async with coll.watch(resume_after=resume_after, full_document="updateLookup") as stream:
+            # Hackiness to make sure the watch is actually started so that our "started" message
+            # below is accurate.  Normally Motor doesn't start the watch until you actually try and
+            # get the first change item.
+            def init_stream():
+                stream.delegate = stream._target.delegate.watch(**stream._kwargs)  # pylint:disable=protected-access
+
+            await stream._framework.run_on_executor(stream.get_io_loop(), init_stream)  # pylint:disable=protected-access
+
             # Send a start message so that clients can know when it is safe to fetch docs without
             # missing updates when there was no resume token provided.
             await message.send_response({
@@ -47,7 +52,7 @@ async def send_changes(mongo_db, message):
     collection = message.get('collection')
     resume_after = message.get('resumeAfter')
 
-    message.logger.info("Received change stream request for collection '%s'", collection)
+    message.logger.info(f"Received change stream request for collection '{collection}', resuming from {resume_after}")
 
     await stream_collection_updates(mongo_db, collection, resume_after, message)
     message.logger.info("Stopped change stream")

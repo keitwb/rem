@@ -39,7 +39,6 @@ async def watch_is_active(mongo_client, instances):
         if ip.get("originatingCommand", {}).get("pipeline") \
             and '$changeStream' in ip["originatingCommand"]["pipeline"][0]
     ]
-    print("LEN = %d" % len(change_streams))
     return len(change_streams) >= len(watch.COLLECTIONS_TO_INDEX) * instances
 
 

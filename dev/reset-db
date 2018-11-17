@@ -8,8 +8,8 @@ set -exuo pipefail
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd $SCRIPT_DIR/..
 
-TAG=dev make mongo-dev-fixtures
+PUSH=yes TAG=dev make mongo-dev-fixtures
 
-kubectl exec -it mongo-0 -- mongo rem --eval 'db.dropDatabase();'
+kubectl exec mongo-0 -- mongo rem --eval 'db.dropDatabase();'
 kubectl exec mongo-0 -- /opt/setup/run.sh
-kubectl run dev-fixtures -i -t --rm --restart=Never --image quay.io/rem/mongo-dev-fixtures:dev -- /opt/dev/load-fixtures.sh
+kubectl run dev-fixtures -i -t --rm --image-pull-policy=Always --restart=Never --image quay.io/rem/mongo-dev-fixtures:dev -- /opt/dev/load-fixtures.sh

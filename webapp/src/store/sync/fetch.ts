@@ -11,20 +11,24 @@ export function ensureModelPresent(dispatch: Dispatch) {
 }
 
 export function createFetchMiddleware(mongoClient: MongoClient): Middleware<{}, AppState> {
-  return ({ dispatch }) => (next: Dispatch<Action>) => (action: ActionType<typeof dbActions>) => {
+  return ({ dispatch, getState }) => (next: Dispatch<Action>) => (action: ActionType<typeof dbActions>) => {
     if (getType(dbActions.fetchOne) === action.type) {
-      return (async function doUpdate() {
-        const { collection, id } = action.payload;
-        try {
-          const doc = await mongoClient.getOne(collection, id);
-          dispatch(dbActions.loadOne(collection, doc));
-        } catch (err) {
-          dispatch(dbActions.fetchFailed(collection, id, err));
-          throw err;
-        }
-      })();
-    } else {
-      return next(action);
+      const { collection, id, force } = action.payload;
+
+      // Don't fetch if the doc is already in the store since the change stream ought to keep it up
+      // to date.
+      if (force || !getState().db.properties.docs[id.toString()]) {
+        return (async function doUpdate() {
+          try {
+            const doc = await mongoClient.getOne(collection, id);
+            dispatch(dbActions.loadOne(collection, doc));
+          } catch (err) {
+            dispatch(dbActions.fetchFailed(collection, id, err));
+            throw err;
+          }
+        })();
+      }
     }
+    return next(action);
   };
 }

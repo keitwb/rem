@@ -13,7 +13,7 @@ export const deleteOne = createAction("[db] Delete", resolve => {
 });
 
 export const fetchOne = createAction("[db] Fetch", resolve => {
-  return (collection: string, id: ObjectId) => resolve({ collection, id });
+  return (collection: string, id: ObjectId, force: boolean = false) => resolve({ collection, id, force });
 });
 
 export const fetchFailed = createAction("[db] Fetch Failed", resolve => {

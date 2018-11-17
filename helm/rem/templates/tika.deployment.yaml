@@ -8,7 +8,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: {{ .Values.tika.replicas }}
+  replicas: {{ .Values.tikaReplicas }}
   selector:
     matchLabels:
       app: tika
@@ -22,6 +22,6 @@ spec:
       containers:
       - name: tika
         image: logicalspark/docker-tikaserver:1.18
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         ports:
         - containerPort: 9998

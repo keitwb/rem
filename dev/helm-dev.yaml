@@ -1,29 +1,20 @@
 ingressHost: 'rem.test'
 devMode: true
 
-dataStreamer:
-  replicas: 2
-  image:
-    tag: dev
+dataStreamerReplicas: 2
+dataStreamerImageTag: dev
 
-searchIndexer:
-  replicas: 2
-  image:
-    tag: dev
+searchIndexerReplicas: 2
+searchIndexerImageTag: dev
 
-webapp:
-  # Disable the webapp and run it locally
-  replicas: 0
-  image:
-    tag: dev
+# Disable the webapp and run it locally
+webappReplicas: 0
+webappImageTag: dev
 
-mongo:
-  image:
-    tag: dev
+mongoImageTag: dev
 
-es:
-  image:
-    tag: dev
+esImageTag: dev
+enableESHQ: true
 
 tlsCert: |
   -----BEGIN CERTIFICATE-----

@@ -23,13 +23,13 @@ spec:
       initContainers:
       - name: init-sysctl
         image: busybox
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: ["sysctl", "-w", "vm.max_map_count=262144"]
         securityContext:
           privileged: true
       - name: init-mount
         image: busybox
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         command: ["chown", "1000.1000", "-R", "/usr/share/elasticsearch/data"]
         securityContext:
           privileged: true
@@ -38,11 +38,16 @@ spec:
           mountPath: /usr/share/elasticsearch/data
       containers:
       - name: es
-        image: quay.io/rem/es:{{.Values.es.image.tag}}
+        image: quay.io/rem/es:{{default .Values.defaultTag .Values.esImageTag}}
         environment:
         - name: ES_JAVA_OPTS
           value: "-Xms256m -Xmx256m"
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
+        readinessProbe:
+          tcpSocket:
+            port: 9200
+          initialDelaySeconds: 5
+          periodSeconds: 5
         ports:
         - containerPort: 9200
         volumeMounts:

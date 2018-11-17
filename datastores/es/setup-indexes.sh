@@ -8,7 +8,7 @@ echo "Setting up ES indexes..."
 for f in $SCRIPT_DIR/*.json
 do
   echo "Processing $f"
-  curl -X PUT -H 'Content-Type: application/json' -d @$f http://${ES_HOST-127.0.0.1}:9200/$(basename $f .index.json)
+  curl --fail -X PUT -H 'Content-Type: application/json' -d @$f http://${ES_HOST-127.0.0.1}:9200/$(basename $f .index.json)
 done
 
 echo "Done"

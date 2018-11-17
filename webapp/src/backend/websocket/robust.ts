@@ -2,6 +2,8 @@ import { logger } from "@/util/log";
 import sleep from "@/util/sleep";
 import WebSocketProvider from "./provider";
 
+const MAX_FAILS = 100;
+
 /**
  * A wrapper for a WebSocket that automatically reconnects if it gets disconnected (closed).
  */
@@ -41,13 +43,19 @@ export default class RobustWebSocket implements WebSocketProvider {
     this._ws.close(1000);
   }
 
-  private initSocket(url: string) {
+  private initSocket(url: string, failCount: number = 0) {
     this._ws = new WebSocket(url);
 
-    this._closePromise = new Promise<CloseEvent>(resolve => {
+    this._closePromise = new Promise<CloseEvent>((resolve, reject) => {
       this._ws.onclose = async (e: CloseEvent) => {
         if (this.cancelled) {
           resolve(e);
+          return;
+        }
+
+        if (failCount > MAX_FAILS) {
+          logger.error("Websocket closed too many times, giving up");
+          reject(e);
           return;
         }
 
@@ -57,7 +65,7 @@ export default class RobustWebSocket implements WebSocketProvider {
         if (e.code === 1006) {
           await sleep(2000);
         }
-        this.initSocket(url);
+        this.initSocket(url, failCount + 1);
         resolve(e);
       };
     });

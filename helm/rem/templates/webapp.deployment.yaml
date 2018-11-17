@@ -8,7 +8,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: {{ .Values.webapp.replicas }}
+  replicas: {{ .Values.webappReplicas }}
   selector:
     matchLabels:
       app: webapp
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: static
-        image: quay.io/rem/webapp:{{ .Values.webapp.image.tag }}
-        imagePullPolicy: IfNotPresent
+        image: quay.io/rem/webapp:{{default .Values.defaultTag  .Values.webappImageTag }}
+        imagePullPolicy: Always
         ports:
         - containerPort: 80

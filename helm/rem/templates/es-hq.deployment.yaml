@@ -1,0 +1,32 @@
+{{if .Values.enableESHQ }}
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: es-hq
+  labels:
+    app: es-hq
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: es-hq
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: es-hq
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: es-hq
+        image: elastichq/elasticsearch-hq:release-v3.4.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        env:
+        - name: HQ_DEFAULT_URL
+          value: http://es:9200
+{{end}}

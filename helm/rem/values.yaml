@@ -1,37 +1,32 @@
 # Set to true to enable certain development conveniences that should not be present in an actual
 # deployment
 devMode: false
+allowHTTP: false
 
 tlsCert:
 tlsKey:
 
-tika:
-  replicas: 1
-  image:
-    tag: latest
+defaultTag: latest
 
-mongo:
-  replicas: 1
-  image:
-    tag: latest
+tikaReplicas: 1
+tikaImageTag:
 
-searchIndexer:
-  replicas: 1
-  image:
-    tag: latest
+mongoReplicas: 1
+mongoImageTag:
+mongoEphemeralDisk: false
 
-dataStreamer:
-  replicas: 1
-  image:
-    tag: latest
+esReplicas: 1
+esImageTag:
 
-webapp:
-  replicas: 1
-  image:
-    tag: latest
+searchIndexerReplicas: 1
+searchIndexerImageTag:
 
-es:
-  replicas: 1
-  image:
-    tag: latest
+dataStreamerReplicas: 1
+dataStreamerImageTag:
+
+webappReplicas: 1
+webappImageTag:
+
+# Enable the ElasticSearch HQ app that provides a webapp UI for the ES cluster
+enableESHQ: false
 

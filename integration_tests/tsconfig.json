@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./tests",
+    "outDir": "./dist/",
+    "lib": [ "dom", "ES2015.Promise", "es2017" ],
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "module": "commonjs",
+    "target": "es6",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "paths": {
+      "@/*": [
+        "*"
+      ]
+    }
+  },
+  "include": [
+    "./test/**/*"
+  ]
+}

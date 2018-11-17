@@ -134,8 +134,3 @@ async def test_preexisting_docs_get_indexed_once_if_no_prior_claims(event_loop):
             for insert_result in res:
                 assert await wait_for_async(
                     p(get_es_doc, es_client, index="properties", doc_id=insert_result.inserted_id), timeout_seconds=10)
-
-        # Get statistics on how many indexing commands have been issues to ensure that the watchers
-        # are not duplicating work.
-        assert (await get_es_indexing_stats("properties", es_client))["index_total"] == 6, \
-                'Only 6 indexing operations should happen'
