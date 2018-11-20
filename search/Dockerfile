@@ -1,10 +1,10 @@
-FROM alpine:3.7 as base
+FROM python:3.7
 
-RUN apk add --no-cache python3 g++ make python3-dev
+RUN pip install pipenv==2018.7.1
 
 WORKDIR "/opt"
-CMD ["python3", "-m", "remsearch"]
+ENTRYPOINT ["pipenv", "run", "python", "-m", "remsearch"]
 
-COPY requirements.txt /opt/requirements.txt
-RUN pip3 install -r /opt/requirements.txt
+COPY Pipfile* /opt/
+RUN pipenv install
 COPY ./remsearch/ /opt/remsearch/

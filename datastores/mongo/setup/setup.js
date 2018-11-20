@@ -3,7 +3,7 @@
 
 function main() {
   rs.initiate();
-  sleep(2500);
+  sleep(3000);
 
   load("properties.js");
   load("leases.js");

@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import Config from "@/config/config";
 import { logger } from "@/util/log";
 
+import BadRoute from "./BadRoute";
 import ConfigEditor from "./ConfigEditor";
 import connectModelById from "./connectModelById";
 import SearchContext from "./context/SearchContext";
@@ -31,6 +32,7 @@ export default class App extends React.Component {
               }}
             />
             <Route exact path="/" component={PropertyOverview} />
+            <Route component={BadRoute} />
           </Switch>
         </div>
       </BrowserRouter>

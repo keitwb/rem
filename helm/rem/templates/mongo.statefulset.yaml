@@ -23,7 +23,8 @@ spec:
     spec:
       containers:
       - name: mongo
-        image: quay.io/rem/mongo:{{ .Values.mongo.image.tag }}
+        image: quay.io/rem/mongo:{{default .Values.defaultTag  .Values.mongoImageTag }}
+        imagePullPolicy: Always
         command:
         - "mongod"
         - "--bind_ip"
@@ -35,6 +36,21 @@ spec:
         volumeMounts:
           - mountPath: "/data/db"
             name: data
+      - name: setup
+        image: quay.io/rem/mongo:{{default .Values.defaultTag  .Values.mongoImageTag }}
+        imagePullPolicy: Always
+        env:
+          - name: STAY_UP
+            value: "yes"
+        command:
+        - "/opt/setup/run.sh"
+      {{if .Values.mongoEphemeralDisk }}
+      volumes:
+        - name: data
+          emptyDir:
+            medium: Memory
+      {{end}}
+  {{if not .Values.mongoEphemeralDisk}}
   volumeClaimTemplates:
   - metadata:
       name: data
@@ -44,3 +60,4 @@ spec:
       resources:
         requests:
           storage: 8Gi
+  {{end}}

@@ -1,0 +1,28 @@
+{
+  "name": "rem-integration-tests",
+  "version": "1.0.0",
+  "description": "Integration tests for the REM webapp",
+  "main": "index.js",
+  "scripts": {
+    "test": "ts-mocha 'test/**/*test.ts'"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/dockerode": "^2.5.5",
+    "@types/expect": "^1.20.3",
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.12.0",
+    "@types/selenium-webdriver": "^3.0.12",
+    "dockerode": "^2.5.7",
+    "mocha": "^5.2.0",
+    "mocha-jenkins-reporter": "^0.4.1",
+    "selenium-webdriver": "^4.0.0-alpha.1",
+    "ts-mocha": "^2.0.0",
+    "typescript": "^3.1.3",
+    "wait-port": "^0.2.2"
+  },
+  "devDependencies": {
+    "prettier": "^1.14.3"
+  }
+}

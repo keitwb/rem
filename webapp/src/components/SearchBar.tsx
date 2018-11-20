@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
 
-import { SearchClient, SearchHit, SearchResults } from "@/backend/search";
+import { SearchClient, SearchResults } from "@/backend/search";
+import SearchResultList from "./SearchResultList";
 
 interface Props {
   searchClient: SearchClient;
@@ -10,45 +10,48 @@ interface Props {
 interface State {
   results: SearchResults;
   err: Error;
+  searching: boolean;
 }
 
 export default class SearchBar extends React.Component<Props, State> {
   public readonly state: State = {
     err: null,
     results: null,
+    searching: false,
   };
 
   public render() {
     return (
-      <div>
-        <form>
-          <input type="text" className="form-control" onChange={e => this.doSearch(e.target.value)} />
+      <div className="w-50 position-relative">
+        <form className="w-100">
+          <input
+            type="text"
+            className="w-100 p-2 border border-secondary"
+            placeholder="Search"
+            onChange={e => this.doSearch(e.target.value)}
+          />
         </form>
-        {this.state.results ? (
-          <ul className="list-group">
-            {this.state.results.hits.hits.map(r => (
-              <li key={r._id}>{this.itemForResult(r)}</li>
-            ))}
-          </ul>
-        ) : null}
+        <div className="bg-light position-absolute w-100">
+          <div className="shadow-sm">
+            {this.state.results ? <SearchResultList results={this.state.results} /> : null}
+          </div>
+        </div>
       </div>
     );
   }
 
-  private itemForResult(r: SearchHit) {
-    return <Link to={`/property/${r._id}`}>{r._source.name}</Link>;
-  }
-
   private async doSearch(query: string) {
+    this.setState({ searching: true });
     const [results, err] = await this.props.searchClient.query(query);
+    this.setState({ searching: false });
     if (err) {
       this.setState({
         err,
       });
-    } else {
-      this.setState({
-        results,
-      });
+      return;
     }
+    this.setState({
+      results,
+    });
   }
 }

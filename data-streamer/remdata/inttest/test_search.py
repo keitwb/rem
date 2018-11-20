@@ -25,7 +25,7 @@ async def test_do_query_by_ids():
             await es_client.index(index="properties", doc_type="_doc", id=_id, body=body, refresh=True)
 
         async with open_stream(ws_port, "/search") as ws_client:
-            await ws_client.send(ujson.dumps({"query": {"match": {"name": "Building"}}}))
+            await ws_client.send(ujson.dumps({"searchBody": {"query": {"match": {"name": "Building"}}}}))
             resp = ujson.loads(await ws_client.recv())
             assert resp.get('hits', {}).get('total') == 1
             assert resp['hits']['hits'][0]['_id'] == "b"

@@ -4,7 +4,7 @@ kind: Ingress
 metadata:
   name: frontend
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{if .Values.allowHTTP}}false{{else}}true{{end}}"
 spec:
   tls:
     - hosts:
@@ -25,8 +25,7 @@ kind: Ingress
 metadata:
   name: frontend-websockets
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    kubernetes.io/ingress.allow-http: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{if .Values.allowHTTP}}false{{else}}true{{end}}"
     # Set to one hour for websocket connections
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"

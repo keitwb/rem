@@ -2,8 +2,35 @@ pipeline {
     agent none
 
     stages {
-        stage('python-tests') {
+        stage('tests') {
             parallel {
+                stage('integration-tests') {
+                    agent {
+                        dockerfile {
+                            dir 'integration_tests'
+                            args '-v $HOME/.npm:/root/.npm -v /var/run/docker.sock:/var/run/docker.sock'
+                        }
+                    }
+                    environment {
+                        QUAY_IO_BOT = credentials("quay-rem-jenkins")
+                    }
+                    steps { dir('integration_tests') {
+                        withCredentials([[$class: "FileBinding", credentialsId: 'rem-int-tests-kubeconfig', variable: 'KUBECONFIG']]) {
+                            sh '''
+                              docker login -u="$QUAY_IO_BOT_USR" -p="$QUAY_IO_BOT_PSW" quay.io
+                              npm install
+
+                              JUNIT_REPORT_PATH="report.xml" ./run.sh
+                            '''
+                        }
+                    }}
+                    // TODO: Figure out how to make it pick up test output in containers
+                    //post {
+                    //    always {
+                    //        junit "*.xml"
+                    //    }
+                    //}
+                }
                 stage('search-pylint') {
                     agent {
                         docker {

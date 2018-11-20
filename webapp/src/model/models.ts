@@ -123,7 +123,7 @@ export interface Party extends MongoDoc {
 }
 
 export enum CollectionName {
-  Media = "media.files",
+  Media = "media",
 }
 
 export interface Media extends MongoDoc, GridFSDoc {

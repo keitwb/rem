@@ -2,14 +2,25 @@ import { ValOrErr, withErr } from "@/util/errors";
 import RequestWebSocket from "./websocket/request";
 
 export interface SearchHit<T = any> {
-  _index: string;
-  _id: string;
-  _score: number;
-  _source: T;
+  readonly _index: string;
+  readonly _id: string;
+  readonly _score: number;
+  readonly _source: T;
+  readonly highlight: Highlight;
+}
+
+export interface Highlight {
+  readonly [index: string]: string[];
+}
+
+export interface Hits {
+  readonly hits: SearchHit[];
+  readonly max_score: number;
+  readonly total: number;
 }
 
 export interface SearchResults {
-  readonly hits: { hits: any[] };
+  readonly hits: Hits;
 }
 
 export interface CompletionResult {
@@ -37,14 +48,18 @@ export class SearchClient {
 
   public async query(q: string): Promise<ValOrErr<SearchResults>> {
     const body = {
+      highlight: {
+        fields: { "*": {} },
+        type: "fvh",
+      },
       query: {
-        multi_match: {
+        query_string: {
           query: q,
         },
       },
     };
 
-    const [resp, err] = await withErr(this.ws.doSimpleRequest<SearchResults>(body));
+    const [resp, err] = await withErr(this.ws.doSimpleRequest<SearchResults>({ searchBody: body }));
     if (err) {
       return [null, err];
     }

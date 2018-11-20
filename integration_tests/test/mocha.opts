@@ -1,0 +1,5 @@
+--delay
+--timeout 20000
+--slow 3000
+--reporter mocha-jenkins-reporter
+--reporter-options junit_report_stack=1

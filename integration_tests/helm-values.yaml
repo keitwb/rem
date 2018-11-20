@@ -1,0 +1,5 @@
+allowHTTP: true
+mongoEphemeralDisk: true
+dataStreamerReplicas: 2
+searchIndexerReplicas: 2
+webappReplicas: 1

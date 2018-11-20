@@ -8,7 +8,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: {{ .Values.searchIndexer.replicas | default "2" }}
+  replicas: {{ .Values.searchIndexerReplicas | default "2" }}
   selector:
     matchLabels:
       app: search-indexer
@@ -21,8 +21,8 @@ spec:
     spec:
       containers:
       - name: search-indexer
-        image: quay.io/rem/search-indexer:{{ .Values.searchIndexer.image.tag }}
-        imagePullPolicy: {{ .Values.searchIndexer.image.pullPolicy | default "IfNotPresent" }}
+        image: quay.io/rem/search-indexer:{{default .Values.defaultTag  .Values.searchIndexerImageTag }}
+        imagePullPolicy: Always
         env:
         - name: INSTANCE_NAME
           valueFrom:

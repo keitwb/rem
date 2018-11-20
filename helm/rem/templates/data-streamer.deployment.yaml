@@ -8,7 +8,7 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
-  replicas: {{ .Values.dataStreamer.replicas }}
+  replicas: {{ .Values.dataStreamerReplicas }}
   selector:
     matchLabels:
       app: data-streamer
@@ -21,8 +21,8 @@ spec:
     spec:
       containers:
       - name: data-streamer
-        image: quay.io/rem/data-streamer:{{ .Values.dataStreamer.image.tag }}
-        imagePullPolicy: IfNotPresent
+        image: quay.io/rem/data-streamer:{{ default .Values.defaultTag .Values.dataStreamerImageTag }}
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:

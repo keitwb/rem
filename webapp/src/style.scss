@@ -1,1 +1,6 @@
 @import "~bootstrap/scss/bootstrap";
+
+// Turn off input border when editing
+input:focus {
+    outline: none;
+}

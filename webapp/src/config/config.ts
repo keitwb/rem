@@ -7,6 +7,11 @@ function getFromLocalStorage<T>(key: string, def: T): T {
   return def;
 }
 
+function pageRelativeWebSocketPath(path: string): string {
+  const l = window.location;
+  return (l.protocol === "https:" ? "wss://" : "ws://") + l.host + path;
+}
+
 let localConfig: Config;
 
 export default class Config {
@@ -27,8 +32,7 @@ export default class Config {
     });
   }
 
-  public dbStreamURL = "/db";
-  public changeStreamURL = "/changes";
-  public searchStreamURL = "/search";
-  public mediaUploadStreamURL = "/media";
+  public dbStreamURL = pageRelativeWebSocketPath("/stream/db");
+  public changeStreamURL = pageRelativeWebSocketPath("/stream/changes");
+  public searchStreamURL = pageRelativeWebSocketPath("/stream/search");
 }
