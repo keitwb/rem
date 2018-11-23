@@ -49,8 +49,10 @@ export enum CollectionName {
 }
 
 export interface Note extends MongoDoc {
+  title: string;
   note: string;
-  media: Media[];
+  media: ObjectID[];
+  updatedDate: MongoDate;
   createdDate: MongoDate;
   createdBy: ObjectID;
 }
@@ -95,6 +97,7 @@ export interface Property extends MongoDoc {
   desiredRent?: number;
   desiredSalesPrice?: number;
   tryingToSell?: boolean;
+  tags?: string[];
   contacts?: ObjectID[];
   notes?: ObjectID[];
   media?: ObjectID[];

@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 
 ALLOWED_COLLECTIONS = [
     "properties",
+    "notes",
+    "leases",
+    "media.files",
+    "users",
 ]
 
 
@@ -49,6 +53,7 @@ async def do_get_by_id(collection, message):
     """
     logger.info("Finding by ids: %s", message.get('ids'))
     cursor = collection.find({"_id": {"$in": [maybe_convert_to_object_id(oid) for oid in message.get('ids', [])]}})
+    cursor.max_time_ms(5000)
 
     try:
         prev_doc = None

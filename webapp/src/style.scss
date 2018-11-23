@@ -1,6 +1,18 @@
-@import "~bootstrap/scss/bootstrap";
-
 // Turn off input border when editing
 input:focus {
-    outline: none;
+  outline: none;
+}
+
+.on-top {
+  z-index: 99;
+}
+
+@import "~bootstrap/scss/bootstrap";
+
+.bg-light-hover:hover {
+  background-color: theme-color-level("primary", -10);
+}
+
+.no-link-underline:hover {
+  text-decoration: none !important;
 }

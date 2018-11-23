@@ -31,34 +31,6 @@ pipeline {
                     //    }
                     //}
                 }
-                stage('search-pylint') {
-                    agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
-                        }
-                    }
-                    steps { dir('search') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run pylint remsearch'
-                    }}
-                }
-                stage('search-yapf-formatting') {
-                    agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
-                        }
-                    }
-                    steps { dir('search') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run yapf --diff --recursive --parallel remsearch'
-                    }}
-                }
                 stage('search-test') {
                     agent {
                         docker {
@@ -87,6 +59,34 @@ pipeline {
                         sh 'pipenv run pytest -n2 remdata/inttest'
                     }}
                 }
+                stage('search-pylint') {
+                    agent {
+                        docker {
+                            image 'python:3.7'
+                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        }
+                    }
+                    steps { dir('search') {
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
+
+                        sh 'pipenv run pylint remsearch'
+                    }}
+                }
+                stage('search-yapf-formatting') {
+                    agent {
+                        docker {
+                            image 'python:3.7'
+                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        }
+                    }
+                    steps { dir('search') {
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
+
+                        sh 'pipenv run yapf --diff --recursive --parallel remsearch'
+                    }}
+                }
                 stage('data-streamer-pylint') {
                     agent {
                         docker {
@@ -113,6 +113,18 @@ pipeline {
                         sh 'pipenv install --deploy --dev --system'
 
                         sh 'pipenv run yapf --diff --recursive --parallel remdata'
+                    }}
+                }
+                stage('webapp-prettier-check') {
+                    agent {
+                        docker {
+                            image 'node:10.11-alpine'
+                            args '-v $HOME/.npm:/root/.npm'
+                        }
+                    }
+                    steps { dir('webapp') {
+                        sh 'npm install prettier'
+                        sh './node_modules/.bin/prettier --list-different ./src/**/*'
                     }}
                 }
                 stage('webapp-jest-tests') {

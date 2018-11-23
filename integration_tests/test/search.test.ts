@@ -10,9 +10,13 @@ describe("Search functionality", function() {
       2000
     );
     await elm.sendKeys("Cumberl");
-    const result = await getBrowser().wait(
-      until.elementLocated(By.xpath("//a[text()='Industrial Complex']"))
+    await getBrowser().wait(
+      until.elementLocated(By.xpath("//*[text()='Industrial Complex']")),
+      2000
     );
-    assert.ok(result);
+    await getBrowser().wait(
+      until.elementLocated(By.xpath("//span[text()='Cumberl']")),
+      2000
+    );
   });
 });

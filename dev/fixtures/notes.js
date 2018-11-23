@@ -5,6 +5,7 @@ upsert("notes", [
     _id: ID(1),
     createdDate: new Date("2017-03-01"),
     createdBy:   ID(1),
+    title:       "Outside",
     note:        "Needs work -- lawn needs mowing.",
   },
   {

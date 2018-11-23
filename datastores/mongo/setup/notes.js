@@ -7,6 +7,3 @@ rem.runCommand({
    validator:{},
    validationLevel:"strict"
 });
-
-rem.notes.dropIndex("text-search");
-rem.notes.createIndex({ "$**": "text" }, {name: "text-search"});

@@ -35,6 +35,7 @@ class SocketMessage:
         message["reqID"] = self.req_id
         message["hasMore"] = not last_message
         await self.socket.send(self.encoder.encode(message))
+        logger.info("Completed request %s", self.req_id)
 
     async def send_error(self, error_msg, **extra):
         """

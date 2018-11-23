@@ -6,10 +6,11 @@ import { CollectionName } from "@/model/models";
 import { capitalize, truncate } from "@/util/string";
 
 interface Props {
-  hit: SearchHit;
+  hit: SearchHit<any>;
+  onSelect: () => void;
 }
 
-const SearchResultItem: React.SFC<Props> = ({ hit }) => {
+const SearchResultItem: React.SFC<Props> = ({ hit, onSelect }) => {
   let content;
   let pathCollection;
 
@@ -34,9 +35,11 @@ const SearchResultItem: React.SFC<Props> = ({ hit }) => {
       throw new Error(`Unknown search index result type: ${hit._index}`);
   }
   return (
-    <Link to={`/${pathCollection}/${hit._id}`}>
-      {truncate(content, 40)}
-      {highlightContent(hit.highlight)}
+    <Link onClick={onSelect} className="no-link-underline" to={`/${pathCollection}/${hit._id}`}>
+      <div className="bg-light-hover px-1">
+        {truncate(content, 40)}
+        {highlightContent(hit.highlight)}
+      </div>
     </Link>
   );
 };
@@ -49,9 +52,10 @@ function highlightContent(highlight: Highlight): React.ReactNode {
   return (
     <div>
       {Object.keys(highlight).map(field => (
-        <span key={field}>
-          {capitalize(field)}: {parseHighlightValue(highlight[field][0])}
-        </span>
+        <div key={field}>
+          <span className="font-weight-light font-italic">{capitalize(field)}:</span>{" "}
+          {parseHighlightValue(highlight[field][0])}
+        </div>
       ))}
     </div>
   );

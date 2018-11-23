@@ -2,6 +2,6 @@ import * as React from "react";
 
 export default class PropertyOverview extends React.Component<{}, {}> {
   public render() {
-    return <div className="container">Properties</div>;
+    return <div>Properties</div>;
   }
 }

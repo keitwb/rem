@@ -12,7 +12,7 @@ async def handle_search(es_client, message):
     index = message.get("index", "_all")
     body = message.get("searchBody")
     try:
-        result = await es_client.search(index=index, body=body)
+        result = await es_client.search(index=index, body=body, timeout='5s')
         await message.send_response(result)
     except elasticsearch.exceptions.RequestError as e:
         await message.send_error(str(e))

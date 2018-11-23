@@ -4,6 +4,7 @@
  */
 
 import * as Docker from "dockerode";
+import * as fs from "fs";
 import * as waitPort from "wait-port";
 
 import * as browser from "./browser";
@@ -40,8 +41,19 @@ async function setup() {
 
 setup().then(run);
 
+afterEach(async function() {
+  if (this.currentTest.isFailed()) {
+    const imageBase64 = await browser.getBrowser().takeScreenshot();
+    fs.writeFileSync(
+      `/tmp/${this.currentTest.fullTitle()}.png`,
+      Buffer.from(imageBase64, "base64")
+    );
+  }
+  return null;
+});
+
 after(async function() {
   if (seleniumCont) {
-    await seleniumCont.remove({ force: true });
+    await seleniumCont.remove({ force: true, timeout: 1 });
   }
 });

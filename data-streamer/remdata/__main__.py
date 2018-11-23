@@ -8,7 +8,8 @@ import signal
 
 from .core import start_server
 
-logging.basicConfig(level=logging.INFO)
+FORMAT = '%(asctime)-15s %(levelname)s %(module)s: %(message)s'
+logging.basicConfig(level=logging.INFO, format=FORMAT)
 
 
 async def run():

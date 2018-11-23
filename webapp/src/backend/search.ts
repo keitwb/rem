@@ -1,7 +1,11 @@
+import { ObjectID } from "bson";
+
+import { MongoDoc } from "@/model/models";
 import { ValOrErr, withErr } from "@/util/errors";
+
 import RequestWebSocket from "./websocket/request";
 
-export interface SearchHit<T = any> {
+export interface SearchHit<T> {
   readonly _index: string;
   readonly _id: string;
   readonly _score: number;
@@ -13,14 +17,14 @@ export interface Highlight {
   readonly [index: string]: string[];
 }
 
-export interface Hits {
-  readonly hits: SearchHit[];
+export interface Hits<T> {
+  readonly hits: Array<SearchHit<T>>;
   readonly max_score: number;
   readonly total: number;
 }
 
-export interface SearchResults {
-  readonly hits: Hits;
+export interface SearchResults<T> {
+  readonly hits: Hits<T>;
 }
 
 export interface CompletionResult {
@@ -46,8 +50,8 @@ export class SearchClient {
     this.ws = ws;
   }
 
-  public async query(q: string): Promise<ValOrErr<SearchResults>> {
-    const body = {
+  public async queryByString<T = any>(q: string): Promise<ValOrErr<SearchResults<T>>> {
+    return this.query({
       highlight: {
         fields: { "*": {} },
         type: "fvh",
@@ -57,12 +61,15 @@ export class SearchClient {
           query: q,
         },
       },
-    };
+    });
+  }
 
-    const [resp, err] = await withErr(this.ws.doSimpleRequest<SearchResults>({ searchBody: body }));
+  public async query<T = any>(searchBody: any, index = "_all"): Promise<ValOrErr<SearchResults<T>>> {
+    const [resp, err] = await withErr(this.ws.doSimpleRequest<SearchResults<T>>({ searchBody, index }));
     if (err) {
       return [null, err];
     }
+
     return [resp, null];
   }
 
@@ -86,4 +93,9 @@ export class SearchClient {
 
     return [resp.suggest.current.options.map(o => o.text), null];
   }
+}
+
+export function modelFromSearchHit<T extends MongoDoc>(h: SearchHit<T>) {
+  h._source._id = new ObjectID(h._id);
+  return h._source;
 }
