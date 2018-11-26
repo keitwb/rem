@@ -15,8 +15,8 @@ import "./style.scss";
 
 async function init() {
   const conf = Config.fromLocalStorage();
-  const mongoClientPromise = MongoClient.create(conf.dbStreamURL);
-  const searchClientPromise = SearchClient.create(conf.searchStreamURL);
+  const mongoClientPromise = new MongoClient(conf.dbStreamURL);
+  const searchClientPromise = new SearchClient(conf.searchStreamURL);
 
   let mongoClient: MongoClient;
   try {

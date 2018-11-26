@@ -41,6 +41,21 @@ export function reducer(state: State = initialState, action: ActionType<typeof d
         },
       };
 
+    case getType(dbActions.fetchFailed):
+      const docId = action.payload.id.toHexString();
+
+      return {
+        ...state,
+        ...{
+          [collection]: {
+            ...state[collection],
+            docs: {
+              ...state[collection].docs,
+              [docId]: { ...state[collection].docs[docId], _error: action.payload.err },
+            },
+          },
+        },
+      };
     default:
       return state;
   }

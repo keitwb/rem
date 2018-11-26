@@ -1,7 +1,11 @@
+import * as debounce from "debounce";
 import * as React from "react";
 import OutsideClickHandler from "react-outside-click-handler";
 
 import { SearchClient, SearchResults } from "@/backend/search";
+import { withErr } from "@/util/errors";
+import { addDocEvent, UnregisterEventFunc } from "@/util/events";
+
 import SearchResultList from "./SearchResultList";
 
 interface Props {
@@ -23,7 +27,19 @@ export default class SearchBar extends React.Component<Props, State> {
     showResults: true,
   };
 
+  private unregisterKeydown: UnregisterEventFunc;
+
+  public componentDidMount() {
+    this.unregisterKeydown = addDocEvent("keydown", e => this.processKey(e.key));
+  }
+
+  public componentWillUnmount() {
+    this.unregisterKeydown();
+  }
+
   public render() {
+    const doSearchDebounced = debounce((q: string) => this.doSearch(q), 100);
+
     return (
       <OutsideClickHandler onOutsideClick={() => this.hideResults()}>
         <div className="w-50 position-relative">
@@ -32,7 +48,7 @@ export default class SearchBar extends React.Component<Props, State> {
               type="text"
               className="w-100 p-2 border border-secondary"
               placeholder="Search"
-              onChange={e => this.doSearch(e.target.value)}
+              onChange={e => doSearchDebounced(e.target.value)}
             />
           </form>
           {this.state.showResults ? (
@@ -49,6 +65,14 @@ export default class SearchBar extends React.Component<Props, State> {
     );
   }
 
+  private processKey(k: string) {
+    if (k === "Escape") {
+      this.setState({
+        showResults: false,
+      });
+    }
+  }
+
   private hideResults() {
     this.setState({
       showResults: false,
@@ -57,7 +81,7 @@ export default class SearchBar extends React.Component<Props, State> {
 
   private async doSearch(query: string) {
     this.setState({ searching: true });
-    const [results, err] = await this.props.searchClient.queryByString(query);
+    const [results, err] = await withErr(this.props.searchClient.queryByString(query));
     this.setState({ searching: false, showResults: true });
     if (err) {
       this.setState({

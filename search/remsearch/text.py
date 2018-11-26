@@ -13,8 +13,9 @@ async def index_file_change(tika_client, esclient, change, mongo_db):
     """
     Index a change to a text file
     """
-    return await index_gridfs_file(tika_client, esclient, mongo_db, mongo_doc=change["fullDocument"],
-                                   collection=change["ns"]["coll"])
+    return await index_gridfs_file(
+        tika_client, esclient, mongo_db, mongo_doc=change["fullDocument"], collection=change["ns"]["coll"]
+    )
 
 
 async def index_gridfs_file(tika_client, esclient, mongo_db, mongo_doc, collection):
@@ -24,10 +25,10 @@ async def index_gridfs_file(tika_client, esclient, mongo_db, mongo_doc, collecti
 
     :param collection: The name of the GridFS file metadata collection
     """
-    if '.' not in collection:
+    if "." not in collection:
         raise ValueError("'%s' is not a proper GridFS collection name" % collection)
 
-    bucket_name = collection.split('.')[0]
+    bucket_name = collection.split(".")[0]
 
     # TODO: Either implement a cache (maybe Redis or Memcached) that reuses extracted text from tika
     # based on hashsums or else somehow reuse the data already in ES if only the file metadata is

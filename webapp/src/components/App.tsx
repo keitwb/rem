@@ -1,5 +1,5 @@
 import * as React from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 
 import Config from "@/config/config";
 import { logger } from "@/util/log";
@@ -39,6 +39,14 @@ export default class App extends React.Component {
             <Route exact path="/" component={PropertyOverview} />
             <Route component={BadRoute} />
           </Switch>
+          <div className="d-flex justify-content-center">
+            <Link className="font-weight-light px-1" to="/">
+              Home
+            </Link>
+            <Link className="font-weight-light px-1" to="/config">
+              Config
+            </Link>
+          </div>
         </div>
       </BrowserRouter>
     );

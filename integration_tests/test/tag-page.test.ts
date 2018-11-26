@@ -10,7 +10,8 @@ describe("Tag detail page", function() {
       2000
     );
     const result = await getBrowser().wait(
-      until.elementLocated(By.xpath("//a[text()='Industrial Complex']"))
+      until.elementLocated(By.xpath("//a[text()='Industrial Complex']")),
+      10000
     );
     assert.ok(result);
   });

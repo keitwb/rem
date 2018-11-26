@@ -15,10 +15,11 @@ async def start_test_server():
     """
     Run the update streamer with a backing mongo instance
     """
-    async with run_mongo() as mongo_client, run_elasticsearch() as es_client:
-        async with start_server(mongo_client.address, es_client.transport.hosts, port=0) as server:
-            assigned_port = server.server.sockets[0].getsockname()[1]
-            yield [assigned_port, mongo_client, es_client]
+    async with run_mongo() as mongo_client:
+        async with run_elasticsearch() as es_client:
+            async with start_server(mongo_client.address, es_client.transport.hosts, port=0) as server:
+                assigned_port = server.server.sockets[0].getsockname()[1]
+                yield [assigned_port, mongo_client, es_client]
 
 
 @asynccontextmanager

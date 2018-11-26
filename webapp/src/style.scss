@@ -9,10 +9,26 @@ input:focus {
 
 @import "~bootstrap/scss/bootstrap";
 
+.bg-primary-light {
+  background-color: theme-color-level("primary", -10);
+}
+
 .bg-light-hover:hover {
   background-color: theme-color-level("primary", -10);
 }
 
 .no-link-underline:hover {
   text-decoration: none !important;
+}
+
+.visible-on-parent-hover {
+  visibility: hidden;
+}
+
+*:hover > .visible-on-parent-hover {
+  visibility: visible;
+}
+
+.pointer {
+  cursor: pointer;
 }

@@ -34,15 +34,18 @@ async def ensure_unique_index(mongo_db):
     This is what prevents more than one instance from claiming a given change.
     """
     # Only let a change id (resume token) be inserted once
-    await claim_coll(mongo_db).create_index([(COLLECTION_FIELD, pymongo.ASCENDING),
-                                             (RESUME_TOKEN_FIELD, pymongo.ASCENDING)], unique=True)
+    await claim_coll(mongo_db).create_index(
+        [(COLLECTION_FIELD, pymongo.ASCENDING), (RESUME_TOKEN_FIELD, pymongo.ASCENDING)], unique=True
+    )
 
     # Make sorting by timestamp able to use an index.
-    await claim_coll(mongo_db).create_index([
-        (COLLECTION_FIELD, pymongo.ASCENDING),
-        (RESUME_TOKEN_FIELD, pymongo.ASCENDING),
-        (TIMESTAMP_FIELD, pymongo.DESCENDING),
-    ])
+    await claim_coll(mongo_db).create_index(
+        [
+            (COLLECTION_FIELD, pymongo.ASCENDING),
+            (RESUME_TOKEN_FIELD, pymongo.ASCENDING),
+            (TIMESTAMP_FIELD, pymongo.DESCENDING),
+        ]
+    )
 
     # Ensure changes for a given document are not processed by different instances at the same time
     # to avoid races and version conflicts.
@@ -62,20 +65,10 @@ async def attempt_to_claim_change(mongo_db, change, instance_name):
     """
     try:
         update_res = await claim_coll(mongo_db).update_one(
+            {"_id": ObjectId()},
             {
-                "_id": ObjectId()
-            },
-            {
-                "$set": {
-                    INSTANCE_FIELD: instance_name,
-                    CHANGE_FIELD: change,
-                    COMPLETED_FIELD: False
-                },
-                "$currentDate": {
-                    TIMESTAMP_FIELD: {
-                        "$type": "timestamp"
-                    }
-                },
+                "$set": {INSTANCE_FIELD: instance_name, CHANGE_FIELD: change, COMPLETED_FIELD: False},
+                "$currentDate": {TIMESTAMP_FIELD: {"$type": "timestamp"}},
             },
             upsert=True,
         )
@@ -99,11 +92,9 @@ async def attempt_to_claim_initial_indexing(mongo_db, collection, instance_name)
 
     # Get a prior claim that wasn't completed in case the instance crashed before finishing the
     # indexing.
-    prior_claim = await claim_coll(mongo_db).find_one({
-        RESUME_TOKEN_FIELD: None,
-        INSTANCE_FIELD: instance_name,
-        COMPLETED_FIELD: False
-    })
+    prior_claim = await claim_coll(mongo_db).find_one(
+        {RESUME_TOKEN_FIELD: None, INSTANCE_FIELD: instance_name, COMPLETED_FIELD: False}
+    )
     if prior_claim:
         return prior_claim["_id"]
 
@@ -115,7 +106,9 @@ async def wait_for_initial_indexing_complete(mongo_db, collection):
     Polls the initial indexing claim until it reaches a completed state and then returns
     """
     while True:
-        prior_claim = await claim_coll(mongo_db).find_one({COLLECTION_FIELD: collection, RESUME_TOKEN_FIELD: None})
+        prior_claim = await claim_coll(mongo_db).find_one(
+            {COLLECTION_FIELD: collection, RESUME_TOKEN_FIELD: None}
+        )
         if prior_claim[COMPLETED_FIELD]:
             return
 
@@ -150,7 +143,7 @@ async def get_previous_claim(mongo_db, collection, instance_name):
     Returns the most recent claim for this instance for the given collection.  This can include the
     initial indexing claim, which will have a resume token that is None.
     """
-    return await claim_coll(mongo_db).find_one({
-        COLLECTION_FIELD: collection,
-        INSTANCE_FIELD: instance_name
-    }, sort=[(TIMESTAMP_FIELD, pymongo.DESCENDING)])
+    return await claim_coll(mongo_db).find_one(
+        {COLLECTION_FIELD: collection, INSTANCE_FIELD: instance_name},
+        sort=[(TIMESTAMP_FIELD, pymongo.DESCENDING)],
+    )

@@ -32,13 +32,7 @@ from .tikaclient import TikaClient
 
 logger = logging.getLogger(__name__)
 
-COLLECTIONS_TO_INDEX = [
-    "properties",
-    "contacts",
-    "leases",
-    "notes",
-    "media.files",
-]
+COLLECTIONS_TO_INDEX = ["properties", "contacts", "leases", "notes", "media.files"]
 
 MAX_ES_INDEX_TASKS = 10
 
@@ -47,24 +41,33 @@ async def watch_indexed_collections(instance_name, mongo_loc, es_hosts, tika_loc
     """
     Watches all of the configured collections for changes.  Blocks indefinitely
     """
-    mongo_client = AsyncIOMotorClient(mongo_loc[0], mongo_loc[1], maxPoolSize=100, maxIdleTimeMS=30 * 1000,
-                                      socketTimeoutMS=15 * 1000, connectTimeoutMS=10 * 1000)
+    mongo_client = AsyncIOMotorClient(
+        mongo_loc[0],
+        mongo_loc[1],
+        maxPoolSize=100,
+        maxIdleTimeMS=30 * 1000,
+        socketTimeoutMS=15 * 1000,
+        connectTimeoutMS=10 * 1000,
+    )
     mongo_db = mongo_client[mongo_database]
 
     await claims.ensure_unique_index(mongo_db)
 
     # This is used for mapping files to text through Tika
     async with aiohttp.ClientSession() as http_session:
-        esclient = elasticsearch_async.AsyncElasticsearch(es_hosts, sniff_on_start=False,
-                                                          sniff_on_connection_fail=False)
+        esclient = elasticsearch_async.AsyncElasticsearch(
+            es_hosts, sniff_on_start=False, sniff_on_connection_fail=False
+        )
 
         tika_client = TikaClient(http_session, host=tika_loc[0], port=tika_loc[1])
 
         try:
-            await asyncio.gather(*[
-                watch_collection_with_retry(mongo_db, tika_client, esclient, c, instance_name) \
-                for c in COLLECTIONS_TO_INDEX
-            ])
+            await asyncio.gather(
+                *[
+                    watch_collection_with_retry(mongo_db, tika_client, esclient, c, instance_name)
+                    for c in COLLECTIONS_TO_INDEX
+                ]
+            )
         except asyncio.CancelledError:
             logger.info("Shutting down watchers")
             raise
@@ -108,7 +111,9 @@ async def watch_collection(mongo_db, tika_client, esclient, collection, instance
         # This means the last job run didn't finish successfully before this
         # instance shutdown, so rerun it.
         if resume_token and not last_was_completed:
-            logger.info("Last change to collection '%s' did not complete before shutdown, reindexing", collection)
+            logger.info(
+                "Last change to collection '%s' did not complete before shutdown, reindexing", collection
+            )
             last_change = last_claim[claims.CHANGE_FIELD]
             assert last_change["_id"] == resume_token
 
@@ -138,7 +143,7 @@ async def process_stream(mongo_db, collection, tika_client, esclient, stream, in
     """
     logger.info("Starting to watch change stream for %s", collection)
     async for change in stream:
-        assert collection == change["ns"]["coll"], 'collections did not match up'
+        assert collection == change["ns"]["coll"], "collections did not match up"
 
         if change["operationType"] == "invalidate":
             logger.info("Collection %s was invalidated", collection)
@@ -199,8 +204,13 @@ async def index_collection(mongo_db, tika_client, esclient, collection):
     changes are actually being processed, so that nothing is missed.
     """
     if is_gridfs_collection(collection):
-        index_func = p(text.index_gridfs_file, tika_client=tika_client, esclient=esclient, mongo_db=mongo_db,
-                       collection=collection)
+        index_func = p(
+            text.index_gridfs_file,
+            tika_client=tika_client,
+            esclient=esclient,
+            mongo_db=mongo_db,
+            collection=collection,
+        )
     else:
         index_func = p(es.index_document, esclient=esclient, index=collection)
 

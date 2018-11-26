@@ -17,5 +17,5 @@ class TikaClient:
         """
         Does a request to tika to extract text from the give file stream.
         """
-        async with self.session.put('%s/tika' % (self.base_url,), data=file_stream) as resp:
+        async with self.session.put("%s/tika" % (self.base_url,), data=file_stream) as resp:
             return await resp.text()

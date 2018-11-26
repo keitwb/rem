@@ -9,6 +9,7 @@ describe("Search functionality", function() {
       until.elementLocated(By.xpath("//input[@placeholder='Search']")),
       2000
     );
+
     await elm.sendKeys("Cumberl");
     await getBrowser().wait(
       until.elementLocated(By.xpath("//*[text()='Industrial Complex']")),
@@ -16,7 +17,7 @@ describe("Search functionality", function() {
     );
     await getBrowser().wait(
       until.elementLocated(By.xpath("//span[text()='Cumberl']")),
-      2000
+      4000
     );
   });
 });

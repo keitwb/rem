@@ -1,5 +1,3 @@
-load("common.js");
-
 // Notes
 rem.createCollection("notes");
 rem.runCommand({

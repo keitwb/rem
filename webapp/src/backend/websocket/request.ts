@@ -25,22 +25,17 @@ function newId(): RequestID {
  * A WebSocket client that supports multiple concurrent streams of request/responses.
  */
 export default class RequestWebSocket {
-  public static async open(url: string): Promise<RequestWebSocket> {
-    const provider = await RobustWebSocket.open(url);
-    return new RequestWebSocket(provider);
-  }
-
   private provider: WebSocketProvider;
   private responseHandlers: Map<RequestID, (resp: any) => void>;
   private responseQueues: Map<RequestID, MessageInfo[]>;
 
-  constructor(wsProvider: WebSocketProvider) {
-    this.provider = wsProvider;
+  constructor(url: string) {
+    this.provider = new RobustWebSocket(url);
     this.responseHandlers = new Map<RequestID, (resp: any) => void>();
     this.responseQueues = new Map<RequestID, MessageInfo[]>();
     // Run the message streamer in a separate stack.
     setTimeout(async () => {
-      for await (const msg of streamWebSocket(wsProvider)) {
+      for await (const msg of streamWebSocket(this.provider)) {
         logger.debug("got repsonse message", msg);
         this.messageHandler(msg);
       }
@@ -62,8 +57,10 @@ export default class RequestWebSocket {
     const reqId = newId();
     msgCopy.reqID = reqId;
 
-    setTimeout(() => {
-      this.provider.ws.send(EJSON.stringify(msgCopy));
+    // Defer the sending of the request until our response handling logic has started so we don't
+    // miss responses.
+    setTimeout(async () => {
+      (await this.provider.ws).send(EJSON.stringify(msgCopy));
     }, 1);
 
     while (true) {

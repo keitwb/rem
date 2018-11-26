@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import { modelFromSearchHit, SearchClient } from "@/backend/search";
 import { Property } from "@/model/models";
+import { withErr } from "@/util/errors";
 
 import SearchContext from "./context/SearchContext";
 
@@ -48,9 +49,11 @@ export default class TagDetailWithSearch extends React.Component<Props, State> {
 
   public async componentDidMount() {
     this.setState({ loading: true });
-    const [results, err] = await this.context.query<Property>({
-      query: { term: { "tags.keyword": this.props.tag } },
-    });
+    const [results, err] = await withErr(
+      this.context.query<Property>({
+        query: { term: { "tags.keyword": this.props.tag } },
+      })
+    );
     this.setState({ loading: false });
     if (err) {
       this.setState({

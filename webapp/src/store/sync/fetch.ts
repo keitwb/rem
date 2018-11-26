@@ -24,7 +24,6 @@ export function createFetchMiddleware(mongoClient: MongoClient): Middleware<{}, 
             dispatch(dbActions.loadOne(collection, doc));
           } catch (err) {
             dispatch(dbActions.fetchFailed(collection, id, err));
-            throw err;
           }
         })();
       }

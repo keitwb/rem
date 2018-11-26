@@ -38,6 +38,4 @@ async def handle_media(mongo_db, message):
         await message.send_error(f"Could not insert gridfs file: {str(e)}")
         return
 
-    await message.send_response({
-        "id": _id,
-    })
+    await message.send_response({"id": _id})

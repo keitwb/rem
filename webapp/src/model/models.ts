@@ -8,6 +8,7 @@ export interface MongoDoc {
   _id: ObjectID;
   _createdDate?: { $date: number };
   _updates?: MongoUpdate[];
+  _error: Error;
 }
 
 export type Model = MongoDoc;

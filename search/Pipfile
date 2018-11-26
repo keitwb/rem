@@ -12,9 +12,9 @@ motor = "==2.0.0"
 
 [dev-packages]
 pylint = "==2.1.1"
-yapf = "==0.24.0"
 isort = "==4.3.4"
 remtesting = {editable = true, path = "./../testutil"}
+black = "==18.9b"
 
 [requires]
 python_version = "3.7"

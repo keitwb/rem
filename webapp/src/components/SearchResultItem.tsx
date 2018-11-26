@@ -45,6 +45,9 @@ const SearchResultItem: React.SFC<Props> = ({ hit, onSelect }) => {
 };
 export default SearchResultItem;
 
+/*
+ * The content that comes from the ElasticSearch highlighter
+ */
 function highlightContent(highlight: Highlight): React.ReactNode {
   if (!highlight) {
     return null;

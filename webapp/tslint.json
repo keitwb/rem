@@ -19,6 +19,7 @@
         "esSpecCompliant": true
       }],
     "arrow-parens": [true, "ban-single-arg-parens"],
+    "no-invalid-this": [true, "check-function-in-method"],
     "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"]
 	}
 }

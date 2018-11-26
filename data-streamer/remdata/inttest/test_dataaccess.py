@@ -17,9 +17,7 @@ async def test_do_query_by_ids():
     async with start_test_server() as [ws_port, mongo_client, _]:
         ids = []
         for i in range(0, 20):
-            res = await mongo_client.rem.properties.insert_one({
-                "name": f"property-{i}",
-            })
+            res = await mongo_client.rem.properties.insert_one({"name": f"property-{i}"})
             # Test a mix of objectid and hex string ids in the query
             if i > 10:
                 ids.append(str(res.inserted_id))
@@ -28,12 +26,8 @@ async def test_do_query_by_ids():
 
         async with open_stream(ws_port, "/db") as ws_client:
             await ws_client.send(
-                json_util.dumps({
-                    "action": "getByIds",
-                    "collection": "properties",
-                    "ids": ids,
-                    "reqID": "a1",
-                }))
+                json_util.dumps({"action": "getByIds", "collection": "properties", "ids": ids, "reqID": "a1"})
+            )
 
             for i in range(0, 19):
                 msg = ujson.loads(await ws_client.recv())
