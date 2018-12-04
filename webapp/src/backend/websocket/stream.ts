@@ -8,7 +8,10 @@ export default async function* streamWebSocket(wsProvider: WebSocketProvider): A
   const responseQueue = new Array<MessageEvent>();
 
   const handlerProvider = new HandlerProvider();
-  init(wsProvider, handlerProvider, responseQueue);
+
+  wsProvider.setOnMessage(msg => {
+    messageHandler(responseQueue, handlerProvider, msg);
+  });
 
   let nextMessagePromise = nextMessage(responseQueue, handlerProvider);
   while (true) {
@@ -46,18 +49,6 @@ class HandlerProvider {
   set handler(h: MessageHandler) {
     this._handler = h;
   }
-}
-
-function init(wsProvider: WebSocketProvider, handlerProvider: HandlerProvider, responseQueue: MessageEvent[]) {
-  wsProvider.openPromise.then(() => {
-    wsProvider.ws.onmessage = (msg: MessageEvent) => messageHandler(responseQueue, handlerProvider, msg);
-  });
-
-  wsProvider.closePromise.then(_ => {
-    if (!wsProvider.cancelled) {
-      init(wsProvider, handlerProvider, responseQueue);
-    }
-  });
 }
 
 function messageHandler(queue: MessageEvent[], handlerProvider: HandlerProvider, msg: MessageEvent) {

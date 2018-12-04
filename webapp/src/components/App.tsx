@@ -1,16 +1,16 @@
 import * as React from "react";
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
 
 import Config from "@/config/config";
 import { logger } from "@/util/log";
 
 import BadRoute from "./BadRoute";
 import ConfigEditor from "./ConfigEditor";
-import connectModelById from "./connectModelById";
 import SearchContext from "./context/SearchContext";
-import PropertyDetail from "./PropertyDetail";
+import { PropertyDetailConnected } from "./PropertyDetail";
 import PropertyOverview from "./PropertyOverview";
 import SearchBar from "./SearchBar";
+import TagDetail from "./TagDetail";
 
 export default class App extends React.Component {
   public componentDidCatch(error: Error, info: React.ErrorInfo): void {
@@ -25,15 +25,28 @@ export default class App extends React.Component {
           <Switch>
             <Route path="/config" render={() => <ConfigEditor config={Config.fromLocalStorage()} />} />
             <Route
+              path="/tag/:tag"
+              render={({ match }) => {
+                return <TagDetail tag={match.params.tag} />;
+              }}
+            />
+            <Route
               path="/property/:id"
               render={({ match }) => {
-                const Component = connectModelById("properties", match.params.id, PropertyDetail);
-                return <Component />;
+                return <PropertyDetailConnected id={match.params.id} />;
               }}
             />
             <Route exact path="/" component={PropertyOverview} />
             <Route component={BadRoute} />
           </Switch>
+          <div className="d-flex justify-content-center">
+            <Link className="font-weight-light px-1" to="/">
+              Home
+            </Link>
+            <Link className="font-weight-light px-1" to="/config">
+              Config
+            </Link>
+          </div>
         </div>
       </BrowserRouter>
     );

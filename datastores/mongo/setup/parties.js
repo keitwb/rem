@@ -1,5 +1,3 @@
-load("common.js");
-
 // Parties
 rem.createCollection("parties");
 
@@ -10,6 +8,3 @@ rem.runCommand({
    ]},
    validationLevel:"strict"
 });
-
-rem.parties.dropIndex("text-search");
-rem.parties.createIndex({ "$**": "text" }, {name: "text-search"});

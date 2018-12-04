@@ -13,6 +13,7 @@ class BSONDocForJSON:
     This wraps a BSON doc from PyMongo and makes it automatically encoded to JSON when used in a larger JSON
     document.
     """
+
     __slots__ = ["raw_doc"]
 
     def __init__(self, raw_doc: bytes):

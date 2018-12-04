@@ -19,21 +19,22 @@ TEST_FILES_DIR = os.path.join(os.path.dirname(__file__), "testfiles")
 @pytest.mark.timeout(60)
 async def test_do_media_upload():
     async with start_test_server() as [ws_port, mongo_client, _]:
-        with open(os.path.join(TEST_FILES_DIR, "doc1.pdf"), 'rb') as fd:
+        with open(os.path.join(TEST_FILES_DIR, "doc1.pdf"), "rb") as fd:
             content = fd.read()
 
         async with open_stream(ws_port, "/media") as ws_client:
             _id = ObjectId()
             await ws_client.send(
-                BSON.encode({
-                    "id": _id,
-                    "filename": "doc.pdf",
-                    "content": content,
-                    "metadata": {
-                        "tags": ["a"],
-                    },
-                    "reqID": "a1",
-                }))
+                BSON.encode(
+                    {
+                        "id": _id,
+                        "filename": "doc.pdf",
+                        "content": content,
+                        "metadata": {"tags": ["a"]},
+                        "reqID": "a1",
+                    }
+                )
+            )
 
             msg = BSON.decode(await ws_client.recv())
             assert msg["id"] == _id, "Unexpected id received"

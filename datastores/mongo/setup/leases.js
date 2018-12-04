@@ -1,5 +1,3 @@
-load("common.js");
-
 // Leases
 rem.createCollection("leases");
 
@@ -15,6 +13,3 @@ rem.runCommand({
    ]},
    validationLevel:"strict"
 });
-
-rem.leases.dropIndex("text-search");
-rem.leases.createIndex({ "$**": "text" }, {name: "text-search"});

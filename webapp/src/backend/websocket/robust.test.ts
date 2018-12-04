@@ -23,12 +23,13 @@ describe("RobustWebSocket Client", () => {
       connected = true;
     });
 
-    const rs = await RobustWebSocket.open(url);
-    expect(rs.ws).toBeTruthy();
+    const rs = new RobustWebSocket(url);
 
-    await rs.openPromise;
+    await rs.ws;
+
     expect(connected).toBeTruthy();
 
+    const closePromise = rs.closePromise;
     server.close({ code: 1006 });
 
     connected = false;
@@ -39,26 +40,26 @@ describe("RobustWebSocket Client", () => {
       connected = true;
     });
 
-    // it waits 2s before reconnecting
-    jest.advanceTimersByTime(2000);
-    await rs.closePromise;
+    // it waits 5s before reconnecting
+    jest.advanceTimersByTime(5000);
+    await closePromise;
 
-    await rs.openPromise;
+    await rs.ws;
     expect(connected).toBeTruthy();
 
     const messages = [] as string[];
-    rs.ws.onmessage = event => {
+    rs.setOnMessage(event => {
       messages.push(event.data);
-    };
+    });
     server.send("test");
 
     expect(messages).toContain("test");
   });
 
   test("does not reconnect if the stop method is called", async () => {
-    const rs = await RobustWebSocket.open(url);
+    const rs = new RobustWebSocket(url);
 
-    await rs.openPromise;
+    await rs.ws;
 
     let connected = false;
     server.on("connection", () => {

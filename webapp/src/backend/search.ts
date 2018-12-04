@@ -1,7 +1,10 @@
-import { ValOrErr, withErr } from "@/util/errors";
+import { ObjectID } from "bson";
+
+import { MongoDoc } from "@/model/models";
+
 import RequestWebSocket from "./websocket/request";
 
-export interface SearchHit<T = any> {
+export interface SearchHit<T> {
   readonly _index: string;
   readonly _id: string;
   readonly _score: number;
@@ -13,14 +16,14 @@ export interface Highlight {
   readonly [index: string]: string[];
 }
 
-export interface Hits {
-  readonly hits: SearchHit[];
+export interface Hits<T> {
+  readonly hits: Array<SearchHit<T>>;
   readonly max_score: number;
   readonly total: number;
 }
 
-export interface SearchResults {
-  readonly hits: Hits;
+export interface SearchResults<T> {
+  readonly hits: Hits<T>;
 }
 
 export interface CompletionResult {
@@ -34,20 +37,19 @@ export interface CompletionResult {
   };
 }
 
-export class SearchClient {
-  public static async create(searchStreamerURL: string) {
-    const ws = await RequestWebSocket.open(searchStreamerURL);
-    return new SearchClient(ws);
-  }
+interface GetFieldsResult {
+  fields: string[];
+}
 
+export class SearchClient {
   private ws: RequestWebSocket;
 
-  private constructor(ws: RequestWebSocket) {
-    this.ws = ws;
+  constructor(searchStreamerURL: string) {
+    this.ws = new RequestWebSocket(searchStreamerURL);
   }
 
-  public async query(q: string): Promise<ValOrErr<SearchResults>> {
-    const body = {
+  public async queryByString<T = any>(q: string): Promise<SearchResults<T>> {
+    return this.query({
       highlight: {
         fields: { "*": {} },
         type: "fvh",
@@ -57,16 +59,18 @@ export class SearchClient {
           query: q,
         },
       },
-    };
-
-    const [resp, err] = await withErr(this.ws.doSimpleRequest<SearchResults>({ searchBody: body }));
-    if (err) {
-      return [null, err];
-    }
-    return [resp, null];
+    });
   }
 
-  public async suggest(field: string, index: string, prefix: string): Promise<ValOrErr<string[]>> {
+  public async query<T = any>(body: any, index = "_all"): Promise<SearchResults<T>> {
+    return await this.ws.doSimpleRequest<SearchResults<T>>({ action: "search", body, index });
+  }
+
+  public async getFields(index = "_all"): Promise<GetFieldsResult> {
+    return await this.ws.doSimpleRequest<GetFieldsResult>({ action: "getFields", index });
+  }
+
+  public async suggest(field: string, index: string, prefix: string): Promise<string[]> {
     const reqBody = {
       index,
       suggest: {
@@ -79,11 +83,12 @@ export class SearchClient {
       },
     };
 
-    const [resp, err] = await withErr(this.ws.doSimpleRequest<CompletionResult>(reqBody));
-    if (err) {
-      return [null, err];
-    }
-
-    return [resp.suggest.current.options.map(o => o.text), null];
+    const resp = await this.ws.doSimpleRequest<CompletionResult>(reqBody);
+    return resp.suggest.current.options.map(o => o.text);
   }
+}
+
+export function modelFromSearchHit<T extends MongoDoc>(h: SearchHit<T>) {
+  h._source._id = new ObjectID(h._id);
+  return h._source;
 }

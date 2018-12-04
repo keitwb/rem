@@ -9,10 +9,15 @@ describe("Search functionality", function() {
       until.elementLocated(By.xpath("//input[@placeholder='Search']")),
       2000
     );
+
     await elm.sendKeys("Cumberl");
-    const result = await getBrowser().wait(
-      until.elementLocated(By.xpath("//a[text()='Industrial Complex']"))
+    await getBrowser().wait(
+      until.elementLocated(By.xpath("//*[text()='Industrial Complex']")),
+      2000
     );
-    assert.ok(result);
+    await getBrowser().wait(
+      until.elementLocated(By.xpath("//span[text()='Cumberl']")),
+      4000
+    );
   });
 });

@@ -18,7 +18,7 @@ describe("streamWebSocket", () => {
   });
 
   test("yields all messages received in order", async () => {
-    const rs = await RobustWebSocket.open(url);
+    const rs = new RobustWebSocket(url);
 
     setTimeout(() => {
       server.send("a");
@@ -39,7 +39,7 @@ describe("streamWebSocket", () => {
   });
 
   test("reestablishes stream when websocket reconnects", async () => {
-    const rs = await RobustWebSocket.open(url);
+    const rs = new RobustWebSocket(url);
 
     setTimeout(() => {
       server.send("a");
@@ -59,7 +59,7 @@ describe("streamWebSocket", () => {
     server.start();
 
     await rs.closePromise;
-    await rs.openPromise;
+    await rs.ws;
 
     server.send("c");
 

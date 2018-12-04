@@ -1,5 +1,3 @@
-load("common.js")
-
 rem.createCollection("properties");  // This is idempotent
 
 rem.runCommand({

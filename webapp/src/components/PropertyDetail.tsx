@@ -1,10 +1,14 @@
 import * as React from "react";
 
 import EditableText from "@/components/forms/EditableText";
-import { Property } from "@/model/models";
-import { ModelUpdate, set } from "@/model/updates";
+import { CollectionName, Property } from "@/model/models";
+import { ModelUpdate, pull, push, set } from "@/model/updates";
 
+import connectModelById from "./connectModelById";
 import MediaList from "./MediaList";
+import NotesList from "./NotesList";
+import TagEditor from "./TagEditor";
+import TagList from "./TagList";
 
 interface Props {
   instance: Property;
@@ -23,11 +27,24 @@ const PropertyDetail: React.SFC<Props> = ({ instance, onUpdate }) =>
           <div>{instance.county}</div>
         </EditableText>
       </div>
-      <div>Media:</div>
-      <MediaList mediaIds={instance.media} />
+      <div>
+        Notes:
+        <NotesList noteIds={instance.notes} />
+      </div>
+      <div>
+        <div>Media:</div>
+        <MediaList mediaIds={instance.media} />
+      </div>
+      <div>
+        <div>Tags:</div>
+        <TagList onRemove={removedTag => onUpdate(pull<Property>("tags", removedTag))} tags={instance.tags} />
+        <TagEditor onAdd={newTag => onUpdate(push<Property>("tags", newTag))} />
+      </div>
     </div>
   ) : (
     <div>Not loaded yet</div>
   );
 
 export default PropertyDetail;
+
+export const PropertyDetailConnected = connectModelById(CollectionName.Property, PropertyDetail);

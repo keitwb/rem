@@ -32,12 +32,11 @@ async def start_server(mongo_loc, es_hosts, db_name="rem", port=8080):
     mongo_client = AsyncIOMotorClient(*mongo_loc, document_class=RawBSONDocument)
 
     # Use a single ES client for every connection
-    es_client = elasticsearch_async.AsyncElasticsearch(es_hosts, sniff_on_start=False, sniff_on_connection_fail=False,
-                                                       sniffer_timeout=30, maxsize=20)
+    es_client = elasticsearch_async.AsyncElasticsearch(es_hosts, maxsize=20)
 
     mongo_db = mongo_client[db_name]
 
-    async with websockets.serve(p(route_connection, mongo_db, es_client), '0.0.0.0', port) as server:
+    async with websockets.serve(p(route_connection, mongo_db, es_client), "0.0.0.0", port) as server:
         yield server
 
 
@@ -74,9 +73,7 @@ async def handle_message(socket, handler, encoder):
         try:
             obj = encoder.decode(raw_message)
         except ValueError as e:
-            await socket.send(encoder.encode({
-                "error": f"Could not decode message as JSON: {str(e)}",
-            }))
+            await socket.send(encoder.encode({"error": f"Could not decode message as JSON: {str(e)}"}))
             return
 
         message = SocketMessage(obj, socket, encoder)

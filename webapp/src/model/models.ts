@@ -8,6 +8,7 @@ export interface MongoDoc {
   _id: ObjectID;
   _createdDate?: { $date: number };
   _updates?: MongoUpdate[];
+  _error: Error;
 }
 
 export type Model = MongoDoc;
@@ -49,8 +50,10 @@ export enum CollectionName {
 }
 
 export interface Note extends MongoDoc {
+  title: string;
   note: string;
-  media: Media[];
+  media: ObjectID[];
+  updatedDate: MongoDate;
   createdDate: MongoDate;
   createdBy: ObjectID;
 }
@@ -95,6 +98,7 @@ export interface Property extends MongoDoc {
   desiredRent?: number;
   desiredSalesPrice?: number;
   tryingToSell?: boolean;
+  tags?: string[];
   contacts?: ObjectID[];
   notes?: ObjectID[];
   media?: ObjectID[];

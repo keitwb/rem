@@ -23,7 +23,7 @@ kubectl="kubectl --context $KUBE_CONTEXT --namespace $NAMESPACE"
 helm="helm --kube-context $KUBE_CONTEXT"
 
 cleanup() {
-  if [[ -z "${NO_CLEANUP-}" ]]; then
+  if [[ "${DO_CLEANUP-yes}" == "yes" ]]; then
     $helm delete --purge $RELEASE_NAME
   fi
 }
@@ -64,6 +64,11 @@ done
 
 if [[ -z "$INGRESS_IP" ]]; then
   echo "Could not determine K8s ingress IP address" >&2
+  exit 1
+fi
+
+if [[ "${SETUP_ONLY-}" == "yes" ]]; then
+  echo "Done setting up, skipping tests"
   exit 1
 fi
 

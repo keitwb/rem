@@ -15,7 +15,7 @@ from remtesting.es import run_elasticsearch
 from remtesting.mongo import run_mongo
 from remtesting.wait import wait_for_async, wait_for_shutdown
 
-TIKA_IMAGE = 'logicalspark/docker-tikaserver:1.18'
+TIKA_IMAGE = "logicalspark/docker-tikaserver:1.18"
 
 
 async def get_es_doc(es_client, index, doc_id):
@@ -35,9 +35,10 @@ async def watch_is_active(mongo_client, instances):
     """
     ops = await mongo_client.rem.current_op()
     change_streams = [
-        ip for ip in ops["inprog"] \
-        if ip.get("originatingCommand", {}).get("pipeline") \
-            and '$changeStream' in ip["originatingCommand"]["pipeline"][0]
+        ip
+        for ip in ops["inprog"]
+        if ip.get("originatingCommand", {}).get("pipeline")
+        and "$changeStream" in ip["originatingCommand"]["pipeline"][0]
     ]
     return len(change_streams) >= len(watch.COLLECTIONS_TO_INDEX) * instances
 
@@ -60,14 +61,20 @@ async def run_watchers(event_loop, mongo_client, es_client, tika_container=None,
 
     watcher_tasks = [
         event_loop.create_task(
-            watch.watch_indexed_collections("test-%d" % i, mongo_loc=mongo_client.address,
-                                            es_hosts=es_client.transport.hosts, tika_loc=(tika_host, 9998)))
+            watch.watch_indexed_collections(
+                "test-%d" % i,
+                mongo_loc=mongo_client.address,
+                es_hosts=es_client.transport.hosts,
+                tika_loc=(tika_host, 9998),
+            )
+        )
         for i in range(0, instances)
     ]
 
     try:
-        assert await wait_for_async(p(watch_is_active, mongo_client, instances)), \
-                'change streams never activated'
+        assert await wait_for_async(
+            p(watch_is_active, mongo_client, instances)
+        ), "change streams never activated"
 
         yield
     finally:
@@ -80,6 +87,7 @@ async def run_watchers_with_services(event_loop, instances=1):
     Run the necessary storage services and then start the watchers configured with them.
     """
     async with run_mongo() as mongo_client, run_elasticsearch() as es_client, run_container(
-            TIKA_IMAGE, wait_for_port=9998) as tika_container:
+        TIKA_IMAGE, wait_for_port=9998
+    ) as tika_container:
         async with run_watchers(event_loop, mongo_client, es_client, tika_container, instances):
             yield [mongo_client, es_client]

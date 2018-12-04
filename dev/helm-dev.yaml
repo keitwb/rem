@@ -1,5 +1,6 @@
 ingressHost: 'rem.test'
 devMode: true
+allowHTTP: true
 
 dataStreamerReplicas: 2
 dataStreamerImageTag: dev

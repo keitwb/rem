@@ -6,7 +6,7 @@ import Config from "@/config/config";
 import * as dbActions from "@/store/db/actions";
 import { logger } from "@/util/log";
 
-const COLLECTIONS_TO_SYNC = ["properties", "media.files"];
+const COLLECTIONS_TO_SYNC = ["properties", "leases", "media.files", "notes"];
 
 /**
  * Launches long-running async loops that watch all of the app collections for changes and keeps our

@@ -11,4 +11,4 @@ EOH
 }
 
 collection=$1
-printf '{"collection": "%s"}\n' "$collection" | websocat -n ws://localhost:8080/changes
+printf '{"collection": "%s"}\n' "$collection" | ws -k wss://${REM_INGRESS-"localhost:8080"}/stream/changes

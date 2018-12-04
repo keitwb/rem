@@ -13,15 +13,10 @@ interface UpdateResult {
 }
 
 export class MongoClient {
-  public static async create(dbStreamURL: string) {
-    const ws = await RequestWebSocket.open(dbStreamURL);
-    return new this(ws);
-  }
-
   private ws: RequestWebSocket;
 
-  constructor(ws: RequestWebSocket) {
-    this.ws = ws;
+  constructor(dbStreamURL: string) {
+    this.ws = new RequestWebSocket(dbStreamURL);
   }
 
   public async getOne<T extends MongoDoc>(collection: string, id: ObjectID): Promise<T> {

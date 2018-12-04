@@ -17,14 +17,13 @@ export function createFetchMiddleware(mongoClient: MongoClient): Middleware<{}, 
 
       // Don't fetch if the doc is already in the store since the change stream ought to keep it up
       // to date.
-      if (force || !getState().db.properties.docs[id.toString()]) {
+      if (force || !getState().db[collection].docs[id.toString()]) {
         return (async function doUpdate() {
           try {
             const doc = await mongoClient.getOne(collection, id);
             dispatch(dbActions.loadOne(collection, doc));
           } catch (err) {
             dispatch(dbActions.fetchFailed(collection, id, err));
-            throw err;
           }
         })();
       }

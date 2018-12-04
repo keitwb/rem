@@ -34,7 +34,7 @@ describe("RequestWebSocket Client", () => {
           })
         );
       });
-      const rs = await RequestWebSocket.open(url);
+      const rs = new RequestWebSocket(url);
 
       const resp = await rs.doSimpleRequest({ testing: "yes" });
       expect(resp).toMatchObject({ a: 1 });
@@ -43,7 +43,7 @@ describe("RequestWebSocket Client", () => {
 
   describe("doRequest", () => {
     test("yields all messages from specific request", async () => {
-      const rs = await RequestWebSocket.open(url);
+      const rs = new RequestWebSocket(url);
 
       server.on("message", m => {
         const reqID = JSON.parse(m).reqID;
@@ -73,7 +73,7 @@ describe("RequestWebSocket Client", () => {
     });
 
     test("handles interleaved requests/responses", async () => {
-      const rs = await RequestWebSocket.open(url);
+      const rs = new RequestWebSocket(url);
 
       let firstRequestID: string;
       server.on("message", m => {

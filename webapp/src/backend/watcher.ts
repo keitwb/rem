@@ -101,9 +101,9 @@ export async function watchCollection(
 }
 
 async function initStreamer(collection: string, provider: WebSocketProvider, resumeContext: ResumeContext) {
-  provider.openPromise
-    .then(async () => {
-      provider.ws.send(
+  provider.ws
+    .then(async ws => {
+      ws.send(
         JSON.stringify({
           collection,
           resumeAfter: resumeContext.get(),

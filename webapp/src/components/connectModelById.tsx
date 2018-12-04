@@ -11,19 +11,24 @@ import { CollectionName, ModelState as DBModelState, State as DBState } from "@/
 import { ensureModelPresent } from "@/store/sync/fetch";
 
 type UpdateFunc<T> = (updates: Array<ModelUpdate<T>> | ModelUpdate<T>) => void;
-interface ComponentProps<T> {
+interface Props<T> {
   instance: T;
   onUpdate?: UpdateFunc<T>;
 }
 
+interface IDProp {
+  id: string;
+}
+
+type AllProps<T> = Props<T> & IDProp & DispatchProp;
+
 export default function connectModelById<M extends DBState[CollectionName] extends DBModelState<infer S> ? S : never>(
   collection: CollectionName,
-  id: string,
   component: React.ComponentType<{ instance: M }>
 ) {
-  const mapStateToProps = (state: AppState): { instance: M } => {
+  const mapStateToProps = (state: AppState, ownProps: { id: string }): { instance: M } => {
     return {
-      instance: (state.db[collection] as DBModelState<M>).docs[id],
+      instance: (state.db[collection] as DBModelState<M>).docs[ownProps.id],
     };
   };
 
@@ -47,24 +52,32 @@ export default function connectModelById<M extends DBState[CollectionName] exten
         return dispatchProps.onUpdate(stateProps.instance, updates);
       },
     })
-  )(createWrapped<M>(component, collection, id));
+  )(createWrapped<M>(component, collection));
 }
 
-function createWrapped<T extends Model>(
-  WrappedComponent: React.ComponentType<ComponentProps<T>>,
-  collection: string,
-  id: string
-) {
-  return class ConnectModelById extends React.Component<ComponentProps<T>> {
-    constructor(props: DispatchProp & ComponentProps<T>) {
+function createWrapped<T extends Model>(WrappedComponent: React.ComponentType<Props<T>>, collection: string) {
+  return class ConnectModelById extends React.Component<AllProps<T>> {
+    constructor(props: AllProps<T>) {
       super(props);
-      if (!props.instance) {
-        ensureModelPresent(props.dispatch)(collection, new ObjectID(id));
+      this.ensureModel();
+    }
+
+    public componentDidUpdate(prevProps: AllProps<T>) {
+      if (prevProps.id === this.props.id) {
+        return;
       }
+
+      this.ensureModel();
     }
 
     public render() {
       return <WrappedComponent {...this.props} />;
+    }
+
+    private ensureModel() {
+      if (!this.props.instance) {
+        ensureModelPresent(this.props.dispatch)(collection, new ObjectID(this.props.id));
+      }
     }
   };
 }

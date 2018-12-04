@@ -23,15 +23,17 @@ async def stream_collection_updates(mongo_db, collection, resume_after, message)
             # below is accurate.  Normally Motor doesn't start the watch until you actually try and
             # get the first change item.
             def init_stream():
-                stream.delegate = stream._target.delegate.watch(**stream._kwargs)  # pylint:disable=protected-access
+                stream.delegate = stream._target.delegate.watch(  # pylint:disable=protected-access
+                    **stream._kwargs  # pylint:disable=protected-access
+                )
 
-            await stream._framework.run_on_executor(stream.get_io_loop(), init_stream)  # pylint:disable=protected-access
+            await stream._framework.run_on_executor(  # pylint:disable=protected-access
+                stream.get_io_loop(), init_stream
+            )
 
             # Send a start message so that clients can know when it is safe to fetch docs without
             # missing updates when there was no resume token provided.
-            await message.send_response({
-                "started": True,
-            })
+            await message.send_response({"started": True})
 
             async for change in stream:
                 try:
@@ -49,10 +51,12 @@ async def send_changes(mongo_db, message):
     up the stream of changes from Mongo back to the client and blocks until an Mongo error happens
     or the websocket disconnects.
     """
-    collection = message.get('collection')
-    resume_after = message.get('resumeAfter')
+    collection = message.get("collection")
+    resume_after = message.get("resumeAfter")
 
-    message.logger.info(f"Received change stream request for collection '{collection}', resuming from {resume_after}")
+    message.logger.info(
+        f"Received change stream request for collection '{collection}', resuming from {resume_after}"
+    )
 
     await stream_collection_updates(mongo_db, collection, resume_after, message)
     message.logger.info("Stopped change stream")

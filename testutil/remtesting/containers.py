@@ -55,13 +55,14 @@ async def run_container(image, wait_for_port=None, **kwargs):
         assert await wait_for_async(asyncify(container_ip, cont)), "Container did not get an IP address"
 
         if wait_for_port:
-            assert await wait_for_async(asyncify(tcp_socket_open, container_ip(cont), wait_for_port)), \
-                    "TCP port %d did not get opened" % wait_for_port
+            assert await wait_for_async(asyncify(tcp_socket_open, container_ip(cont), wait_for_port)), (
+                "TCP port %d did not get opened" % wait_for_port
+            )
 
         yield cont
     finally:
         try:
             print("Removing container %s" % image)
-            print("Container %s logs:\n%s" % (image, cont.logs().decode('utf-8')))
+            print("Container %s logs:\n%s" % (image, cont.logs().decode("utf-8")))
         finally:
             cont.remove(v=True, force=True)

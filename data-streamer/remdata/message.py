@@ -14,6 +14,7 @@ class SocketMessage:
     """
     Wrapper for a websocket message that has been received
     """
+
     __slots__ = ["message", "socket", "encoder"]
 
     def __init__(self, message, socket, encoder):
@@ -35,6 +36,7 @@ class SocketMessage:
         message["reqID"] = self.req_id
         message["hasMore"] = not last_message
         await self.socket.send(self.encoder.encode(message))
+        self.logger.info("Completed request")
 
     async def send_error(self, error_msg, **extra):
         """
