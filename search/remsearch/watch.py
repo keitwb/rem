@@ -1,25 +1,11 @@
 """
-Watch the Mongo change stream for changes to documents in collections that we
-want to make available for searching and index them in ElasticSearch.  In
-order for this to be scalable beyond one instance, each worker claims a
-change event before processing it by creating a claim document in a special
-collection in Mongo (search_index_claims).  This special collection has a
-unique index on the collection name and the change id so that only one
-instance can successfully make a claim.  Once it is successfully processed,
-it marks the claim as completed.
-
-To make error handling simpler, each instance of this service must have a
-unique and stable identity that gets reused upon restart.  Each claim has a
-field with that instance identity.  That way, if an instance crashes, upon
-startup the worker for each collection checks whether a previous run of the
-instance has any incomplete jobs, and if so, processes them and continues.
-An instance should never process a change in the change stream until it has
-successfully processed all the previous changes it has claimed.
+Watch the Mongo change stream for changes to documents in collections that we want to make available
+for searching and index them in ElasticSearch.  This uses the watch helper in pycommon that
+distributes watching a collection across multiple instances with stable identities.
 """
 
 import asyncio
 import logging
-from concurrent.futures import CancelledError
 from functools import partial as p
 
 import aiohttp
@@ -27,12 +13,22 @@ import elasticsearch_async
 import pymongo
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from . import claims, es, text
+from remcommon import watch
+from remcommon.models_gen import CollectionName
+
+from . import es, text
 from .tikaclient import TikaClient
 
 logger = logging.getLogger(__name__)
 
-COLLECTIONS_TO_INDEX = ["properties", "contacts", "leases", "notes", "media.files"]
+COLLECTIONS_TO_INDEX = [
+    CollectionName.PROPERTIES,
+    CollectionName.PARTIES,
+    CollectionName.LEASES,
+    CollectionName.NOTES,
+    CollectionName.MEDIA_FILES,
+    CollectionName.PARTIES,
+]
 
 MAX_ES_INDEX_TASKS = 10
 
@@ -50,8 +46,6 @@ async def watch_indexed_collections(instance_name, mongo_loc, es_hosts, tika_loc
         connectTimeoutMS=10 * 1000,
     )
     mongo_db = mongo_client[mongo_database]
-
-    await claims.ensure_unique_index(mongo_db)
 
     # This is used for mapping files to text through Tika
     async with aiohttp.ClientSession() as http_session:
@@ -96,78 +90,11 @@ async def watch_collection(mongo_db, tika_client, esclient, collection, instance
     resume token to use if picking back up from a previous run.  It also
     completes the previously claimed change if the previous watcher crashed.
     """
-    last_claim = await claims.get_previous_claim(mongo_db, collection, instance_name)
-
-    last_was_completed = False
-    if last_claim:
-        logger.info("Resuming on collection %s", collection)
-        resume_token = last_claim[claims.CHANGE_FIELD]["_id"]
-        last_was_completed = last_claim[claims.COMPLETED_FIELD]
-    else:
-        logger.info("No previous state found for collection %s", collection)
-        resume_token = None
-
-    async with mongo_db[collection].watch(resume_after=resume_token, full_document="updateLookup") as stream:
-        # This means the last job run didn't finish successfully before this
-        # instance shutdown, so rerun it.
-        if resume_token and not last_was_completed:
-            logger.info(
-                "Last change to collection '%s' did not complete before shutdown, reindexing", collection
-            )
-            last_change = last_claim[claims.CHANGE_FIELD]
-            assert last_change["_id"] == resume_token
-
-            await index_change(esclient, tika_client, last_change, mongo_db)
-            await claims.mark_claim_completed(mongo_db, last_claim["_id"])
-        # This covers the cases where we need to consider an initial indexing, whenever there are no
-        # claims or the last claim didn't have a resume token because it is an initial indexing
-        # claim that didn't complete.
-        elif (not resume_token or not last_claim) and not last_was_completed:
-            claim_id = await claims.attempt_to_claim_initial_indexing(mongo_db, collection, instance_name)
-            if claim_id:
-                logger.info("got claim, reindexing all docs in %s", collection)
-                await index_collection(mongo_db, tika_client, esclient, collection)
-                await claims.mark_claim_completed(mongo_db, claim_id)
-            else:
-                logger.info("Waiting for another instance to reindex everything")
-                await claims.wait_for_initial_indexing_complete(mongo_db, collection)
-
-        await process_stream(mongo_db, collection, tika_client, esclient, stream, instance_name)
-
-
-# pylint: disable=too-many-arguments
-async def process_stream(mongo_db, collection, tika_client, esclient, stream, instance_name):
-    """
-    Process each change in the given stream, trying to claim the change first
-    and moving on to the next change immediately if a change cannot be claimed.
-    """
-    logger.info("Starting to watch change stream for %s", collection)
-    async for change in stream:
-        assert collection == change["ns"]["coll"], "collections did not match up"
-
-        if change["operationType"] == "invalidate":
-            logger.info("Collection %s was invalidated", collection)
-            # If a collection gets invalidated then wipe any prior claims
-            # so it doesn't try to resume from them.
-            await claims.delete_claims_for_instance(mongo_db, instance_name)
-            return
-
-        logger.info("Saw change on collection %s.%s", collection, change["documentKey"]["_id"])
-
-        claim_id = await claims.attempt_to_claim_change(mongo_db, change, instance_name)
-        if claim_id:
-            logger.info("Claimed change for doc %s.%s", collection, change["documentKey"]["_id"])
-
-            try:
-                await index_change(esclient, tika_client, change, mongo_db)
-                logger.info("Document %s.%s indexed", collection, change["documentKey"]["_id"])
-            except CancelledError:
-                await claims.mark_claim_completed(mongo_db, claim_id)
-                raise
-
-            await claims.mark_claim_completed(mongo_db, claim_id)
+    async for change in watch.watch_collection(mongo_db, collection, "search_indexer", instance_name):
+        if change is watch.INITIAL_LEAD_WATCHER:
+            await index_collection(mongo_db, tika_client, esclient, collection)
         else:
-            logger.info("Unable to claim change for %s.%s", collection, change["documentKey"]["_id"])
+            await index_change(esclient, tika_client, change, mongo_db)
 
 
 def is_gridfs_collection(collection):

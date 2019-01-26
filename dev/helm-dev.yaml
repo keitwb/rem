@@ -5,6 +5,9 @@ allowHTTP: true
 dataStreamerReplicas: 2
 dataStreamerImageTag: dev
 
+taxInfoReplicas: 1
+taxInfoImageTag: dev
+
 searchIndexerReplicas: 2
 searchIndexerImageTag: dev
 

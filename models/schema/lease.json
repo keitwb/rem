@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rem-lease",
+  "title": "Lease",
+  "description": "A lease for one or more properties",
+  "type": "object",
+  "allOf": [
+    { "$ref": "./common.json#/definitions/commonProps" },
+    { "properties": {
+       "description": { "type": "string" },
+       "startDate": {"type": "string", "format": "date-time"},
+       "leaseType": { "enum": [ "gross", "N", "NN", "NNN", "option"] },
+       "termLength": {"type": "number"},
+       "termUnit": {"enum": ["months", "years", "quarters"]},
+       "rate": {"type": "number"},
+       "lessees": {
+         "type": "array",
+         "items": { "$ref": "common.json#/definitions/oid" }
+       },
+       "notes": {
+         "type": "array",
+         "items": {"$ref": "note.json#" }
+       }
+    }}
+  ]
+}

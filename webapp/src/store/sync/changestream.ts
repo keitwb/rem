@@ -2,11 +2,16 @@ import { Action, Dispatch } from "redux";
 
 import { isDelete, isInsert, isReplace, isUpdate, watchCollection } from "@/backend/watcher";
 import Config from "@/config/config";
-
+import { CollectionName } from "@/model/models.gen";
 import * as dbActions from "@/store/db/actions";
 import { logger } from "@/util/log";
 
-const COLLECTIONS_TO_SYNC = ["properties", "leases", "media.files", "notes"];
+const COLLECTIONS_TO_SYNC = [
+  CollectionName.Properties,
+  CollectionName.Leases,
+  CollectionName.MediaFiles,
+  CollectionName.Notes,
+];
 
 /**
  * Launches long-running async loops that watch all of the app collections for changes and keeps our

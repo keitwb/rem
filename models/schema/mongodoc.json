@@ -1,0 +1,7 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rem-mongodoc",
+  "title": "MongoDoc",
+  "description": "",
+  "$ref": "common.json#/definitions/commonProps"
+}

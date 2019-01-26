@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: thumbnailer
+  labels:
+    app: thumbnailer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.thumbnailerReplicas }}
+  selector:
+    matchLabels:
+      app: thumbnailer
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: thumbnailer
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: thumbnailer
+        image: quay.io/rem/thumbnailer:{{ default .Values.defaultTag .Values.thumbnailerImageTag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGO_HOSTNAME
+          value: mongo
+        - name: MONGO_PORT
+          value: "27017"

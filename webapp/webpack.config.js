@@ -118,7 +118,7 @@ module.exports = (env, argv) => {
         //favicon: helpers.root('./src/favicon.ico')
       }),
       new ForkTsCheckerWebpackPlugin({
-        tslint: true,
+        tslint: false,
       }),
       new MiniCSSPlugin(),
       isDev ? null : new CompressionPlugin({ test: /\.css$|\.js$|\.html$/ }),

@@ -8,6 +8,13 @@ var fileMetadata = [
       tags: ['taxes', 'bills'],
     },
   },
+  {
+    filename: "farm.jpg",
+    metadata: {
+      description: "Pic of farm",
+      tags: ['overview'],
+    },
+  },
 ];
 
 // The file content itself is loaded by the mongofiles utility in the main fixture script.  That

@@ -7,7 +7,7 @@ const defaultModelState = { docs: {}, queryResults: {}, updateResults: {}, creat
 
 export const initialState: State = {
   leases: defaultModelState,
-  media: defaultModelState,
+  "media.files": defaultModelState,
   notes: defaultModelState,
   parties: defaultModelState,
   properties: defaultModelState,
@@ -42,7 +42,12 @@ export function reducer(state: State = initialState, action: ActionType<typeof d
       };
 
     case getType(dbActions.fetchFailed):
-      const docId = action.payload.id.toHexString();
+      const docIds = action.payload.ids.map(i => i.toHexString());
+
+      const docsToMerge = docIds.reduce(
+        (obj, docId) => ({ ...obj, [docId]: { ...state[collection].docs[docId], _error: action.payload.err } }),
+        {}
+      );
 
       return {
         ...state,
@@ -51,7 +56,7 @@ export function reducer(state: State = initialState, action: ActionType<typeof d
             ...state[collection],
             docs: {
               ...state[collection].docs,
-              [docId]: { ...state[collection].docs[docId], _error: action.payload.err },
+              ...docsToMerge,
             },
           },
         },

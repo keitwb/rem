@@ -1,14 +1,15 @@
 import * as React from "react";
 
 import EditableText from "@/components/forms/EditableText";
-import { CollectionName, Property } from "@/model/models";
+import { CollectionName, Property } from "@/model/models.gen";
 import { ModelUpdate, pull, push, set } from "@/model/updates";
 
-import connectModelById from "./connectModelById";
+import { connectOneModelById } from "./connectModels";
 import MediaList from "./MediaList";
-import NotesList from "./NotesList";
+import { NoteListConnected } from "./NotesList";
 import TagEditor from "./TagEditor";
 import TagList from "./TagList";
+import TaxInfo from "./TaxInfo";
 
 interface Props {
   instance: Property;
@@ -29,16 +30,20 @@ const PropertyDetail: React.SFC<Props> = ({ instance, onUpdate }) =>
       </div>
       <div>
         Notes:
-        <NotesList noteIds={instance.notes} />
+        <NoteListConnected ids={instance.noteIds} />
       </div>
       <div>
         <div>Media:</div>
-        <MediaList mediaIds={instance.media} />
+        <MediaList mediaIds={instance.mediaIds} />
       </div>
       <div>
         <div>Tags:</div>
         <TagList onRemove={removedTag => onUpdate(pull<Property>("tags", removedTag))} tags={instance.tags} />
         <TagEditor onAdd={newTag => onUpdate(push<Property>("tags", newTag))} />
+      </div>
+      <div>
+        <div>Tax Info:</div>
+        <TaxInfo property={instance} onRefreshRequested={() => onUpdate(set<Property>("taxRefreshRequested", true))} />
       </div>
     </div>
   ) : (
@@ -47,4 +52,4 @@ const PropertyDetail: React.SFC<Props> = ({ instance, onUpdate }) =>
 
 export default PropertyDetail;
 
-export const PropertyDetailConnected = connectModelById(CollectionName.Property, PropertyDetail);
+export const PropertyDetailConnected = connectOneModelById(CollectionName.Properties, PropertyDetail);

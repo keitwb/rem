@@ -1,0 +1,19 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: thumbnailer
+  labels:
+    app: thumbnailer
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  selector:
+    app: thumbnailer
+    release: "{{ .Release.Name }}"
+  clusterIP: None
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080

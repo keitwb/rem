@@ -1,6 +1,6 @@
 import { ObjectID } from "bson";
 
-import { MongoDoc } from "@/model/models";
+import { MongoDoc } from "@/model/models.gen";
 
 import RequestWebSocket from "./websocket/request";
 

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: tax-info
+  labels:
+    app: tax-info
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.taxInfoReplicas }}
+  selector:
+    matchLabels:
+      app: tax-info
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: tax-info
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: tax-info
+        image: quay.io/rem/tax-info:{{ default .Values.defaultTag .Values.taxInfoImageTag }}
+        imagePullPolicy: Always
+        env:
+        - name: MONGO_HOSTNAME
+          value: mongo
+        - name: MONGO_PORT
+          value: "27017"
+        - name: INSTANCE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name

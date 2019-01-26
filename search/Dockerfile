@@ -5,6 +5,7 @@ RUN pip install pipenv==2018.7.1
 WORKDIR "/opt"
 ENTRYPOINT ["pipenv", "run", "python", "-m", "remsearch"]
 
-COPY Pipfile* /opt/
+COPY pycommon/ /pycommon
+COPY search/Pipfile* /opt/
 RUN pipenv install
-COPY ./remsearch/ /opt/remsearch/
+COPY search/remsearch/ /opt/remsearch/

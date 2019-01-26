@@ -2,9 +2,9 @@ import { History } from "history";
 import * as React from "react";
 import { RouteComponentProps, withRouter } from "react-router";
 
-import { CollectionName, Property } from "@/model/models";
+import { CollectionName, Property } from "@/model/models.gen";
 
-import connectModelById from "./connectModelById";
+import { connectOneModelById } from "./connectModels";
 
 interface Props {
   instance: Property;
@@ -31,5 +31,5 @@ export const PropertyRow: React.SFC<Props & RouteComponentProps<any>> = ({ histo
     <div>Loading...</div>
   );
 
-export const PropertyRowConnected = connectModelById(CollectionName.Property, withRouter(PropertyRow));
+export const PropertyRowConnected = connectOneModelById(CollectionName.Properties, withRouter(PropertyRow));
 export default PropertyRowConnected;

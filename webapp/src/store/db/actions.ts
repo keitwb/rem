@@ -1,7 +1,7 @@
 import { ObjectId } from "bson";
 import { createAction } from "typesafe-actions";
 
-import { MongoDoc } from "@/model/models";
+import { MongoDoc } from "@/model/models.gen";
 import { ModelUpdate } from "@/model/updates";
 
 export const loadOne = createAction("[db] Load", resolve => {
@@ -12,12 +12,12 @@ export const deleteOne = createAction("[db] Delete", resolve => {
   return (collection: string, id: ObjectId) => resolve({ collection, id });
 });
 
-export const fetchOne = createAction("[db] Fetch", resolve => {
-  return (collection: string, id: ObjectId, force: boolean = false) => resolve({ collection, id, force });
+export const fetch = createAction("[db] Fetch", resolve => {
+  return (collection: string, ids: ObjectId[], force: boolean = false) => resolve({ collection, ids, force });
 });
 
 export const fetchFailed = createAction("[db] Fetch Failed", resolve => {
-  return (collection: string, id: ObjectId, err: Error) => resolve({ collection, id, err: err.message });
+  return (collection: string, ids: ObjectId[], err: Error) => resolve({ collection, ids, err: err.message });
 });
 
 export const modifyOne = createAction("[db] Modify", resolve => {

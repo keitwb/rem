@@ -1,9 +1,11 @@
 """
 Logic related to altering the main Mongo store
 """
+from datetime import datetime
 import logging
 
 import pymongo
+from remcommon import fieldnames_gen as fields
 
 from .json import BSONDocForJSON, maybe_convert_to_object_id
 
@@ -55,7 +57,7 @@ async def do_get_by_id(collection, message):
     try:
         prev_doc = None
         async for doc in cursor:
-            logger.info("Got doc in cursor: %s", doc["_id"])
+            logger.debug("Got doc in cursor: %s", doc["_id"])
             if prev_doc:
                 await message.send_response({"doc": BSONDocForJSON(prev_doc.raw)}, last_message=False)
             prev_doc = doc
@@ -83,6 +85,16 @@ async def do_upsert(collection, message):
         _filter["_id"] = _id
 
     updates = message.get("updates", {})
+
+    now = datetime.now()
+    if fields.MONGO_DOC_CREATED_DATE not in updates.get("$set", {}):
+        updates["$setOnInsert"] = updates.get("$setOnInsert", {})
+        updates["$setOnInsert"][fields.MONGO_DOC_CREATED_DATE] = now
+
+    if fields.MONGO_DOC_MODIFIED_DATE not in updates.get("$set", {}):
+        updates["$set"] = updates.get("$set", {})
+        updates["$set"][fields.MONGO_DOC_MODIFIED_DATE] = now
+
     try:
         message.logger.debug(f"Updating {_id} with {updates}")
         res = await collection.update_one(_filter, updates, upsert=True)
@@ -90,4 +102,6 @@ async def do_upsert(collection, message):
     except (TypeError, pymongo.errors.PyMongoError) as e:
         return f"Could not upsert doc: {str(e)}"
 
-    await message.send_response({"modifiedCount": res.modified_count, "upsertedId": res.upserted_id})
+    await message.send_response(
+        {"modifiedCount": res.modified_count, "upsertedId": {"$oid": str(res.upserted_id or _id)}}
+    )

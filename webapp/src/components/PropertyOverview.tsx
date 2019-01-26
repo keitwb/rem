@@ -1,7 +1,7 @@
 import * as React from "react";
 
 import { modelFromSearchHit, SearchClient } from "@/backend/search";
-import { CollectionName, Property } from "@/model/models";
+import { CollectionName, Property } from "@/model/models.gen";
 import { withErr } from "@/util/errors";
 
 import SearchContext from "./context/SearchContext";
@@ -96,7 +96,7 @@ export default class PropertyOverviewWithSearch extends React.Component<SearchPr
 
     const sort = ["county.keyword", "state.keyword", "name.keyword"];
 
-    const [results, err] = await withErr(this.context.query<Property>({ query, sort }, CollectionName.Property));
+    const [results, err] = await withErr(this.context.query<Property>({ query, sort }, CollectionName.Properties));
     this.setState({ loading: false });
     if (err) {
       this.setState({
@@ -110,7 +110,7 @@ export default class PropertyOverviewWithSearch extends React.Component<SearchPr
   }
 
   private async suggestFilter(s: string): Promise<string[]> {
-    return (await this.context.getFields(CollectionName.Property)).fields.filter(f =>
+    return (await this.context.getFields(CollectionName.Properties)).fields.filter(f =>
       f.toLowerCase().startsWith(s.toLowerCase())
     );
   }

@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { modelFromSearchHit, SearchClient } from "@/backend/search";
-import { Property } from "@/model/models";
+import { Property } from "@/model/models.gen";
 import { withErr } from "@/util/errors";
 
 import SearchContext from "./context/SearchContext";

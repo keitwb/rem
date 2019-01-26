@@ -1,9 +1,9 @@
 import * as React from "react";
 
-import { CollectionName, Note } from "@/model/models";
+import { CollectionName, Note } from "@/model/models.gen";
 import { truncate } from "@/util/string";
 
-import connectModelById from "./connectModelById";
+import { connectOneModelById } from "./connectModels";
 
 const NoteItem: React.SFC<{ instance: Note }> = ({ instance }) => {
   if (!instance) {
@@ -20,4 +20,4 @@ const NoteItem: React.SFC<{ instance: Note }> = ({ instance }) => {
 
 export default NoteItem;
 
-export const NoteItemConnected = connectModelById(CollectionName.Note, NoteItem);
+export const NoteItemConnected = connectOneModelById(CollectionName.Notes, NoteItem);

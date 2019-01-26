@@ -1,0 +1,512 @@
+<HTML>
+  <HEAD><TITLE>CUMB CTY ASSESSOR: PI MINI-SHEET BASPRINF411</TITLE>
+
+<SCRIPT language="JavaScript">
+   var maxTaxYear = 2018; // change this at Tax Admin request
+   var minTaxYear = maxTaxYear - 11; // (11 in April, 10 in August)
+   var selectedTaxYear = "2018";
+
+   function UseValidTaxYear(taxYear) {
+      if (parseInt(taxYear) > maxTaxYear) {
+         var href = location.href;
+         var currHREF = "TXYEAR=" + taxYear;
+         var maxHREF = "TXYEAR=" + maxTaxYear;
+
+         location.href = href.replace(currHREF, maxHREF);
+      }
+   }
+
+   function MakeTxYearOptions() {
+      var TXYEAR = document.getElementById("TXYEAR");
+      TXYEAR.remove(0);
+
+      var index = 0;
+      var selectedIndex = 0;
+      for (var i = maxTaxYear; i >= minTaxYear; i--) {
+         var option = document.createElement("option");
+         option.text = i;
+         option.value = i;
+
+         TXYEAR.add(option);
+
+         if (parseInt(selectedTaxYear) == i) {
+            selectedIndex = index;
+         }
+
+         index++;
+      }
+
+      TXYEAR.selectedIndex = selectedIndex;
+   }
+</SCRIPT>
+
+</HEAD>
+<! Author = Nancy Griffith >
+
+<BODY BGCOLOR="#dbd8cf" text="navy"
+    onload="UseValidTaxYear(selectedTaxYear); MakeTxYearOptions();">
+
+<FONT FACE="Times New Roman,Times,Serif,Georgia">
+<DIV ALIGN=center>
+
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR><TD>
+ <IMG SRC="HTTP://WWW.CO.CUMBERLAND.NC.US/vd-IMAGES/SMCOLORSEALA1.GIF"
+	ALT="CUMBERLAND COUNTY SEAL" ALIGN=RIGHT WIDTH="90" HEIGHT="90"></TD>
+
+<TD ALIGN=CENTER>
+<IMG SRC="HTTP://WWW.CO.CUMBERLAND.NC.US/vd-IMAGES/CCTEXTLOGOE.GIF"
+	HSPACE="30" HEIGHT="81" ALT="CUMBERLAND COUNTY NORTH CAROLINA"
+	BORDER="0" WIDTH="193" ALIGN="TOP"><BR>
+        <FONT SIZE=4>Public Tax Records</FONT><BR><FONT SIZE=2>
+<A HREF="MAILTO:taxweb@co.cumberland.nc.us">EMAIL</A></FONT>
+	</TD>
+
+ <TD><IMG SRC="HTTP://WWW.CO.CUMBERLAND.NC.US/vd-IMAGES/FLAGB.GIF"
+	HEIGHT="54" ALT="CUMBERLAND COUNTY FLAG"
+ ALIGN=CENTER BORDER="0" WIDTH="80">
+         &nbsp; </TD>
+
+</TR></TABLE><BR>
+
+
+
+<FONT SIZE=4> &nbsp; Property Information Mini-Sheet</FONT>
+
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR>
+    <TD ALIGN=left WIDTH="45%">
+	<FONT SIZE=2>
+	<A HREF="SWMW100.CGI?PARCEL=12313212-&LRPARC=
+	&TXYEAR=2018" >  Click for Tax Sheet</A></FONT>
+	</TD>
+  </TR>
+</TABLE>
+
+<FORM METHOD="post" ACTION="/d21lib/www/swmW200.CGI">
+<INPUT TYPE="HIDDEN" NAME="PARCEL" VALUE="12313212-">
+<INPUT TYPE="HIDDEN" NAME="LRPARC" VALUE="">
+
+
+<FONT SIZE="2">
+| <A HREF="http://www.co.cumberland.nc.us/tax/tax_rates.aspx">Tax Rate</A>
+| <A HREF="DEFAULT.HTM">Tax Records</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">General Info</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">Phone Numbers</A>
+| <A HREF="BASEARCH.HTM">Real Estate</A>
+| <A HREF="BASRCHPP.HTM">Personal</A>
+| <A HREF="http://gis.co.cumberland.nc.us">GIS Mapping</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax_payments">Electronic Pmts</A>
+| <A HREF="http://www.co.cumberland.nc.us">County</A> |
+</FONT>
+
+
+
+<HR WIDTH=595>
+<TABLE  BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR>
+      <TD ALIGN=left><FONT SIZE="1">
+	Date: 12/30/2018</FONT></TD>
+      <TD ALIGN=center><FONT SIZE="1">
+	COUNTY OF CUMBERLAND                        
+	&nbsp; &nbsp;Tax Year: 2018
+	</FONT></TD>
+      <TD ALIGN=right><FONT SIZE="1">
+	Time: 18:09:47</FONT></TD>
+  </TR>
+</TABLE>
+
+
+<TABLE BORDER=0 BGCOLOR="#FFFFFF" CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR BGCOLOR="#FFFF99">
+    	<TD><B>           Parcel ID:</B></TD>
+	<TD> 12313212-&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
+	&nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;&nbsp; &nbsp;
+
+	<B>TaxYear:</B>
+   	   	<SELECT NAME="TXYEAR" OnChange="document.forms[0].submit();"
+                ID="TXYEAR">
+    	<OPTION SELECTED> 2018
+		
+   		</SELECT>
+	<INPUT TYPE="submit" NAME="cmd" VALUE="Go"></TD>
+	</TR>
+  <TR><TD><B>       Owner Name(s):</B></TD>
+	<TD>   </TD></TR>
+           </TD></TR>
+  <TR><TD><B>    Owner Address:</B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>    Situs Address:</B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>  Taxing District:</B></TD>
+	<TD>       </TD></TR>
+  <TR><TD><B>  Tax Bill Number:</B></TD>
+	<TD>  </TD></TR>
+  <TR><TD><B>  Old Parcel ID:</B></TD>
+	<TD>  </TD></TR>
+  <TR><TD><B>   Property Class:</B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>     Neighborhood:</B></TD>
+	<TD>  </TD></TR>
+  <TR><TD><B>           Zoning:</B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>         Frontage:</B></TD>
+	<TD> 
+   <B> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Depth:</B> &nbsp; 
+   </TD></TR>
+  <TR><TD><B>      Map & Sheet:</B></TD>
+	<TD>     -</TD></TR>
+  <TR><TD><B> Plat Book & Page:</B></TD>
+	<TD>      -</TD></TR>
+
+  <TR><TD><B>Legal Description:</B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>                  </B></TD>
+	<TD> </TD></TR>
+
+</TABLE>
+
+<BR>
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+ <TR ALIGN=left>
+	<TD colspan=4><B>Parcel Taxable Value: </B> <!-- REVAL96 -->
+(REVALUATION 2017)
+	</TD>
+ </TR>
+ <TR ALIGN="RIGHT">
+	<TH>     </TH>
+	<TH>Total </TH>
+	<TH>Land </TH>
+	<TH>Building</TH>
+	<TH>Misc.</TH>
+	<TH>Date</TH>
+</TR>
+ <TR ALIGN="RIGHT">
+     <TD><B>  Appraised:</B><TD>   </TD>
+                            <TD>  </TD>
+			    <TD>  </TD>
+			    <TD>  </TD>
+			    <TD>  </TD></TR>
+
+</TABLE>
+
+<BR>
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+ <TR ALIGN=left><TD colspan=3><B>Land Assessment:</B></TD></TR>
+
+<TR ALIGN=right><TD><B>  Land Use </B></TD>
+		<TD><B> Land Units </B></TD>
+                <TD><B> Land Type </B></TD>
+		<TD><B> Land Rate </B></TD>
+                <TD><B>Land Value </B>
+		</TD></TR>
+</TABLE>
+<BR>
+
+<TABLE BORDER=0 WIDTH=600 CELLPADDING=0 CELLSPACING=0>
+ <TR ALIGN=left><TD><FONT SIZE=1>(A max of 5 sales can be shown)
+		</FONT></TD>
+ </TR>
+</TABLE>
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR ALIGN=left><TD colspan=3><B>Sale History Data:</B></TD></TR>
+  <TR ALIGN=right><TH>Deed Book</TH>
+		<TH>Deed Page</TH>
+		<TH>Sale Date </TH>
+		<TH>Sale Price</TH></TR>
+  <TR ALIGN=right><TD> </TD>
+		<TD> </TD>
+                <TD> </TD>
+		<TD> </TD></TR>
+  <TR ALIGN=right><TD> </TD>
+		<TD> </TD>
+                <TD> </TD>
+		<TD> </TD></TR>
+  <TR ALIGN=right><TD> </TD>
+		<TD> </TD>
+                <TD> </TD>
+		<TD> </TD></TR>
+  <TR ALIGN=right><TD> </TD>
+		<TD> </TD>
+                <TD> </TD>
+		<TD> </TD></TR>
+  <TR ALIGN=right><TD> </TD>
+		<TD> </TD>
+                <TD> </TD>
+		<TD> </TD></TR>
+</TABLE>
+
+<BR>
+
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+ <TR ALIGN=left><TD><FONT SIZE=1>(A max of 10 improvements can be shown)
+		</FONT></TD>
+ </TR>
+</TABLE>
+
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR ALIGN=left>
+	<TD colspan=3><B>Miscellaneous Improvements:</B>
+  <TR ALIGN=right>
+	<TH ALIGN=center>Description </TH>
+	<TH>Type </TH>
+        <TH>Unit </TH>
+	<TH>Number of Units</TH>
+  </TR>
+  <TR ALIGN=right>
+	<TD ALIGN=left> NO DATA FOUND </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+  <TR ALIGN=right>
+    	<TD ALIGN=left>  </TD>
+	<TD>   </TD>
+    	<TD>  </TD>
+	<TD>  </TD>
+  </TR>
+</TABLE>
+<BR>
+
+<A NAME="BUILDING"></a>
+
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR>
+	<TD><B>Choose the Building to Display:</B>
+   	   	<SELECT NAME="BLDNUM" OnChange="document.forms[0].submit();">
+    	<OPTION SELECTED> 00
+		
+   		</SELECT></TD>
+	<TD><INPUT TYPE="submit" NAME="cmd" VALUE="Get Building Info"></TD>
+  </TR>
+</TABLE></FORM>
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+ <TR><TH>Building Characteristics </TH></TR>
+</TABLE>
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR><TD><B>  Building #:      </B></TD>
+	<TD> 00 <B> OF </B>00</TD>
+<TD><B> # of Stry </B></TD></TR>
+  <TR><TD><B> Improvement Type: </B></TD>
+	<TD> NO DATA FOUND</TD></TR>
+  <TR><TD><B>    Quality Grade: </B></TD>
+	<TD>    </TD></TR>
+  <TR><TD><B>Actual Year Built: </B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+  <TR><TD><B>  </B></TD>
+	<TD> </TD>
+ <TD> </TD></TR>
+</TABLE>
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR><TD><B>  Foundation:</B></TD>
+	<TD>  </TD>
+    	<TD><B>    Exterior:</B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>Heat Method:</B></TD>
+	<TD> </TD>
+   	<TD><B>Heat Source:</B></TD>
+	<TD> </TD></TR>
+  <TR><TD><B>   Roof Type:</B></TD>
+	<TD> </TD>
+    	<TD><B>       Cover:</B></TD>
+	<TD> </TD></TR>
+</TABLE>
+
+<TABLE BGCOLOR="#FFFFFF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR ALIGN=right>
+		<TD><B>5-Fix Baths:</B></TD>
+		<TD>     </TD>
+		<TD><B>4-Fix Baths:</B></TD>
+		<TD>     </TD>
+                <TD><B>3-Fix Baths:</B></TD>
+		<TD>     </TD>
+                <TD><B>2-Fix Baths:</B></TD>
+		<TD>     </TD>
+                <TD><B>  Extra Fix:</B></TD>
+		<TD> &nbsp;</TD></TR>
+  <TR ALIGN=right>
+		<TD><B>   Bedrooms:</B></TD>
+		<TD>     </TD>
+                <TD><B> Fireplaces:</B></TD>
+		<TD>    </TD>
+                <TD><B>   Air Cond:</B></TD>
+		<TD>   </TD>
+                <TD><B>  Condition:</B></TD>
+		<TD> &nbsp;</TD></TR>
+</TABLE>
+
+
+<TABLE BORDER=0 WIDTH=600>
+<TR><TD><B><FONT COLOR=red>       REC NOT FOUN </FONT></B></TD></TR>
+</TABLE>
+
+<HR WIDTH=595>
+
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR>
+    <TD ALIGN=left>
+	<FONT SIZE=2>
+	<A HREF="SWMW100.CGI?PARCEL=12313212-&LRPARC=
+	&TXYEAR=2018" >  Click for Tax Sheet</A></FONT>
+	</TD>
+  </TR>
+</TABLE>
+
+<FORM METHOD="post" ACTION="/d21lib/www/SWMW010.CGI">
+<INPUT TYPE="HIDDEN" NAME="LNAME" VALUE="">
+<INPUT TYPE="HIDDEN" NAME="TXYEAR" VALUE="2018">
+<INPUT TYPE="HIDDEN" NAME="VLIMIT" VALUE="010">
+<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="NAME">
+
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR>
+	<TD ALIGN=center>Personal Property Search for 
+	   <INPUT TYPE="submit" NAME="CMDTAG" VALUE="Go">
+	</TD>
+  </TR>
+</TABLE>
+</FORM>
+
+<! ========= ========= Links to others ========= ==========>
+
+
+<FONT SIZE="2">
+| <A HREF="http://www.co.cumberland.nc.us/tax/tax_rates.aspx">Tax Rate</A>
+| <A HREF="DEFAULT.HTM">Tax Records</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">General Info</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">Phone Numbers</A>
+| <A HREF="BASEARCH.HTM">Real Estate</A>
+| <A HREF="BASRCHPP.HTM">Personal</A>
+| <A HREF="http://gis.co.cumberland.nc.us">GIS Mapping</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax_payments">Electronic Pmts</A>
+| <A HREF="http://www.co.cumberland.nc.us">County</A> |
+</FONT>
+
+
+
+<HR WIDTH=595>
+<TABLE COLOR="#DBD8CF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=595>
+  <TR>
+	<TD><FONT SIZE=-1>
+	    <B>Disclaimer:</B><BR>
+		The public information contained herein is furnished as a
+		public service by the Cumberland County Tax Administration
+		Office.
+		The Cumberland County Tax Administration Office makes <U><B>no
+		warranties</B></U>, either expressed or implied, concerning
+		the accuracy, completeness, reliability, or suitability of
+		the information for any other particular use.  Furthermore,
+		the Cumberland County Tax Administration Office assumes <U><B>no
+		liability</B></U> associated with the use or misuse of said
+		information.
+
+	</FONT></TD>
+  </TR>
+
+</TABLE>
+
+<HR WIDTH=595>
+<FONT SIZE=-1>
+        ERROR                                                                                                    </FONT>
+</DIV>
+</FONT>
+</BODY>
+</HTML>

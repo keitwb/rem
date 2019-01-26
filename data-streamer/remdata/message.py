@@ -5,7 +5,7 @@ websocket server.
 
 import logging
 
-from .log import FieldLogger
+from remcommon.log import FieldLogger
 
 logger = logging.getLogger(__name__)
 
