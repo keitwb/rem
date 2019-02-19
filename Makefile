@@ -54,16 +54,9 @@ thumbnailer:
 images: auth search-indexer data-streamer tax-info webapp es mongo mongo-dev-fixtures parceldata thumbnailer
 	true
 
-.PHONY: minikube-kvm
-minikube:
-	dev/run-minikube
-
 .PHONY: helm-dev
 helm-dev:
 	dev/helm-dev
-
-minikube-etc-hosts:
-	sudo sed -i -e "s/.* rem.dev/$$(minikube ip --profile rem) rem.dev/" /etc/hosts
 
 .PHONY: reset-dev-db
 reset-dev-db:
