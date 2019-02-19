@@ -1,4 +1,4 @@
-TAG ?= dev
+TAG ?= $(USER)
 PUSH ?= no
 
 .PHONY: search-indexer

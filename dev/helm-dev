@@ -6,4 +6,4 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 #TAG=dev make images
 
-helm upgrade --install --values $SCRIPT_DIR/helm-dev.yaml remdev $SCRIPT_DIR/../helm/rem
+helm upgrade --install --values $SCRIPT_DIR/helm-dev.yaml --set defaultTag=$USER remdev $SCRIPT_DIR/../helm/rem
