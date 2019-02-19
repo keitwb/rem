@@ -12,7 +12,7 @@ interface Props {
 
 function sumTotalAppraisedCents(property: Property): number {
   return property.pinNumbers.reduce(
-    (acc, pin) => acc + ((property.taxPropInfo[pin] || {}).totalAppraisedCents || 0),
+    (acc, pin) => acc + (((property.taxPropInfo || {})[pin] || {}).totalAppraisedCents || 0),
     0
   );
 }

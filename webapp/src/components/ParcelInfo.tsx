@@ -9,7 +9,7 @@ interface Props {
 }
 
 const ParcelInfo: React.SFC<Props> = ({ property, pin }) => {
-  const taxPropInfo = property.taxPropInfo[pin] || {};
+  const taxPropInfo = (property.taxPropInfo || {})[pin] || {};
   return (
     <div>
       <div>PIN: {pin}</div>

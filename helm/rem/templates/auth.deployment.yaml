@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: auth
+  labels:
+    app: auth
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.authReplicas }}
+  selector:
+    matchLabels:
+      app: auth
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: auth
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: auth
+        image: quay.io/rem/auth:{{ default .Values.defaultTag .Values.authImageTag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGO_HOSTNAME
+          value: mongo
+        - name: MONGO_PORT
+          value: "27017"

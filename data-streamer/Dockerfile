@@ -1,11 +1,19 @@
-FROM python:3.7
+FROM python:3.7-slim-stretch as builder
 
-RUN pip install pipenv==2018.7.1
+RUN apt update && apt install -y gcc
+RUN pip install pipenv==2018.11.26
 
 WORKDIR "/opt"
-ENTRYPOINT ["pipenv", "run", "python", "-m", "remdata"]
+ENV PIPENV_VENV_IN_PROJECT=1
 
-COPY pycommon/ /pycommon
-COPY data-streamer/Pipfile* /opt/
-RUN pipenv install
-COPY data-streamer/remdata/ /opt/remdata/
+COPY pycommon/ ./pycommon/
+COPY data-streamer/Pipfile* ./data-streamer/
+RUN cd data-streamer; pipenv install --deploy
+COPY data-streamer/remdata/ ./data-streamer/remdata/
+
+FROM python:3.7-slim-stretch
+
+WORKDIR "/opt/data-streamer"
+CMD [".venv/bin/python", "-m", "remdata"]
+
+COPY --from=builder /opt/ /opt/

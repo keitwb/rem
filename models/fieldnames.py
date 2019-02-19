@@ -12,6 +12,9 @@ import subprocess
 
 
 def generate_json_schema():
+    """
+    Makes the schema less normalized so it is simpler to transform.
+    """
     com = subprocess.run(
         "quicktype --src-lang schema --lang schema schema/*.json",
         capture_output=True,

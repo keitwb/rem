@@ -4,6 +4,6 @@ set -euo pipefail
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-TAG=dev make images
+#TAG=dev make images
 
-helm upgrade --install --values dev/helm-dev.yaml remdev helm/rem
+helm upgrade --install --values $SCRIPT_DIR/helm-dev.yaml remdev $SCRIPT_DIR/../helm/rem

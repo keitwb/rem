@@ -22,12 +22,12 @@ from .tikaclient import TikaClient
 logger = logging.getLogger(__name__)
 
 COLLECTIONS_TO_INDEX = [
-    CollectionName.PROPERTIES,
-    CollectionName.PARTIES,
-    CollectionName.LEASES,
-    CollectionName.NOTES,
-    CollectionName.MEDIA_FILES,
-    CollectionName.PARTIES,
+    CollectionName.PROPERTIES.value,
+    CollectionName.PARTIES.value,
+    CollectionName.LEASES.value,
+    CollectionName.NOTES.value,
+    CollectionName.MEDIA_FILES.value,
+    CollectionName.PARTIES.value,
 ]
 
 MAX_ES_INDEX_TASKS = 10

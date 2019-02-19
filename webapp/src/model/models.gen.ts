@@ -193,11 +193,14 @@ export interface User {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: Date;
-    email?:        string;
-    firstName?:    string;
-    lastName?:     string;
-    username?:     string;
+    modifiedDate?:   Date;
+    disabled:        boolean;
+    email?:          string;
+    firstName?:      string;
+    lastName?:       string;
+    passwordHashed?: string;
+    sessionIDs?:     string[];
+    username:        string;
 }
 
 export interface MongoDoc {

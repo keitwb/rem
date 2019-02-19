@@ -6,11 +6,20 @@
   "type": "object",
   "allOf": [
     { "$ref": "./common.json#/definitions/commonProps" },
-    { "properties": {
+    {
+      "properties": {
        "username": { "type": "string" },
        "firstName": { "type": "string" },
        "lastName": { "type": "string" },
-       "email": { "type": "string", "format": "email" }
-    }}
+       "disabled": { "type": "boolean" },
+       "email": { "type": "string", "format": "email" },
+       "passwordHashed": { "type": "string" },
+       "sessionIDs": {
+         "type": "array",
+         "items": { "type": "string" }
+       }
+      },
+      "required": ["username", "disabled"]
+    }
   ]
 }

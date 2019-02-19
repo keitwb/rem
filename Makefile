@@ -41,7 +41,17 @@ parceldata:
 	docker build --rm -t quay.io/rem/$@:$(TAG) -f parceldata/Dockerfile .
 	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
-images: search-indexer data-streamer tax-info webapp es mongo mongo-dev-fixtures parceldata
+.PHONY: auth
+auth:
+	docker build --rm -t quay.io/rem/$@:$(TAG) -f auth/Dockerfile .
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
+
+.PHONY: thumbnailer
+thumbnailer:
+	docker build --rm -t quay.io/rem/$@:$(TAG) -f thumbnailer/Dockerfile .
+	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
+
+images: auth search-indexer data-streamer tax-info webapp es mongo mongo-dev-fixtures parceldata thumbnailer
 	true
 
 .PHONY: minikube-kvm
