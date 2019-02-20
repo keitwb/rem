@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: tika
-        image: logicalspark/docker-tikaserver:1.18
+        image: logicalspark/docker-tikaserver:1.20
         imagePullPolicy: Always
         ports:
         - containerPort: 9998

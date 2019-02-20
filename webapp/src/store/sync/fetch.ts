@@ -7,26 +7,33 @@ import { AppState } from "@/store";
 import * as dbActions from "@/store/db/actions";
 
 export function ensureModelPresent(dispatch: Dispatch) {
-  return (collection: string, id: ObjectId) => dispatch(dbActions.fetchOne(collection, id));
+  return (collection: string, ids: ObjectId[]) => dispatch(dbActions.fetch(collection, ids));
 }
 
 export function createFetchMiddleware(mongoClient: MongoClient): Middleware<{}, AppState> {
   return ({ dispatch, getState }) => (next: Dispatch<Action>) => (action: ActionType<typeof dbActions>) => {
-    if (getType(dbActions.fetchOne) === action.type) {
-      const { collection, id, force } = action.payload;
+    if (getType(dbActions.fetch) === action.type) {
+      const { collection, ids, force } = action.payload;
 
-      // Don't fetch if the doc is already in the store since the change stream ought to keep it up
-      // to date.
-      if (force || !getState().db[collection].docs[id.toString()]) {
-        return (async function doUpdate() {
-          try {
-            const doc = await mongoClient.getOne(collection, id);
-            dispatch(dbActions.loadOne(collection, doc));
-          } catch (err) {
-            dispatch(dbActions.fetchFailed(collection, id, err));
-          }
-        })();
+      const idsToFetch: ObjectId[] = [];
+      for (const id of ids) {
+        // Don't fetch if the doc is already in the store since the change stream ought to keep it up
+        // to date.
+        if (force || !(id.toString() in getState().db[collection].docs)) {
+          idsToFetch.push(id);
+        }
       }
+
+      return (async function doUpdate() {
+        try {
+          const docs = await mongoClient.getMany(collection, idsToFetch);
+          for (const doc of docs) {
+            dispatch(dbActions.loadOne(collection, doc));
+          }
+        } catch (err) {
+          dispatch(dbActions.fetchFailed(collection, idsToFetch, err));
+        }
+      })();
     }
     return next(action);
   };

@@ -2,19 +2,17 @@ ingressHost: 'rem.test'
 devMode: true
 allowHTTP: true
 
+defaultTag: dev
+
 dataStreamerReplicas: 2
-dataStreamerImageTag: dev
+
+taxInfoReplicas: 1
 
 searchIndexerReplicas: 2
-searchIndexerImageTag: dev
 
 # Disable the webapp and run it locally
 webappReplicas: 0
-webappImageTag: dev
 
-mongoImageTag: dev
-
-esImageTag: dev
 enableESHQ: true
 
 tlsCert: |

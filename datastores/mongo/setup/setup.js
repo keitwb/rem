@@ -7,7 +7,6 @@ function main() {
   rs.initiate();
   sleep(3000);
 
-
   load("properties.js");
   load("leases.js");
   load("parties.js");

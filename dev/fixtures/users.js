@@ -1,6 +1,6 @@
 load("util.js");
 
-upsert("user", [
+upsert("users", [
   {
     _id: ID(1),
     createdDate: new Date("2016-02-01"),

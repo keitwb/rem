@@ -1,7 +1,7 @@
 import { ObjectId } from "bson";
 import * as EJSON from "mongodb-extended-json";
 
-import { MongoDoc } from "@/model/models";
+import { MongoDoc } from "@/model/models.gen";
 import { logger } from "@/util/log";
 import WebSocketProvider from "./websocket/provider";
 import RobustWebSocket from "./websocket/robust";

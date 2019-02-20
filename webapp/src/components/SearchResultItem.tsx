@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link } from "react-router-dom";
 
 import { Highlight, SearchHit } from "@/backend/search";
-import { CollectionName } from "@/model/models";
+import { CollectionName } from "@/model/models.gen";
 import { capitalize, truncate } from "@/util/string";
 
 interface Props {
@@ -15,19 +15,19 @@ const SearchResultItem: React.SFC<Props> = ({ hit, onSelect }) => {
   let pathCollection;
 
   switch (hit._index) {
-    case CollectionName.Property:
+    case CollectionName.Properties:
       pathCollection = "property";
       content = hit._source.name;
       break;
-    case CollectionName.Lease:
+    case CollectionName.Leases:
       pathCollection = "lease";
       content = hit._source.description;
       break;
-    case CollectionName.Note:
+    case CollectionName.Notes:
       pathCollection = "note";
       content = hit._source.note;
       break;
-    case CollectionName.Media:
+    case CollectionName.MediaFiles:
       pathCollection = "media";
       content = `${hit._source.filename} - ${hit._source.description}`;
       break;

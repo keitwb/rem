@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rem-party",
+  "title": "Party",
+  "description": "A person or organization/company that interacts with real estate in some way, e.g. owner, lessee, contractors, etc.",
+  "$ref": "#/definitions/party",
+  "definitions": {
+    "party": {
+      "allOf": [
+        { "$ref": "./common.json#/definitions/commonProps" },
+        { "properties": {
+           "name": { "type": "string" },
+           "type": {"enum": ["person", "company"] },
+           "subParties": {
+             "type": "array",
+             "items": { "$ref": "#/" }
+           },
+           "phone": {"type": "string" },
+           "address": {"type": "string" },
+           "city": {"type": "string" },
+           "state": {"type": "string" },
+           "zipcode": {"type": "string" },
+           "notes": {"$ref": "./note.json#" }
+        }}
+      ]
+    }
+  }
+}

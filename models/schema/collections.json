@@ -1,0 +1,9 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rem-collections",
+  "title": "CollectionName",
+  "description": "A set of Mongo collection names for the various models",
+  "allOf": [
+    { "enum": ["properties", "leases", "parties", "media.files", "notes", "users"] }
+  ]
+}

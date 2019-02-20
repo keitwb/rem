@@ -1,6 +1,13 @@
 .git/
-ansible/
 tmp/
-/webapp/node_modules/**
+/**/node_modules/**
 /webapp/tmp/**
 **/virtualenv/
+**/build/
+**/dist/
+**/pip-wheel-metadata/
+**/*.egg-info/
+**/.pytest_cache/
+**/.mypy_cache/
+**/__pycache__/
+auth/auth

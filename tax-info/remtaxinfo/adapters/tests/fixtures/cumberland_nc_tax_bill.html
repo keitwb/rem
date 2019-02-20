@@ -1,0 +1,352 @@
+<HTML>
+<HEAD><TITLE>CUMBERLAND COUNTY PROPERTY TAX SHEET BASTAX</TITLE>
+
+<SCRIPT language="JavaScript">
+   var maxTaxYear = 2018; // change this at Tax Admin request
+   var selectedTaxYear = "2018";
+
+   function UseValidTaxYear(taxYear) {
+      if (parseInt(taxYear) > maxTaxYear) {
+         var href = location.href;
+         var currHREF = "TXYEAR=" + taxYear;
+         var maxHREF = "TXYEAR=" + maxTaxYear;
+
+         location.href = href.replace(currHREF, maxHREF);
+      }
+   }
+
+   function TaxYearSelection(taxYear) {
+      UseValidTaxYear(taxYear);
+
+      var TXYEAR = document.getElementById("TXYEAR");
+      var currSelectedYear = TXYEAR.options[TXYEAR.selectedIndex].text;
+
+      if (currSelectedYear != taxYear) {
+         for (var i = 0; i < TXYEAR.options.length; i++) {
+            var yr = TXYEAR.options[i].text;
+
+            if (yr == taxYear) {
+               TXYEAR.options[i].selected = true;
+               break;
+            }
+         }
+      }
+   }
+</SCRIPT>
+
+</HEAD>
+<! Author = Nancy Griffith >
+
+<BODY BGCOLOR="#dbd8cf" text="navy"
+    onload="TaxYearSelection(selectedTaxYear);">
+
+<FONT FACE="Times New Roman,Times,Serif,Georgia">
+
+<DIV ALIGN=CENTER>
+
+<TABLE BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=600>
+  <TR><TD>
+ <IMG SRC="HTTP://WWW.CO.CUMBERLAND.NC.US/vd-IMAGES/SMCOLORSEALA1.GIF"
+	ALT="CUMBERLAND COUNTY SEAL" ALIGN=RIGHT WIDTH="90" HEIGHT="90"></TD>
+
+<TD ALIGN=CENTER>
+<IMG SRC="HTTP://WWW.CO.CUMBERLAND.NC.US/vd-IMAGES/CCTEXTLOGOE.GIF"
+	HSPACE="30" HEIGHT="81" ALT="CUMBERLAND COUNTY NORTH CAROLINA"
+	BORDER="0" WIDTH="193" ALIGN="TOP"><BR>
+        <FONT SIZE=4>Public Tax Records</FONT><BR><FONT SIZE=2>
+<A HREF="MAILTO:taxweb@co.cumberland.nc.us">EMAIL</A></FONT>
+	</TD>
+
+ <TD><IMG SRC="HTTP://WWW.CO.CUMBERLAND.NC.US/vd-IMAGES/FLAGB.GIF"
+	HEIGHT="54" ALT="CUMBERLAND COUNTY FLAG"
+ ALIGN=CENTER BORDER="0" WIDTH="80">
+         &nbsp; </TD>
+
+</TR></TABLE><BR>
+
+
+
+<FORM METHOD="post" ACTION="/d21lib/www/SWMW100.CGI">
+<INPUT TYPE="hidden" NAME="LRPARC" VALUE="2175893">
+<INPUT TYPE="hidden" NAME="PARCEL" VALUE="0404-72-7216-">
+
+
+<FONT SIZE="2">
+| <A HREF="http://www.co.cumberland.nc.us/tax/tax_rates.aspx">Tax Rate</A>
+| <A HREF="DEFAULT.HTM">Tax Records</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">General Info</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">Phone Numbers</A>
+| <A HREF="BASEARCH.HTM">Real Estate</A>
+| <A HREF="BASRCHPP.HTM">Personal</A>
+| <A HREF="http://gis.co.cumberland.nc.us">GIS Mapping</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax_payments">Electronic Pmts</A>
+| <A HREF="http://www.co.cumberland.nc.us">County</A> |
+</FONT>
+
+
+
+<HR WIDTH=595>
+
+<TABLE BORDER=0 WIDTH=595 CELLSPACING=0 CELLPADDING=0>
+<TR><TD ALIGN=left><FONT SIZE="1">&nbsp;</FONT></TD>
+    <TD ALIGN=center>
+     <A HREF="SWMW200.CGI?PARCEL=0404-72-7216-&TXYEAR=2018" >
+          Click for Property Info Sheet</A></FONT>
+    <TD ALIGN=right><FONT SIZE="1">&nbsp;</FONT></TD>
+</TR>
+<TR><TD ALIGN=left><FONT SIZE="1">
+          DATE: 12/30/2018</FONT></TD>
+    <TD ALIGN=center><FONT SIZE="1">
+          COUNTY OF CUMBERLAND                        </FONT></TD>
+    <TD ALIGN=right><FONT SIZE="1">
+          TIME: 18:57:04</FONT></TD>
+</TR></TABLE>
+
+<!  ===========  GENERAL INFORMATION  ============  >
+<TABLE BORDER=0 BGCOLOR="#FFFFFF" WIDTH=595 CELLPADDING=0 CELLSPACING=0>
+<TR BGCOLOR="#FFFF99">
+    <TD><B>Parcel ID:</B></TD>
+    <TD> 0404-72-7216- </TD>
+    <TD ALIGN=right><B>TaxYear: </B>
+             <SELECT NAME="TXYEAR" ID="TXYEAR"
+                                   OnChange="document.forms[0].submit();">
+                               <!-- T Y R S E L E C T -->
+
+<!-- ########################################################## -->
+<!-- DO NOT ADD YEAR UNTIL SPECIFIED BY TAX SOME TIME IN AUGUST -->
+<!-- SEE HELPDESK #3066                                         -->
+<!-- ########################################################## -->
+
+                 <OPTION>2018</OPTION>
+                 <OPTION>2017</OPTION>
+                 <OPTION>2016</OPTION>
+                 <OPTION>2015</OPTION>
+                 <OPTION>2014</OPTION>
+                 <OPTION>2013</OPTION>
+                 <OPTION>2012</OPTION>
+                 <OPTION>2011</OPTION>
+                 <OPTION>2010</OPTION>
+                 <OPTION>2009</OPTION>
+                 <OPTION>2008</OPTION>
+                 <OPTION>2007</OPTION>
+             </SELECT>
+             <INPUT TYPE="submit" NAME="cmd" VALUE="Go">
+    </TD></TR>
+<TR><TD><B> Owner Name:</B></TD>
+    <TD COLSPAN="2"> A & C SMITH RENTALS LLC </TD></TR>
+  
+<TR><TD><B>    Owner Address:</B></TD>
+    <TD COLSPAN="2">4816  KIARA DR HOPE MILLS NC 28348</TD></TR>
+<TR><TD><B>    Situs Address:</B></TD>
+    <TD COLSPAN="2">005980  RICHFIELD AVE  N/A</TD></TR>
+<TR><TD><B>  Taxing District:</B></TD>
+    <TD COLSPAN="2">2000   HOPE MILLS</TD></TR>
+<TR><TD><B>      Taxing Rate:</B></TD>
+    <TD COLSPAN="2">0.013090000</TD></TR>
+<TR><TD><B>  Tax Bill Number:</B></TD>
+    <TD COLSPAN="2">2175893&nbsp; &nbsp;
+           </TD></TR>
+<TR><TD><B>    Old Parcel ID:</B></TD>
+    <TD COLSPAN="2">0404-72-6230-</TD></TR>
+<TR><TD><B>   Property Class:</B></TD>
+    <TD COLSPAN="2">RESIDENTIAL</TD></TR>
+<TR><TD><B>Legal Description:</B></TD>
+    <TD COLSPAN="2">LT 117 EAGLEWOOD FOREST SEC 5 PT 3 5980 RICHFIELD AVE</TD></TR>
+</TABLE>
+</FORM>
+
+<BR>
+<! ============  ASMT TABLE INFORMATION  ============== 	>
+<TABLE BORDER=0 BGCOLOR="#FFFFFF" WIDTH=595 CELLPADDING=0 CELLSPACING=O>
+<TR><TH>     <TH>Total <TH>Land <TH>Building <TH>Misc.</TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>Appraised:</B></TD>
+                  <TD>     83,700.00</TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD></TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B> Assessed:</B></TD>
+                  <TD>     83,700.00</TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD></TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>Exemption:</B></TD>
+                  <TD>          0.00</TD></TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>  Taxable:</B></TD>
+                  <TD>     83,700.00</TD>
+                  <TD>     0.00</TD></TR>
+</TABLE>
+
+<BR>
+<!  ===========  PSUM TABLE INFORMATION  ==============  >
+<TABLE BORDER=0 BGCOLOR="#FFFFFF" WIDTH=595 CELLPADDING=0 CELLSPACING=0>
+<TR><TH>Tax Year: 2018 <TH>Applied <TH>Paid <TH>Owed</TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>     Tax:</B></TD>
+                  <TD>      1,095.63</TD>
+                  <TD>      1,095.63</TD>
+                  <TD>          0.00</TD></TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>    Sass:</B></TD>
+                  <TD>        320.00</TD>
+                  <TD>        320.00</TD>
+                  <TD>          0.00</TD></TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>    Fees:</B></TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD></TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>Interest:</B></TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD>
+                  <TD>          0.00</TD></TR>
+<TR ALIGN="RIGHT"><TD ALIGN="LEFT"><B>   Total:</B></TD>
+                  <TD>      1,415.63</TD>
+                  <TD>      1,415.63</TD>
+                  <TD>          0.00</TD></TR>
+</TABLE>
+
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH=595>
+<TR>
+<!  ===========  put out a disclaimer for now  >
+<TD ALIGN=center><FONT SIZE="2">
+Interest data is not current - please call for up-to-date amount
+ (910-678-7507)</FONT></TD></TR>
+</TABLE>
+
+<BR>
+<TABLE BORDER=0 BGCOLOR="#FFFFFF" WIDTH=595 CELLPADDING=0 CELLSPACING=0>
+<TR><TD></TD></TR>
+<TR><TD></TD></TR>
+<TR><TD></TD></TR>
+<TR><TD></TD></TR>
+</TABLE>
+
+<BR>
+<TABLE BORDER=0 BGCOLOR="#FFFFFF" WIDTH=595 CELLPADDING=0 CELLSPACING=0>
+<TR><TH>Receipt # <TH>Receipt Type <TH>Payment Date <TH>Paid Amount</TR>
+<TR><TD>05212334</TD>
+    <TD>LOCK BOX</TD>
+    <TD>09/24/2018</TD>
+    <TD ALIGN="RIGHT">        415.63</TD></TR>
+<TR><TD>05226013</TD>
+    <TD>MAIL</TD>
+    <TD>10/31/2018</TD>
+    <TD ALIGN="RIGHT">        500.00</TD></TR>
+<TR><TD>05297722</TD>
+    <TD>MAIL</TD>
+    <TD>12/12/2018</TD>
+    <TD ALIGN="RIGHT">        500.00</TD></TR>
+<TR><TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD>
+    <TD></TD>
+    <TD></TD>
+    <TD ALIGN="RIGHT"></TD></TR>
+</TABLE>
+
+<BR>
+<!  ============  PDET TABLE INFORMATION  =============  >
+<TABLE BORDER=0 BGCOLOR="#FFFFFF" WIDTH=595 CELLPADDING=0 CELLSPACING=0>
+<TR><TH>Authority <TH>Description <TH>Orig Amount</TR>
+<TR><TD>CNTY</TD> <TD>COUNTY WIDE </TD>
+                            <TD ALIGN="RIGHT">        668.76</TD></TR>
+<TR><TD>HMREC</TD> <TD>RECREATION</TD>
+                            <TD ALIGN="RIGHT">         41.85</TD></TR>
+<TR><TD>HPML</TD> <TD>HOPE MILLS</TD>
+                            <TD ALIGN="RIGHT">        385.02</TD></TR>
+<TR><TD>HMRT1</TD> <TD>HM REFUSE TX</TD>
+                            <TD ALIGN="RIGHT">        216.00</TD></TR>
+<TR><TD>HMSWR</TD> <TD>HM STRWRES</TD>
+                            <TD ALIGN="RIGHT">         48.00</TD></TR>
+<TR><TD>SWF1</TD> <TD>SW USER FEE</TD>
+                            <TD ALIGN="RIGHT">         56.00</TD></TR>
+<TR><TD></TD> <TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD> <TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD> <TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD><TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD><TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD><TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD><TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD><TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+<TR><TD></TD><TD></TD>
+                            <TD ALIGN="RIGHT"></TD></TR>
+</TABLE>
+
+<!  ======  THIS INFO IN USED IN DEBUGGING ONLY =========>
+<TABLE BORDER=0  WIDTH=595 CELLPADDING=0 CELLSPACING=0>
+<TR><TD COLSPAN=1><FONT COLOR=red> 
+</FONT></TD></TR>
+</TABLE>
+
+<HR WIDTH=595>
+<A HREF="/d21lib/www/SWMW200?PARCEL=0404-72-7216-&TXYEAR=2018">
+Click for Property Info Sheet</A>
+
+<BR><BR>
+
+<! ========= Links to others ==========>
+
+<FORM METHOD="post" ACTION="/d21lib/www/PHOWXXX.CGI">
+<INPUT TYPE="HIDDEN" NAME="LNAME" VALUE="JOHN SMITH">
+<INPUT TYPE="HIDDEN" NAME="TXYEAR" VALUE="2018">
+<INPUT TYPE="HIDDEN" NAME="VLIMIT" VALUE="010">
+<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="NAME">
+<TABLE BORDER=0 WIDTH=595 CELLPADDING=0 CELLSPACING=0>
+<TR><TD ALIGN=center>
+Personal Property Search for JOHN SMITH
+<INPUT TYPE="submit" NAME="CMDTAG"
+	VALUE="Go"></FORM>
+</TD></TR></TABLE>
+
+<p>
+
+<FONT SIZE="2">
+| <A HREF="http://www.co.cumberland.nc.us/tax/tax_rates.aspx">Tax Rate</A>
+| <A HREF="DEFAULT.HTM">Tax Records</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">General Info</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax/general.aspx">Phone Numbers</A>
+| <A HREF="BASEARCH.HTM">Real Estate</A>
+| <A HREF="BASRCHPP.HTM">Personal</A>
+| <A HREF="http://gis.co.cumberland.nc.us">GIS Mapping</A>
+| <A HREF="http://www.co.cumberland.nc.us/tax_payments">Electronic Pmts</A>
+| <A HREF="http://www.co.cumberland.nc.us">County</A> |
+</FONT>
+
+
+
+<HR WIDTH=595>
+<TABLE COLOR="#DBD8CF" BORDER=0 CELLPADDING=0 CELLSPACING=0 WIDTH=595>
+  <TR>
+	<TD><FONT SIZE=-1>
+	    <B>Disclaimer:</B><BR>
+		The public information contained herein is furnished as a
+		public service by the Cumberland County Treasurer's Office.
+		The Cumberland County Treasurer's Office makes <U><B>no
+		warranties</B></U>, either expressed or implied, concerning
+		the accuracy, completeness, reliability, or suitability of
+		the information for any other particular use.  Furthermore,
+		the Cumberland County Treasurer's Office assumes <U><B>no
+		liability</B></U> associated with the use or misuse of said
+		information.
+	</FONT></TD>
+  </TR>
+</TABLE>
+<HR WIDTH=595>
+
+        ERROR                                                                                                    
+
+</DIV>
+</FONT>
+</BODY>
+</HTML>

@@ -24,6 +24,12 @@ searchIndexerImageTag:
 dataStreamerReplicas: 1
 dataStreamerImageTag:
 
+thumbnailerReplicas: 1
+thumbnailerImageTag:
+
+taxInfoReplicas: 1
+taxInfoImageTag:
+
 webappReplicas: 1
 webappImageTag:
 

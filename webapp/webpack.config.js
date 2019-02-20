@@ -11,7 +11,7 @@ var Visualizer = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 
 module.exports = (env, argv) => {
   const isDev = argv.mode !== "production",
-    publicPath = process.env.STATIC_URL || "/static/";
+    publicPath = process.env.STATIC_URL || "/";
 
   console.log(`Mode is ${argv.mode}`);
   console.log(`Public path is ${publicPath}`);
@@ -75,11 +75,11 @@ module.exports = (env, argv) => {
     },
 
     devServer: {
-      contentBase: path.resolve(__dirname, "dist"),
+      //contentBase: path.resolve(__dirname, "dist"),
       compress: true,
       port: 9000,
       historyApiFallback: true,
-      publicPath,
+      //publicPath,
       hot: false,
       overlay: true,
     },
@@ -118,7 +118,7 @@ module.exports = (env, argv) => {
         //favicon: helpers.root('./src/favicon.ico')
       }),
       new ForkTsCheckerWebpackPlugin({
-        tslint: true,
+        tslint: false,
       }),
       new MiniCSSPlugin(),
       isDev ? null : new CompressionPlugin({ test: /\.css$|\.js$|\.html$/ }),

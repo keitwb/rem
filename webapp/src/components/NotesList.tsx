@@ -1,22 +1,31 @@
-import { ObjectID } from "bson";
 import * as React from "react";
 
-import { NoteItemConnected } from "./NoteItem";
+import { mongoDocModifiedDateSorter } from "@/model/helpers";
+import { CollectionName, Note } from "@/model/models.gen";
 
-const NotesList: React.SFC<{ noteIds: ObjectID[] }> = ({ noteIds }) => {
-  if (!noteIds) {
+import { connectMultipleModelsById } from "./connectModels";
+import NoteItem from "./NoteItem";
+
+const NoteList: React.SFC<{ instances: Note[] }> = ({ instances }) => {
+  if (!instances) {
+    return <div>Loading...</div>;
+  }
+
+  if (instances.length === 0) {
     return <div>No notes</div>;
   }
 
   return (
-    <ul>
-      {noteIds.map(id => (
-        <li key={id.toString()}>
-          <NoteItemConnected id={id.toString()} />
-        </li>
+    <div>
+      {instances.sort(mongoDocModifiedDateSorter).map(note => (
+        <div className="card" key={note._id.toString()}>
+          <NoteItem instance={note} />
+        </div>
       ))}
-    </ul>
+    </div>
   );
 };
 
-export default NotesList;
+export default NoteList;
+
+export const NoteListConnected = connectMultipleModelsById(CollectionName.Notes, NoteList);

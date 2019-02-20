@@ -13,7 +13,7 @@ from .util import open_stream, start_test_server
 @pytest.mark.timeout(60)
 async def test_service_sends_all_changes():
     async with start_test_server() as [ws_port, mongo_client, _]:
-        async with open_stream(ws_port, "changes") as ws_client:
+        async with open_stream(ws_port, "/changes") as ws_client:
             await ws_client.send(ujson.dumps({"collection": "properties"}))
 
             started_msg = ujson.loads(await ws_client.recv())
@@ -50,7 +50,7 @@ async def test_service_sends_all_changes():
 @pytest.mark.timeout(60)
 async def test_service_resumes_from_last():
     async with start_test_server() as [ws_port, mongo_client, _]:
-        async with open_stream(ws_port, "changes") as ws_client:
+        async with open_stream(ws_port, "/changes") as ws_client:
             await ws_client.send(ujson.dumps({"collection": "properties"}))
 
             started_msg = ujson.loads(await ws_client.recv())
@@ -65,7 +65,7 @@ async def test_service_resumes_from_last():
                     f"-{i}"
                 ), "Change stream came out of order"
 
-        async with open_stream(ws_port, "changes") as ws_client:
+        async with open_stream(ws_port, "/changes") as ws_client:
             await ws_client.send(
                 ujson.dumps({"collection": "properties", "resumeAfter": last_msg["doc"]["_id"]})
             )

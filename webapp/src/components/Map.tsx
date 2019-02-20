@@ -8,7 +8,7 @@ import { default as OLMap } from "ol/map";
 import OSM from "ol/source/osm";
 import View from "ol/view";
 
-import * as models from "@/model/models";
+import * as models from "@/model/models.gen";
 
 interface Props {
   properties: models.Property[];

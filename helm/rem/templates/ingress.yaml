@@ -14,21 +14,21 @@ spec:
   - host: "{{ .Values.ingressHost }}"
     http:
       paths:
+      - path: /thumbnailer
+        backend:
+          serviceName: thumbnailer
+          servicePort: 8080
       - path: /
         backend:
           serviceName: webapp
           servicePort: 80
-
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: frontend-websockets
+  name: auth
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "{{if .Values.allowHTTP}}false{{else}}true{{end}}"
-    # Set to one hour for websocket connections
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
 spec:
   tls:
     - hosts:
@@ -38,7 +38,43 @@ spec:
   - host: "{{ .Values.ingressHost }}"
     http:
       paths:
-      - path: /stream
+      - path: /login
+        backend:
+          serviceName: auth
+          servicePort: 8080
+      - path: /logout
+        backend:
+          serviceName: auth
+          servicePort: 8080
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: frontend-websockets
+  annotations:
+    # TODO: Reenable when ingress 0.22.0 is on minikube
+    #nginx.ingress.kubernetes.io/rewrite-target: /$1
+    #nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "{{if .Values.allowHTTP}}false{{else}}true{{end}}"
+    # TODO: Figure out how to make host lookup work
+    #nginx.ingress.kubernetes.io/auth-url: http://auth:8080/auth
+    nginx.ingress.kubernetes.io/auth-method: GET
+    nginx.ingress.kubernetes.io/auth-response-headers: X-REM-Username, X-REM-Roles
+    # Set to one hour for websocket connections
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite "(?i)/stream/?(.*)$" /$1 break;
+spec:
+  tls:
+    - hosts:
+      - "{{ .Values.ingressHost }}"
+      secretName: ingress-tls
+  rules:
+  - host: "{{ .Values.ingressHost }}"
+    http:
+      paths:
+      - path: /stream  # /stream/?(.*)
         backend:
           serviceName: data-streamer
           servicePort: 8080

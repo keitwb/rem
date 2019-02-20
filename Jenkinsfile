@@ -59,7 +59,37 @@ pipeline {
                         sh 'pipenv run pytest -n2 remdata/inttest'
                     }}
                 }
-                stage('search-pylint') {
+                stage('taxinfo-test') {
+                    agent {
+                        docker {
+                            image 'python:3.7'
+                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        }
+                    }
+                    steps { dir('tax-info') {
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
+
+                        sh 'pipenv run pytest -n2 remtaxinfo'
+                    }}
+                }
+                stage('taxinfo-static-checks') {
+                    agent {
+                        docker {
+                            image 'python:3.7'
+                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        }
+                    }
+                    steps { dir('tax-info') {
+                        sh 'pip install pipenv==2018.7.1'
+                        sh 'pipenv install --deploy --dev --system'
+
+                        sh 'pipenv run pylint remtaxinfo'
+                        sh 'pipenv run black --check remtaxinfo'
+                        sh 'pipenv run mypy remtaxinfo/'
+                    }}
+                }
+                stage('search-static-checks') {
                     agent {
                         docker {
                             image 'python:3.7'
@@ -71,23 +101,11 @@ pipeline {
                         sh 'pipenv install --deploy --dev --system'
 
                         sh 'pipenv run pylint remsearch'
-                    }}
-                }
-                stage('search-black-formatting') {
-                    agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip'
-                        }
-                    }
-                    steps { dir('search') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
+                        sh 'pipenv run mypy remsearch'
                         sh 'pipenv run black --check remsearch'
                     }}
                 }
-                stage('data-streamer-pylint') {
+                stage('data-streamer-static-checks') {
                     agent {
                         docker {
                             image 'python:3.7'
@@ -99,19 +117,6 @@ pipeline {
                         sh 'pipenv install --deploy --dev --system'
 
                         sh 'pipenv run pylint remdata'
-                    }}
-                }
-                stage('data-streamer-black-formatting') {
-                    agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip'
-                        }
-                    }
-                    steps { dir('data-streamer') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
                         sh 'pipenv run black --check remdata'
                     }}
                 }
@@ -137,6 +142,20 @@ pipeline {
                     steps { dir('webapp') {
                         sh 'npm install'
                         sh './node_modules/.bin/jest --ci'
+                    }}
+                }
+                stage('model-consistency') {
+                    agent {
+                        docker {
+                            image 'node:10.11-alpine'
+                            args '-v $HOME/.npm:/root/.npm'
+                        }
+                    }
+                    steps { dir('models') {
+                        sh 'apk add --no-cache python3 git'
+                        sh 'npm install'
+                        sh './generate.sh'
+                        sh 'cd ..; git diff --exit-code'
                     }}
                 }
             }

@@ -3,7 +3,7 @@ load("util.js");
 upsert("properties", [
   {
     _id: ID(1),
-    createdDate: new Date("2017-02-01"),
+    createdDate:   new Date("2017-02-01"),
     createdBy:    ID(1),
     name:         "Swamp Tract",
     description:  "Tract in the swamp land behind the old highway",
@@ -12,10 +12,10 @@ upsert("properties", [
     state:        "NC",
     owners:       [{id: ID(1), portion: 50}, {id: ID(2), portion: 50}],
     pinNumbers:   ["123-45-678"],
-    notes:        [ID(1), ID(2)],
-    leases:       [ID(1), ID(2)],
-    contacts:     [ID(1)],
-    media:        [fileByFileName("doc1.pdf")._id],
+    noteIds:      [ID(1), ID(2)],
+    leaseIds:     [ID(1), ID(2)],
+    contactIds:   [ID(1)],
+    mediaIds:     [fileByFileName("doc1.pdf")._id],
     tags:         ["land", "for-sale", "for-lease"],
   },
   {
@@ -28,7 +28,7 @@ upsert("properties", [
     county:       "Cumberland",
     state:        "NC",
     pinNumbers:   ["123-45-678"],
-    leases:       [ID(3)],
+    leaseIds:       [ID(3)],
     tags:         ["commercial", "renovating"],
   },
   {
@@ -41,8 +41,8 @@ upsert("properties", [
     county:       "Cumberland",
     state:        "NC",
     pinNumbers:   ["123-45-678"],
-    leases:       [],
-    media:        [ID(10)],
+    leaseIds:     [],
+    mediaIds:     [ID(10)],
     tags:         ["commercial"],
   },
 ]);

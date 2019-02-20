@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rem-property",
+  "title": "Property",
+  "description": "A set of one or more parcels that constitute a single logic piece of real estate",
+  "type": "object",
+  "allOf": [
+    { "$ref": "./common.json#/definitions/commonProps" },
+    { "properties": {
+       "name": { "type": "string" },
+       "description": { "type": "string" },
+       "acreage": { "type": "number" },
+       "county": { "type": "string" },
+       "state": { "type": "string", "pattern": "^[A-Z]{2}$" },
+       "owners": {
+         "type": "array",
+         "items": {
+           "type": "object",
+           "properties": {
+             "id": { "$ref": "./common.json#/definitions/oid" },
+             "portion": { "type": "integer" }
+           }
+         }
+       },
+       "pinNumbers": {
+         "type": "array",
+         "items": { "type": "string" }
+       },
+       "propType": { "enum": ["residential", "commercial", "industrial", "land" ] },
+       "latitude": { "type": "number" },
+       "longitude": { "type": "number" },
+       "boundary": { "type": "string", "description": "WKT of the boundary of the property" },
+       "desiredRentCents": { "type": "number" },
+       "desiredSalesPriceDollars": { "type": "number" },
+       "noteIds": {
+         "type": "array",
+         "items": { "$ref": "common.json#/definitions/oid" }
+       },
+       "leaseIds": {
+         "type": "array",
+         "items": { "$ref": "common.json#/definitions/oid" }
+       },
+       "contactIds": {
+         "type": "array",
+         "items": { "$ref": "common.json#/definitions/oid" }
+       },
+       "mediaIds": {
+         "type": "array",
+         "items": { "$ref": "common.json#/definitions/oid" }
+       },
+       "insurancePolicyIds": {
+         "type": "array",
+         "items": { "$ref": "./common.json#/definitions/oid" }
+       },
+       "tags": {
+         "type": "array",
+         "items": { "type": "string" }
+       },
+       "taxPropInfo": {
+         "type": "object",
+         "name": "pin",
+         "additionalProperties": {
+           "type": "object",
+           "properties": {
+             "ownerName": {"type": "string" },
+             "ownerAddress": {"type": "string" },
+             "situsAddress": {"type": "string" },
+             "taxDistrict": {"type": "string" },
+             "propertyClass": {"type": "string" },
+             "neighborhood": {"type": "string" },
+             "zoning": {"type": "string" },
+             "legalDescription": {"type": "string" },
+             "totalAppraisedCents": {"type": "number" },
+             "landAppraisedCents": {"type": "number" },
+             "buildingAppraisedCents": {"type": "number" },
+             "miscAppraisedCents": {"type": "number" },
+             "assessmentDate": {"type": "string", "format": "date-time" }
+           }
+         }
+       },
+       "taxBills": {
+         "type": "object",
+         "name": "pin",
+         "additionalProperties": {
+           "type": "object",
+           "description": "The PIN of each parcel",
+           "name": "year",
+           "additionalProperties": {
+             "type": "object",
+             "properties": {
+               "totalAssessedCents": { "type": "number" },
+               "landAssessedCents": { "type": "number" },
+               "buildingAssessedCents": { "type": "number" },
+               "miscAssessedCents": { "type": "number" },
+               "dueDate": { "type": "string", "format": "date" },
+               "lineItems": {
+                 "type": "array",
+                 "items": {
+                   "type": "object",
+                   "properties": {
+                     "description": {"type": "string"},
+                     "amountCents": {"type": "number"}
+                   }
+                 }
+               },
+               "payments": {
+                 "type": "array",
+                 "items": {
+                   "type": "object",
+                   "properties": {
+                      "paymentDate": {"type": "string", "format": "date-time"},
+                      "amountCents": {"type": "number"}
+                   }
+                 }
+               }
+             }
+           }
+         }
+       },
+       "taxRefreshRequested": {"type": "boolean" }
+    }}
+  ]
+}

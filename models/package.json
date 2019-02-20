@@ -1,0 +1,10 @@
+{
+  "name": "models",
+  "description": "Model code gen for REM",
+  "scripts": {
+    "generate": "./generate.sh"
+  },
+  "dependencies": {
+    "quicktype": "^15.0.171"
+  }
+}

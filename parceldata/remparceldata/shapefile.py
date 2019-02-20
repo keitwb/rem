@@ -1,11 +1,12 @@
 from osgeo import ogr, osr
+from typing import Dict, Any
 
 from . import exceptions
 from .util import single_quote_if_string
 
 ogr.UseExceptions()
 
-SHAPEFILE_CACHE = dict()
+SHAPEFILE_CACHE: Dict[str, Any] = dict()
 
 
 def load_shapefile(path):
@@ -37,8 +38,8 @@ def get_features_by_field(data_source, field_name, field_value):
 
     if not features:
         raise exceptions.NoFeatureError(
-            "%s = %s in data source %s" % (field_name, value,
-                                           data_source.GetName()))
+            "%s = %s in data source %s" % (field_name, value, data_source.GetName())
+        )
 
     return features
 

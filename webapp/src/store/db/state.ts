@@ -1,4 +1,4 @@
-import * as models from "@/model/models";
+import * as models from "@/model/models.gen";
 
 export interface MongoDocs<T extends models.MongoDoc> {
   [id: string]: T;
@@ -14,7 +14,7 @@ export interface State {
   leases: ModelState<models.Lease>;
   notes: ModelState<models.Note>;
   parties: ModelState<models.Party>;
-  media: ModelState<models.Media>;
+  "media.files": ModelState<models.Media>;
 }
 
 export type CollectionName = keyof State;

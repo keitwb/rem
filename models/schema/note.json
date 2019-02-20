@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "rem-note",
+  "title": "Note",
+  "description": "A note that gives an update on an item",
+  "$ref": "#/definitions/note",
+  "definitions": {
+    "note": {
+      "allOf": [
+        { "$ref": "./common.json#/definitions/commonProps" },
+        { "properties": {
+           "title": { "type": "string" },
+           "note": { "type": "string" },
+           "media": {
+             "type": "array",
+             "items": { "$ref": "common.json#/definitions/oid" }
+           }
+        }}
+      ]
+    }
+  }
+}
