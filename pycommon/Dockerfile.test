@@ -1,0 +1,18 @@
+FROM python:3.7-slim-stretch
+
+WORKDIR /opt
+
+RUN apt update && apt install -y gcc curl
+RUN pip install pipenv==2018.11.26
+
+ARG basedir
+
+COPY ./pycommon/ /opt/pycommon/
+COPY ${basedir}/Pipfile* ./${basedir}/
+
+RUN cd ${basedir} && pipenv install --system --deploy --dev
+
+COPY ./datastores/ /opt/datastores/
+COPY ${basedir}/ /opt/${basedir}/
+
+

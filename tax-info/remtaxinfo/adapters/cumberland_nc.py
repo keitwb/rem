@@ -6,16 +6,15 @@ import re
 from datetime import datetime
 
 from bs4 import BeautifulSoup
-from remcommon.models_gen import LineItem, Payment, TaxPropInfo, TaxBill
-
-from remtaxinfo.util.adapter import adapter, PinNotFoundError
-from remtaxinfo.util.tables import (
-    parse_horizontal_table,
-    parse_simple_vertical_table,
-    parse_simple_horizontal_table,
-    parse_2d_table,
-)
+from remcommon.models_gen import LineItem, Payment, TaxBill, TaxPropInfo
+from remtaxinfo.util.adapter import PinNotFoundError, adapter
 from remtaxinfo.util.conversion import parse_currency_to_cents
+from remtaxinfo.util.tables import (
+    parse_2d_table,
+    parse_horizontal_table,
+    parse_simple_horizontal_table,
+    parse_simple_vertical_table,
+)
 
 
 @adapter(county="Cumberland", state="NC")
@@ -98,6 +97,7 @@ class CumberlandNCTaxInfo:
             land_assessed_cents=parse_currency_to_cents(values.get("Taxable:", {}).get("Land")),
             building_assessed_cents=parse_currency_to_cents(values.get("Taxable:", {}).get("Building")),
             misc_assessed_cents=parse_currency_to_cents(values.get("Taxable:", {}).get("Misc.")),
+            due_date=None,
         )
 
     @staticmethod

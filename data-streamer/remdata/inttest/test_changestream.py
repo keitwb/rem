@@ -10,7 +10,6 @@ from .util import open_stream, start_test_server
 
 # pylint: disable=missing-docstring
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_service_sends_all_changes():
     async with start_test_server() as [ws_port, mongo_client, _]:
         async with open_stream(ws_port, "/changes") as ws_client:
@@ -47,7 +46,6 @@ async def test_service_sends_all_changes():
 
 # pylint: disable=missing-docstring
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_service_resumes_from_last():
     async with start_test_server() as [ws_port, mongo_client, _]:
         async with open_stream(ws_port, "/changes") as ws_client:

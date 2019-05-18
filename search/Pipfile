@@ -13,3 +13,6 @@ idna = "==2.7"
 
 [requires]
 python_version = "3.7"
+
+[dev-packages]
+pycommon = {editable = true,extras = ["test"],path = "./../pycommon"}

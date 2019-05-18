@@ -33,128 +33,110 @@ pipeline {
                 }
                 stage('search-test') {
                     agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        dockerfile {
+                            filename 'pycommon/Dockerfile.test'
+                            additionalBuildArgs '--build-arg basedir=search'
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('search') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run pytest -n2 remsearch/inttest'
+                        sh 'pytest -n2 --timeout 180 remsearch/inttest'
                     }}
                 }
                 stage('data-streamer-test') {
                     agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        dockerfile {
+                            filename 'pycommon/Dockerfile.test'
+                            additionalBuildArgs '--build-arg basedir=data-streamer'
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('data-streamer') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run pytest -n2 remdata/inttest'
+                        sh 'pytest -n2 --timeout 180 remdata/inttest'
                     }}
                 }
                 stage('taxinfo-test') {
                     agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        dockerfile {
+                            filename 'pycommon/Dockerfile.test'
+                            additionalBuildArgs '--build-arg basedir=tax-info'
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('tax-info') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run pytest -n2 remtaxinfo'
+                        sh 'pytest --timeout 180 -n2 remtaxinfo'
                     }}
                 }
                 stage('taxinfo-static-checks') {
                     agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        dockerfile {
+                            filename 'pycommon/Dockerfile.test'
+                            additionalBuildArgs '--build-arg basedir=tax-info'
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('tax-info') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run pylint remtaxinfo'
-                        sh 'pipenv run black --check remtaxinfo'
-                        sh 'pipenv run mypy remtaxinfo/'
+                        sh 'pylint remtaxinfo'
+                        sh 'black --check remtaxinfo'
+                        sh 'mypy remtaxinfo/'
                     }}
                 }
                 stage('search-static-checks') {
                     agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        dockerfile {
+                            filename 'pycommon/Dockerfile.test'
+                            additionalBuildArgs '--build-arg basedir=search'
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('search') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run pylint remsearch'
-                        sh 'pipenv run mypy remsearch'
-                        sh 'pipenv run black --check remsearch'
+                        sh 'pylint remsearch'
+                        sh 'mypy remsearch'
+                        sh 'black --check remsearch'
                     }}
                 }
                 stage('data-streamer-static-checks') {
                     agent {
-                        docker {
-                            image 'python:3.7'
-                            args '-v $HOME/.cache/pip:/root/.cache/pip -v /var/run/docker.sock:/var/run/docker.sock'
+                        dockerfile {
+                            filename 'pycommon/Dockerfile.test'
+                            additionalBuildArgs '--build-arg basedir=data-streamer'
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     steps { dir('data-streamer') {
-                        sh 'pip install pipenv==2018.7.1'
-                        sh 'pipenv install --deploy --dev --system'
-
-                        sh 'pipenv run pylint remdata'
-                        sh 'pipenv run black --check remdata'
+                        sh 'pylint remdata'
+                        sh 'black --check remdata'
                     }}
                 }
                 stage('webapp-prettier-check') {
                     agent {
-                        docker {
-                            image 'node:10.11-alpine'
-                            args '-v $HOME/.npm:/root/.npm'
+                        dockerfile {
+                            filename 'webapp/Dockerfile.test'
                         }
                     }
                     steps { dir('webapp') {
-                        sh 'npm install prettier'
-                        sh './node_modules/.bin/prettier --list-different ./src/**/*'
+                        sh 'find src ! -name "*.gen.ts" -and -name "*.ts" -or -name "*.tsx" | xargs prettier --list-different'
                     }}
                 }
                 stage('webapp-jest-tests') {
                     agent {
-                        docker {
-                            image 'node:10.11-alpine'
-                            args '-v $HOME/.npm:/root/.npm'
+                        dockerfile {
+                            filename 'webapp/Dockerfile.test'
                         }
                     }
                     steps { dir('webapp') {
-                        sh 'npm install'
-                        sh './node_modules/.bin/jest --ci'
+                        sh 'ln -s /app/node_modules $(pwd)/node_modules && jest --ci'
                     }}
                 }
                 stage('model-consistency') {
                     agent {
-                        docker {
-                            image 'node:10.11-alpine'
-                            args '-v $HOME/.npm:/root/.npm'
+                        dockerfile {
+                            filename 'models/Dockerfile.test'
                         }
                     }
                     steps { dir('models') {
-                        sh 'apk add --no-cache python3 git'
-                        sh 'npm install'
-                        sh './generate.sh'
+                        sh 'node --version'
+                        sh 'bash -x generate.sh'
                         sh 'cd ..; git diff --exit-code'
                     }}
                 }

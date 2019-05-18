@@ -21,7 +21,7 @@ asyncio.set_event_loop(uvloop.new_event_loop())
 asyncio.get_event_loop().run_until_complete(
     watch.run_watch(
         INSTANCE_NAME,
-        mongo_loc=(os.environ.get("MONGO_HOSTNAME", "mongo"), int(os.environ.get("MONGO_PORT", "27017"))),
+        mongo_uri=os.environ.get("MONGO_URI"),
         mongo_database=os.environ.get("MONGO_DATABASE", "rem"),
     )
 )

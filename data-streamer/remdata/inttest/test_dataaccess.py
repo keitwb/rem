@@ -3,6 +3,7 @@ Integration tests for the data access endpoint
 """
 
 from datetime import datetime, timedelta
+
 import pytest
 from bson import json_util, objectid
 
@@ -13,7 +14,6 @@ from .util import open_stream, start_test_server
 
 # pylint: disable=missing-docstring
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_do_query_by_ids():
     async with start_test_server() as [ws_port, mongo_client, _]:
         ids = []
@@ -43,7 +43,6 @@ async def test_do_query_by_ids():
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_do_insert():
     async with start_test_server() as [ws_port, mongo_client, _]:
         async with open_stream(ws_port, "/db") as ws_client:
@@ -78,7 +77,6 @@ async def test_do_insert():
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_do_update():
     async with start_test_server() as [ws_port, mongo_client, _]:
 

@@ -1,0 +1,8 @@
+FROM node:10.12-alpine
+
+RUN apk add --no-cache python2 make g++
+
+WORKDIR /app
+COPY webapp/package.json webapp/package-lock.json /app/
+RUN npm install
+ENV PATH="/app/node_modules/.bin:$PATH" NODE_PATH="/app/node_modules"

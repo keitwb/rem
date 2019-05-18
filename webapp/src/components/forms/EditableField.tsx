@@ -86,8 +86,9 @@ export default abstract class EditableField<T> extends React.Component<Props<T>,
                 Edit
               </button>
             )}
-            {!this.props.value &&
-              this.props.placeholder && <div className="font-italic text-muted">{this.props.placeholder}</div>}
+            {!this.props.value && this.props.placeholder && (
+              <div className="font-italic text-muted">{this.props.placeholder}</div>
+            )}
           </div>
         )}
       </div>

@@ -13,8 +13,6 @@ searchIndexerReplicas: 2
 # Disable the webapp and run it locally
 webappReplicas: 0
 
-enableESHQ: true
-
 tlsCert: |
   -----BEGIN CERTIFICATE-----
   MIIC+TCCAeGgAwIBAgIJAP/HSAP6eND7MA0GCSqGSIb3DQEBBQUAMBMxETAPBgNV

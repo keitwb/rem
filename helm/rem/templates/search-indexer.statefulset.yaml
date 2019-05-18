@@ -24,6 +24,12 @@ spec:
         image: quay.io/rem/search-indexer:{{default .Values.defaultTag  .Values.searchIndexerImageTag }}
         imagePullPolicy: Always
         env:
+        - name: MONGO_URI
+          value: {{required "mongoUri required" .Values.mongoUri}}
+        - name: ES_HOST
+          value: {{required "esHost required" .Values.esHost}}
+        - name: ES_PORT
+          value: "{{.Values.esPort}}"
         - name: INSTANCE_NAME
           valueFrom:
             fieldRef:

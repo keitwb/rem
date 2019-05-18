@@ -14,19 +14,18 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from remcommon import fieldnames_gen as fields, watch
 from remcommon.models_gen import Property
 
-from .fetch import remove_stale_pin_info, update_tax_info
 from . import constants
+from .fetch import remove_stale_pin_info, update_tax_info
 
 logger = logging.getLogger(__name__)
 
 
-async def run_watch(instance_name, mongo_loc, mongo_database="rem"):
+async def run_watch(instance_name, mongo_uri, mongo_database="rem"):
     """
     Watches all of the configured collections for changes.  Blocks indefinitely
     """
     mongo_client = AsyncIOMotorClient(
-        mongo_loc[0],
-        mongo_loc[1],
+        mongo_uri,
         maxPoolSize=100,
         maxIdleTimeMS=30 * 1000,
         socketTimeoutMS=15 * 1000,
@@ -54,7 +53,7 @@ async def watch_properties_with_retry(mongo_db, http_session, instance_name):
             await watch_properties(mongo_db, http_session, instance_name)
         except pymongo.errors.PyMongoError as e:
             logger.error("Error watching properties: %s", e)
-            await asyncio.sleep(10)
+            await asyncio.sleep(5)
 
 
 async def watch_properties(mongo_db, http_session, instance_name):
@@ -86,7 +85,7 @@ async def process_change(change, mongo_db, http_session):
     updated_fields = change.get("updateDescription", {}).get("updatedFields", {})
 
     pin_updated = fields.PROPERTY_PIN_NUMBERS in updated_fields
-    update_requested = updated_fields.get(fields.PROPERTY_TAX_REFRESH_REQUESTED, False)
+    update_requested = change["fullDocument"].get(fields.PROPERTY_TAX_REFRESH_REQUESTED, False)
     county_updated = fields.PROPERTY_COUNTY in updated_fields
     state_updated = fields.PROPERTY_STATE in updated_fields
 
@@ -101,7 +100,8 @@ async def process_change(change, mongo_db, http_session):
     await remove_stale_pin_info(prop, mongo_db)
 
     if update_requested:
-        mongo_db.properties.update_one(
+        logger.info("Unsetting %s field on property %s", fields.PROPERTY_TAX_REFRESH_REQUESTED, prop.id)
+        await mongo_db.properties.update_one(
             {"_id": prop.id}, {"$set": {fields.PROPERTY_TAX_REFRESH_REQUESTED: False}}
         )
 

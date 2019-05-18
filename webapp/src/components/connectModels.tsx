@@ -86,8 +86,8 @@ export function connectMultipleModelsById<M extends DBState[CollectionName] exte
   WrappedComponent: React.ComponentType<{ instances: M[] }>
 ) {
   const mapStateToProps = (state: AppState, ownProps: { ids: ObjectID[] }): { instances: M[] } => {
-    if (!ownProps.ids) {
-      return { instances: null };
+    if (!ownProps.ids || ownProps.ids.length === 0) {
+      return { instances: [] };
     }
 
     const idsAsStrings = ownProps.ids.map(i => i.toString());
@@ -123,7 +123,9 @@ export function connectMultipleModelsById<M extends DBState[CollectionName] exte
       }
 
       private ensureModel() {
-        ensureModelPresent(this.props.dispatch)(collection, this.props.ids.map(i => new ObjectID(i)));
+        if (this.props.ids.length > 0) {
+          ensureModelPresent(this.props.dispatch)(collection, this.props.ids.map(i => new ObjectID(i)));
+        }
       }
     }
   );

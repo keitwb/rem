@@ -1,3 +1,4 @@
+{{ if false }} {{/* Disable the mongo statefulset */}}
 ---
 apiVersion: apps/v1beta2
 kind: StatefulSet
@@ -56,7 +57,9 @@ spec:
       name: data
     spec:
       accessModes: [ "ReadWriteOnce" ]
+      storageClassName: {{ default "" .Values.mongoStorageClassName }}
       resources:
         requests:
-          storage: 8Gi
+          storage: {{ default "8Gi" .Values.mongoStorageRequest }}
   {{end}}
+  {{- end}}

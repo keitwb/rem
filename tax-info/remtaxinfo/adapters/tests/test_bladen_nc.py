@@ -6,7 +6,7 @@ import pytest
 from remcommon.models_gen import LineItem, Payment, TaxBill, TaxPropInfo
 from remtaxinfo.util.adapter import PinNotFoundError
 
-from ..cumberland_nc import CumberlandNCTaxInfo
+from ..bladen_nc import BladenNCTaxInfo
 from .fixtures import load_fixture
 
 
@@ -16,11 +16,11 @@ async def test_property_info(aresponses):
         "152.31.99.19",
         "/d21lib/www/SWMW200.CGI?PARCEL=123-456-7890-&TXYEAR=2018",
         "get",
-        load_fixture("cumberland_nc_property_sheet.html"),
+        load_fixture("bladen_nc_property_sheet.html"),
         match_querystring=True,
     )
 
-    prop_info = await CumberlandNCTaxInfo().get_latest_property_info("123-456-7890-", aiohttp.ClientSession())
+    prop_info = await BladenNCTaxInfo().get_latest_property_info("123-456-7890-", aiohttp.ClientSession())
 
     assert prop_info == TaxPropInfo(
         owner_name="JOHN SMITH",
@@ -45,12 +45,12 @@ async def test_missing_property_info(aresponses):
         "152.31.99.19",
         "/d21lib/www/SWMW200.CGI?PARCEL=123-456-7890-&TXYEAR=2018",
         "get",
-        load_fixture("cumberland_nc_missing_property_sheet.html"),
+        load_fixture("bladen_nc_missing_property_sheet.html"),
         match_querystring=True,
     )
 
     with pytest.raises(PinNotFoundError):
-        await CumberlandNCTaxInfo().get_latest_property_info("123-456-7890-", aiohttp.ClientSession())
+        await BladenNCTaxInfo().get_latest_property_info("123-456-7890-", aiohttp.ClientSession())
 
 
 @pytest.mark.asyncio
@@ -59,11 +59,11 @@ async def test_tax_bill(aresponses):
         "152.31.99.19",
         "/d21lib/www/SWMW100.CGI?TXYEAR=2018&PARCEL=123-456-7890-",
         "get",
-        load_fixture("cumberland_nc_tax_bill.html"),
+        load_fixture("bladen_nc_tax_bill.html"),
         match_querystring=True,
     )
 
-    tax_bill = await CumberlandNCTaxInfo().get_tax_bill("123-456-7890-", 2018, aiohttp.ClientSession())
+    tax_bill = await BladenNCTaxInfo().get_tax_bill("123-456-7890-", 2018, aiohttp.ClientSession())
 
     assert tax_bill == TaxBill(
         line_items=[

@@ -4,8 +4,8 @@ Logic for running containers used for testing dependencies
 import asyncio
 import logging
 import socket
-from functools import partial as p
 from contextlib import asynccontextmanager
+from functools import partial as p
 
 import docker
 
@@ -15,13 +15,17 @@ from .wait import wait_for_async
 logging.getLogger("elasticsearch").setLevel(logging.ERROR)
 
 
+def docker_client():
+    return docker.client.from_env(timeout=90.0)
+
+
 async def build_async(*args, **kwargs):
     """
     Builds a docker container in an executor so it doesn't block the event loop.
     """
-    client = docker.client.from_env()
-
-    return await asyncio.get_event_loop().run_in_executor(None, p(client.images.build, *args, **kwargs))
+    return await asyncio.get_event_loop().run_in_executor(
+        None, p(docker_client().images.build, *args, **kwargs)
+    )
 
 
 def tcp_socket_open(host, port):
@@ -47,7 +51,7 @@ async def run_container(image, wait_for_port=None, **kwargs):
     Run a container using a context manager, yielding the container object and making sure it is
     shut down when the context is exited.
     """
-    client = docker.client.from_env()
+    client = docker_client()
 
     cont = await asyncify(client.containers.run, image, detach=True, **kwargs)()
 
@@ -65,4 +69,7 @@ async def run_container(image, wait_for_port=None, **kwargs):
             print("Removing container %s" % image)
             print("Container %s logs:\n%s" % (image, cont.logs().decode("utf-8")))
         finally:
-            cont.remove(v=True, force=True)
+            try:
+                cont.remove(v=True, force=True)
+            except docker.errors.APIError as e:
+                print(f"Error removing container {image}: {e}")

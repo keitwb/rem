@@ -1,6 +1,6 @@
 // Notes
-rem.createCollection("notes");
-rem.runCommand({
+db.createCollection("notes");
+db.runCommand({
    collMod:"notes",
    validator:{},
    validationLevel:"strict"

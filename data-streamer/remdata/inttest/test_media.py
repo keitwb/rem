@@ -18,7 +18,6 @@ TEST_FILES_DIR = os.path.join(os.path.dirname(__file__), "testfiles")
 
 # pylint: disable=missing-docstring
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_do_media_upload():
     async with start_test_server() as [ws_port, mongo_client, _]:
         with open(os.path.join(TEST_FILES_DIR, "doc1.pdf"), "rb") as fd:
@@ -48,7 +47,6 @@ async def test_do_media_upload():
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_do_media_download():
     test_doc = os.path.join(TEST_FILES_DIR, "doc1.pdf")
 

@@ -21,21 +21,6 @@ webapp:
 	docker build --rm -t quay.io/rem/$@:$(TAG) -f webapp/Dockerfile .
 	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
-.PHONY: es
-es:
-	docker build --pull --rm -t quay.io/rem/$@:$(TAG) -f datastores/es/Dockerfile .
-	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
-
-.PHONY: mongo
-mongo:
-	docker build --rm -t quay.io/rem/$@:$(TAG) -f datastores/mongo/Dockerfile .
-	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
-
-.PHONY: mongo-dev-fixtures
-mongo-dev-fixtures:
-	docker build --rm -t quay.io/rem/$@:$(TAG) -f dev/fixtures/Dockerfile .
-	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
-
 .PHONY: parceldata
 parceldata:
 	docker build --rm -t quay.io/rem/$@:$(TAG) -f parceldata/Dockerfile .
@@ -51,7 +36,7 @@ thumbnailer:
 	docker build --rm -t quay.io/rem/$@:$(TAG) -f thumbnailer/Dockerfile .
 	[[ "$(PUSH)" != "yes" ]] || docker push quay.io/rem/$@:$(TAG)
 
-images: auth search-indexer data-streamer tax-info webapp es mongo mongo-dev-fixtures parceldata thumbnailer
+images: auth search-indexer data-streamer tax-info webapp parceldata thumbnailer
 	true
 
 .PHONY: helm-dev

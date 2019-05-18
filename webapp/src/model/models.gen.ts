@@ -7,6 +7,18 @@
 import { ObjectID } from "bson";
 
 /**
+ * A set of Mongo collection names for the various models
+ */
+export enum CollectionName {
+    Leases = "leases",
+    MediaFiles = "media.files",
+    Notes = "notes",
+    Parties = "parties",
+    Properties = "properties",
+    Users = "users",
+}
+
+/**
  * An insurance policy that applies to one or more properties
  */
 export interface InsurancePolicy {
@@ -22,7 +34,7 @@ export interface InsurancePolicy {
     /**
      * The date the object was first created
      */
-    createdDate?: Date;
+    createdDate?: string;
     /**
      * The id of the user that last modified this object
      */
@@ -30,11 +42,11 @@ export interface InsurancePolicy {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: Date;
+    modifiedDate?: string;
     description?:  string;
-    endDate?:      Date;
+    endDate?:      string;
     mediaIds?:     ObjectID[];
-    startDate?:    Date;
+    startDate?:    string;
 }
 
 /**
@@ -46,6 +58,148 @@ export interface InsurancePolicy {
  */
 export interface OID {
     $oid: string;
+}
+
+/**
+ * A lease for one or more properties
+ */
+export interface Lease {
+    /**
+     * A placeholder where errors concerning the object can go
+     */
+    _error?: string;
+    _id:     ObjectID;
+    /**
+     * The id of the user that created this object
+     */
+    createdBy?: ObjectID;
+    /**
+     * The date the object was first created
+     */
+    createdDate?: string;
+    /**
+     * The id of the user that last modified this object
+     */
+    lastModifiedBy?: ObjectID;
+    /**
+     * The date of the last update to the object
+     */
+    modifiedDate?: string;
+    description?:  string;
+    leaseType?:    LeaseType;
+    lessees?:      ObjectID[];
+    notes?:        Note[];
+    rate?:         number;
+    startDate?:    string;
+    termLength?:   number;
+    termUnit?:     TermUnit;
+}
+
+export enum LeaseType {
+    Gross = "gross",
+    N = "N",
+    Nn = "NN",
+    Nnn = "NNN",
+    Option = "option",
+}
+
+/**
+ * A note that gives an update on an item
+ */
+export interface Note {
+    /**
+     * A placeholder where errors concerning the object can go
+     */
+    _error?: string;
+    _id:     ObjectID;
+    /**
+     * The id of the user that created this object
+     */
+    createdBy?: ObjectID;
+    /**
+     * The date the object was first created
+     */
+    createdDate?: string;
+    /**
+     * The id of the user that last modified this object
+     */
+    lastModifiedBy?: ObjectID;
+    /**
+     * The date of the last update to the object
+     */
+    modifiedDate?: string;
+    media?:        ObjectID[];
+    note?:         string;
+    title?:        string;
+}
+
+export enum TermUnit {
+    Months = "months",
+    Quarters = "quarters",
+    Years = "years",
+}
+
+/**
+ * A media file that is associated with a property, lease, note, etc.
+ */
+export interface Media {
+    /**
+     * A placeholder where errors concerning the object can go
+     */
+    _error?: string;
+    _id:     ObjectID;
+    /**
+     * The id of the user that created this object
+     */
+    createdBy?: ObjectID;
+    /**
+     * The date the object was first created
+     */
+    createdDate?: string;
+    /**
+     * The id of the user that last modified this object
+     */
+    lastModifiedBy?: ObjectID;
+    /**
+     * The date of the last update to the object
+     */
+    modifiedDate?: string;
+    chunkSize?:    number;
+    contentType?:  string;
+    filename?:     string;
+    length?:       number;
+    md5?:          string;
+    uploadDate?:   string;
+    metadata?:     Metadata;
+}
+
+export interface Metadata {
+    description?: string;
+    tags?:        string[];
+}
+
+export interface MongoDoc {
+    /**
+     * A placeholder where errors concerning the object can go
+     */
+    _error?: string;
+    _id:     ObjectID;
+    /**
+     * The id of the user that created this object
+     */
+    createdBy?: ObjectID;
+    /**
+     * The date the object was first created
+     */
+    createdDate?: string;
+    /**
+     * The id of the user that last modified this object
+     */
+    lastModifiedBy?: ObjectID;
+    /**
+     * The date of the last update to the object
+     */
+    modifiedDate?: string;
 }
 
 /**
@@ -65,7 +219,7 @@ export interface Party {
     /**
      * The date the object was first created
      */
-    createdDate?: Date;
+    createdDate?: string;
     /**
      * The id of the user that last modified this object
      */
@@ -73,7 +227,7 @@ export interface Party {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: Date;
+    modifiedDate?: string;
     address?:      string;
     city?:         string;
     name?:         string;
@@ -85,185 +239,9 @@ export interface Party {
     zipcode?:      string;
 }
 
-/**
- * A note that gives an update on an item
- */
-export interface Note {
-    /**
-     * A placeholder where errors concerning the object can go
-     */
-    _error?: string;
-    _id:     ObjectID;
-    /**
-     * The id of the user that created this object
-     */
-    createdBy?: ObjectID;
-    /**
-     * The date the object was first created
-     */
-    createdDate?: Date;
-    /**
-     * The id of the user that last modified this object
-     */
-    lastModifiedBy?: ObjectID;
-    /**
-     * The date of the last update to the object
-     */
-    modifiedDate?: Date;
-    media?:        ObjectID[];
-    note?:         string;
-    title?:        string;
-}
-
 export enum Type {
     Company = "company",
     Person = "person",
-}
-
-/**
- * A lease for one or more properties
- */
-export interface Lease {
-    /**
-     * A placeholder where errors concerning the object can go
-     */
-    _error?: string;
-    _id:     ObjectID;
-    /**
-     * The id of the user that created this object
-     */
-    createdBy?: ObjectID;
-    /**
-     * The date the object was first created
-     */
-    createdDate?: Date;
-    /**
-     * The id of the user that last modified this object
-     */
-    lastModifiedBy?: ObjectID;
-    /**
-     * The date of the last update to the object
-     */
-    modifiedDate?: Date;
-    description?:  string;
-    leaseType?:    LeaseType;
-    lessees?:      ObjectID[];
-    notes?:        Note[];
-    rate?:         number;
-    startDate?:    Date;
-    termLength?:   number;
-    termUnit?:     TermUnit;
-}
-
-export enum LeaseType {
-    Gross = "gross",
-    N = "N",
-    Nn = "NN",
-    Nnn = "NNN",
-    Option = "option",
-}
-
-export enum TermUnit {
-    Months = "months",
-    Quarters = "quarters",
-    Years = "years",
-}
-
-/**
- * A user in the system
- */
-export interface User {
-    /**
-     * A placeholder where errors concerning the object can go
-     */
-    _error?: string;
-    _id:     ObjectID;
-    /**
-     * The id of the user that created this object
-     */
-    createdBy?: ObjectID;
-    /**
-     * The date the object was first created
-     */
-    createdDate?: Date;
-    /**
-     * The id of the user that last modified this object
-     */
-    lastModifiedBy?: ObjectID;
-    /**
-     * The date of the last update to the object
-     */
-    modifiedDate?:   Date;
-    disabled:        boolean;
-    email?:          string;
-    firstName?:      string;
-    lastName?:       string;
-    passwordHashed?: string;
-    sessionIDs?:     string[];
-    username:        string;
-}
-
-export interface MongoDoc {
-    /**
-     * A placeholder where errors concerning the object can go
-     */
-    _error?: string;
-    _id:     ObjectID;
-    /**
-     * The id of the user that created this object
-     */
-    createdBy?: ObjectID;
-    /**
-     * The date the object was first created
-     */
-    createdDate?: Date;
-    /**
-     * The id of the user that last modified this object
-     */
-    lastModifiedBy?: ObjectID;
-    /**
-     * The date of the last update to the object
-     */
-    modifiedDate?: Date;
-}
-
-/**
- * A media file that is associated with a property, lease, note, etc.
- */
-export interface Media {
-    /**
-     * A placeholder where errors concerning the object can go
-     */
-    _error?: string;
-    _id:     ObjectID;
-    /**
-     * The id of the user that created this object
-     */
-    createdBy?: ObjectID;
-    /**
-     * The date the object was first created
-     */
-    createdDate?: Date;
-    /**
-     * The id of the user that last modified this object
-     */
-    lastModifiedBy?: ObjectID;
-    /**
-     * The date of the last update to the object
-     */
-    modifiedDate?: Date;
-    chunkSize?:    number;
-    contentType?:  string;
-    filename?:     string;
-    length?:       number;
-    md5?:          string;
-    uploadDate?:   Date;
-    metadata?:     Metadata;
-}
-
-export interface Metadata {
-    description?: string;
-    tags?:        string[];
 }
 
 /**
@@ -282,7 +260,7 @@ export interface Property {
     /**
      * The date the object was first created
      */
-    createdDate?: Date;
+    createdDate?: string;
     /**
      * The id of the user that last modified this object
      */
@@ -290,7 +268,7 @@ export interface Property {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: Date;
+    modifiedDate?: string;
     acreage?:      number;
     /**
      * WKT of the boundary of the property
@@ -332,7 +310,7 @@ export enum PropType {
 
 export interface TaxBill {
     buildingAssessedCents?: number;
-    dueDate?:               Date;
+    dueDate?:               string;
     landAssessedCents?:     number;
     lineItems?:             LineItem[];
     miscAssessedCents?:     number;
@@ -347,11 +325,11 @@ export interface LineItem {
 
 export interface Payment {
     amountCents?: number;
-    paymentDate?: Date;
+    paymentDate?: string;
 }
 
 export interface TaxPropInfo {
-    assessmentDate?:         Date;
+    assessmentDate?:         string;
     buildingAppraisedCents?: number;
     landAppraisedCents?:     number;
     legalDescription?:       string;
@@ -367,13 +345,35 @@ export interface TaxPropInfo {
 }
 
 /**
- * A set of Mongo collection names for the various models
+ * A user in the system
  */
-export enum CollectionName {
-    Leases = "leases",
-    MediaFiles = "media.files",
-    Notes = "notes",
-    Parties = "parties",
-    Properties = "properties",
-    Users = "users",
+export interface User {
+    /**
+     * A placeholder where errors concerning the object can go
+     */
+    _error?: string;
+    _id:     ObjectID;
+    /**
+     * The id of the user that created this object
+     */
+    createdBy?: ObjectID;
+    /**
+     * The date the object was first created
+     */
+    createdDate?: string;
+    /**
+     * The id of the user that last modified this object
+     */
+    lastModifiedBy?: ObjectID;
+    /**
+     * The date of the last update to the object
+     */
+    modifiedDate?:   string;
+    disabled:        boolean;
+    email?:          string;
+    firstName?:      string;
+    lastName?:       string;
+    passwordHashed?: string;
+    sessionIds?:     string[];
+    username:        string;
 }

@@ -31,15 +31,15 @@ COLLECTIONS_TO_INDEX = [
 ]
 
 MAX_ES_INDEX_TASKS = 10
+SERVICE_NAME = "search_indexer"
 
 
-async def watch_indexed_collections(instance_name, mongo_loc, es_hosts, tika_loc, mongo_database="rem"):
+async def watch_indexed_collections(instance_name, mongo_uri, es_hosts, tika_loc, mongo_database="rem"):
     """
     Watches all of the configured collections for changes.  Blocks indefinitely
     """
     mongo_client = AsyncIOMotorClient(
-        mongo_loc[0],
-        mongo_loc[1],
+        mongo_uri,
         maxPoolSize=100,
         maxIdleTimeMS=30 * 1000,
         socketTimeoutMS=15 * 1000,
@@ -90,7 +90,7 @@ async def watch_collection(mongo_db, tika_client, esclient, collection, instance
     resume token to use if picking back up from a previous run.  It also
     completes the previously claimed change if the previous watcher crashed.
     """
-    async for change in watch.watch_collection(mongo_db, collection, "search_indexer", instance_name):
+    async for change in watch.watch_collection(mongo_db, collection, SERVICE_NAME, instance_name):
         if change is watch.INITIAL_LEAD_WATCHER:
             await index_collection(mongo_db, tika_client, esclient, collection)
         else:

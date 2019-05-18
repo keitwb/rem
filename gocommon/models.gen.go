@@ -30,39 +30,6 @@ type OID struct {
 	OID string `bson:"$oid"`
 }
 
-// A person or organization/company that interacts with real estate in some way, e.g. owner,
-// lessee, contractors, etc.
-type Party struct {
-	Error          *string             `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
-	ID             primitive.ObjectID  `bson:"_id"`
-	CreatedBy      *primitive.ObjectID `bson:"createdBy,omitempty"`      // The id of the user that created this object
-	CreatedDate    *string             `bson:"createdDate,omitempty"`    // The date the object was first created
-	LastModifiedBy *primitive.ObjectID `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
-	ModifiedDate   *string             `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
-	Address        *string             `bson:"address,omitempty"`
-	City           *string             `bson:"city,omitempty"`
-	Name           *string             `bson:"name,omitempty"`
-	Notes          *Note               `bson:"notes,omitempty"`
-	Phone          *string             `bson:"phone,omitempty"`
-	State          *string             `bson:"state,omitempty"`
-	SubParties     []Party             `bson:"subParties"`
-	Type           *Type               `bson:"type,omitempty"`
-	Zipcode        *string             `bson:"zipcode,omitempty"`
-}
-
-// A note that gives an update on an item
-type Note struct {
-	Error          *string              `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
-	ID             primitive.ObjectID   `bson:"_id"`
-	CreatedBy      *primitive.ObjectID  `bson:"createdBy,omitempty"`      // The id of the user that created this object
-	CreatedDate    *string              `bson:"createdDate,omitempty"`    // The date the object was first created
-	LastModifiedBy *primitive.ObjectID  `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
-	ModifiedDate   *string              `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
-	Media          []primitive.ObjectID `bson:"media"`
-	Note           *string              `bson:"note,omitempty"`
-	Title          *string              `bson:"title,omitempty"`
-}
-
 // A lease for one or more properties
 type Lease struct {
 	Error          *string              `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
@@ -81,30 +48,17 @@ type Lease struct {
 	TermUnit       *TermUnit            `bson:"termUnit,omitempty"`
 }
 
-// A user in the system
-type User struct {
-	Error          *string             `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
-	ID             primitive.ObjectID  `bson:"_id"`
-	CreatedBy      *primitive.ObjectID `bson:"createdBy,omitempty"`      // The id of the user that created this object
-	CreatedDate    *string             `bson:"createdDate,omitempty"`    // The date the object was first created
-	LastModifiedBy *primitive.ObjectID `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
-	ModifiedDate   *string             `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
-	Disabled       bool                `bson:"disabled"`
-	Email          *string             `bson:"email,omitempty"`
-	FirstName      *string             `bson:"firstName,omitempty"`
-	LastName       *string             `bson:"lastName,omitempty"`
-	PasswordHashed *string             `bson:"passwordHashed,omitempty"`
-	SessionIDs     []string            `bson:"sessionIDs"`
-	Username       string              `bson:"username"`
-}
-
-type MongoDoc struct {
-	Error          *string             `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
-	ID             primitive.ObjectID  `bson:"_id"`
-	CreatedBy      *primitive.ObjectID `bson:"createdBy,omitempty"`      // The id of the user that created this object
-	CreatedDate    *string             `bson:"createdDate,omitempty"`    // The date the object was first created
-	LastModifiedBy *primitive.ObjectID `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
-	ModifiedDate   *string             `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+// A note that gives an update on an item
+type Note struct {
+	Error          *string              `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
+	ID             primitive.ObjectID   `bson:"_id"`
+	CreatedBy      *primitive.ObjectID  `bson:"createdBy,omitempty"`      // The id of the user that created this object
+	CreatedDate    *string              `bson:"createdDate,omitempty"`    // The date the object was first created
+	LastModifiedBy *primitive.ObjectID  `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
+	ModifiedDate   *string              `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+	Media          []primitive.ObjectID `bson:"media"`
+	Note           *string              `bson:"note,omitempty"`
+	Title          *string              `bson:"title,omitempty"`
 }
 
 // A media file that is associated with a property, lease, note, etc.
@@ -129,6 +83,35 @@ type Metadata struct {
 	Tags        []string `bson:"tags"`
 }
 
+type MongoDoc struct {
+	Error          *string             `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
+	ID             primitive.ObjectID  `bson:"_id"`
+	CreatedBy      *primitive.ObjectID `bson:"createdBy,omitempty"`      // The id of the user that created this object
+	CreatedDate    *string             `bson:"createdDate,omitempty"`    // The date the object was first created
+	LastModifiedBy *primitive.ObjectID `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
+	ModifiedDate   *string             `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+}
+
+// A person or organization/company that interacts with real estate in some way, e.g. owner,
+// lessee, contractors, etc.
+type Party struct {
+	Error          *string             `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
+	ID             primitive.ObjectID  `bson:"_id"`
+	CreatedBy      *primitive.ObjectID `bson:"createdBy,omitempty"`      // The id of the user that created this object
+	CreatedDate    *string             `bson:"createdDate,omitempty"`    // The date the object was first created
+	LastModifiedBy *primitive.ObjectID `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
+	ModifiedDate   *string             `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+	Address        *string             `bson:"address,omitempty"`
+	City           *string             `bson:"city,omitempty"`
+	Name           *string             `bson:"name,omitempty"`
+	Notes          *Note               `bson:"notes,omitempty"`
+	Phone          *string             `bson:"phone,omitempty"`
+	State          *string             `bson:"state,omitempty"`
+	SubParties     []Party             `bson:"subParties"`
+	Type           *Type               `bson:"type,omitempty"`
+	Zipcode        *string             `bson:"zipcode,omitempty"`
+}
+
 // A set of one or more parcels that constitute a single logic piece of real estate
 type Property struct {
 	Error                    *string                       `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
@@ -142,8 +125,8 @@ type Property struct {
 	ContactIDS               []primitive.ObjectID          `bson:"contactIds"`
 	County                   *string                       `bson:"county,omitempty"`
 	Description              *string                       `bson:"description,omitempty"`
-	DesiredRentCents         *float64                      `bson:"desiredRentCents,omitempty"`
-	DesiredSalesPriceDollars *float64                      `bson:"desiredSalesPriceDollars,omitempty"`
+	DesiredRentCents         *int64                        `bson:"desiredRentCents,omitempty"`
+	DesiredSalesPriceDollars *int64                        `bson:"desiredSalesPriceDollars,omitempty"`
 	InsurancePolicyIDS       []primitive.ObjectID          `bson:"insurancePolicyIds"`
 	Latitude                 *float64                      `bson:"latitude,omitempty"`
 	LeaseIDS                 []primitive.ObjectID          `bson:"leaseIds"`
@@ -163,50 +146,72 @@ type Property struct {
 
 type Owner struct {
 	ID      *primitive.ObjectID `bson:"id,omitempty"`
-	Portion *int64              `bson:"portion,omitempty"`
+	Portion *float64            `bson:"portion,omitempty"`
 }
 
 type TaxBill struct {
-	BuildingAssessedCents *float64   `bson:"buildingAssessedCents,omitempty"`
+	BuildingAssessedCents *int64     `bson:"buildingAssessedCents,omitempty"`
 	DueDate               *string    `bson:"dueDate,omitempty"`
-	LandAssessedCents     *float64   `bson:"landAssessedCents,omitempty"`
+	LandAssessedCents     *int64     `bson:"landAssessedCents,omitempty"`
 	LineItems             []LineItem `bson:"lineItems"`
-	MiscAssessedCents     *float64   `bson:"miscAssessedCents,omitempty"`
+	MiscAssessedCents     *int64     `bson:"miscAssessedCents,omitempty"`
 	Payments              []Payment  `bson:"payments"`
-	TotalAssessedCents    *float64   `bson:"totalAssessedCents,omitempty"`
+	TotalAssessedCents    *int64     `bson:"totalAssessedCents,omitempty"`
 }
 
 type LineItem struct {
-	AmountCents *float64 `bson:"amountCents,omitempty"`
-	Description *string  `bson:"description,omitempty"`
+	AmountCents *int64  `bson:"amountCents,omitempty"`
+	Description *string `bson:"description,omitempty"`
 }
 
 type Payment struct {
-	AmountCents *float64 `bson:"amountCents,omitempty"`
-	PaymentDate *string  `bson:"paymentDate,omitempty"`
+	AmountCents *int64  `bson:"amountCents,omitempty"`
+	PaymentDate *string `bson:"paymentDate,omitempty"`
 }
 
 type TaxPropInfo struct {
-	AssessmentDate         *string  `bson:"assessmentDate,omitempty"`
-	BuildingAppraisedCents *float64 `bson:"buildingAppraisedCents,omitempty"`
-	LandAppraisedCents     *float64 `bson:"landAppraisedCents,omitempty"`
-	LegalDescription       *string  `bson:"legalDescription,omitempty"`
-	MiscAppraisedCents     *float64 `bson:"miscAppraisedCents,omitempty"`
-	Neighborhood           *string  `bson:"neighborhood,omitempty"`
-	OwnerAddress           *string  `bson:"ownerAddress,omitempty"`
-	OwnerName              *string  `bson:"ownerName,omitempty"`
-	PropertyClass          *string  `bson:"propertyClass,omitempty"`
-	SitusAddress           *string  `bson:"situsAddress,omitempty"`
-	TaxDistrict            *string  `bson:"taxDistrict,omitempty"`
-	TotalAppraisedCents    *float64 `bson:"totalAppraisedCents,omitempty"`
-	Zoning                 *string  `bson:"zoning,omitempty"`
+	AssessmentDate         *string `bson:"assessmentDate,omitempty"`
+	BuildingAppraisedCents *int64  `bson:"buildingAppraisedCents,omitempty"`
+	LandAppraisedCents     *int64  `bson:"landAppraisedCents,omitempty"`
+	LegalDescription       *string `bson:"legalDescription,omitempty"`
+	MiscAppraisedCents     *int64  `bson:"miscAppraisedCents,omitempty"`
+	Neighborhood           *string `bson:"neighborhood,omitempty"`
+	OwnerAddress           *string `bson:"ownerAddress,omitempty"`
+	OwnerName              *string `bson:"ownerName,omitempty"`
+	PropertyClass          *string `bson:"propertyClass,omitempty"`
+	SitusAddress           *string `bson:"situsAddress,omitempty"`
+	TaxDistrict            *string `bson:"taxDistrict,omitempty"`
+	TotalAppraisedCents    *int64  `bson:"totalAppraisedCents,omitempty"`
+	Zoning                 *string `bson:"zoning,omitempty"`
 }
 
-type Type string
+// A user in the system
+type User struct {
+	Error          *string             `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
+	ID             primitive.ObjectID  `bson:"_id"`
+	CreatedBy      *primitive.ObjectID `bson:"createdBy,omitempty"`      // The id of the user that created this object
+	CreatedDate    *string             `bson:"createdDate,omitempty"`    // The date the object was first created
+	LastModifiedBy *primitive.ObjectID `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
+	ModifiedDate   *string             `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+	Disabled       bool                `bson:"disabled"`
+	Email          *string             `bson:"email,omitempty"`
+	FirstName      *string             `bson:"firstName,omitempty"`
+	LastName       *string             `bson:"lastName,omitempty"`
+	PasswordHashed *string             `bson:"passwordHashed,omitempty"`
+	SessionIDs     []string            `bson:"sessionIds"`
+	Username       string              `bson:"username"`
+}
+
+// A set of Mongo collection names for the various models
+type CollectionName string
 
 const (
-	Company Type = "company"
-	Person  Type = "person"
+	Leases     CollectionName = "leases"
+	MediaFiles CollectionName = "media.files"
+	Notes      CollectionName = "notes"
+	Parties    CollectionName = "parties"
+	Properties CollectionName = "properties"
+	Users      CollectionName = "users"
 )
 
 type LeaseType string
@@ -227,6 +232,13 @@ const (
 	Years    TermUnit = "years"
 )
 
+type Type string
+
+const (
+	Company Type = "company"
+	Person  Type = "person"
+)
+
 type PropType string
 
 const (
@@ -234,16 +246,4 @@ const (
 	Industrial  PropType = "industrial"
 	Land        PropType = "land"
 	Residential PropType = "residential"
-)
-
-// A set of Mongo collection names for the various models
-type CollectionName string
-
-const (
-	Leases     CollectionName = "leases"
-	MediaFiles CollectionName = "media.files"
-	Notes      CollectionName = "notes"
-	Parties    CollectionName = "parties"
-	Properties CollectionName = "properties"
-	Users      CollectionName = "users"
 )

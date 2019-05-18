@@ -21,13 +21,13 @@ from .search import handle_search
 logger = logging.getLogger(__name__)
 
 
-def make_app(mongo_loc, es_hosts, db_name="rem"):
+def make_app(mongo_uri, es_hosts, db_name="rem"):
     """
     Run the server until exit
     """
     logger.info("Starting websocket server")
     # Use a single mongo client for every connection
-    mongo_client = AsyncIOMotorClient(*mongo_loc, document_class=RawBSONDocument)
+    mongo_client = AsyncIOMotorClient(mongo_uri, document_class=RawBSONDocument)
 
     # Use a single ES client for every connection
     es_client = elasticsearch_async.AsyncElasticsearch(es_hosts, maxsize=20)

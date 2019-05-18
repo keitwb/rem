@@ -2,9 +2,9 @@
 Common protocols
 """
 from typing import Optional
-from typing_extensions import Protocol
 
-from remcommon.models_gen import TaxPropInfo, TaxBill
+from remcommon.models_gen import TaxBill, TaxPropInfo
+from typing_extensions import Protocol
 
 
 # pylint:disable=all

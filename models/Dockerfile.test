@@ -1,0 +1,10 @@
+FROM python:3.7-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache npm git bash go
+COPY models/package*.json ./models/
+
+ENV PATH="$PATH:/app/models/node_modules/.bin"
+RUN cd models && npm install
+

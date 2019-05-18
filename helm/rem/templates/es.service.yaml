@@ -1,3 +1,4 @@
+{{ if false }} {{/* Disable the es statefulset */}}
 ---
 apiVersion: v1
 kind: Service
@@ -12,3 +13,4 @@ spec:
   - name: tcp
     port: 9200
     targetPort: 9200
+{{end}}

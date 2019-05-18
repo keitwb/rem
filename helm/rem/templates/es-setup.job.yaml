@@ -1,3 +1,4 @@
+{{ if false }} {{/* Disable the es statefulset */}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -23,8 +24,9 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: setup
-        image: quay.io/rem/es:{{default .Values.defaultTag .Values.esImageTag}}
+        image: quay.io/rem/es-setup:{{default .Values.defaultTag .Values.esImageTag}}
         command: ["/opt/setup/setup-indexes.sh"]
         env:
           - name: ES_HOST
             value: es
+{{end}}

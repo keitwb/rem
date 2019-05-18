@@ -14,10 +14,7 @@ async def startup():
     """
     Run the server until it is stopped
     """
-    app = make_app(
-        mongo_loc=(os.environ.get("MONGO_HOSTNAME", "mongo"), int(os.environ.get("MONGO_PORT", "27017"))),
-        db_name=os.environ.get("MONGO_DATABASE", "rem"),
-    )
+    app = make_app(mongo_uri=os.environ.get("MONGO_URI"), db_name=os.environ.get("MONGO_DATABASE", "rem"))
 
     # This will complete upon startup and this function will return
     await app.create_server(host="0.0.0.0", port=8080)

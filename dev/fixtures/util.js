@@ -1,7 +1,5 @@
-rem = connect('mongo:27017/rem');
-
 function upsert(collName, docs) {
-  var coll = rem.getCollection(collName);
+  var coll = db.getCollection(collName);
 
   print("Loading " + collName);
   docs.forEach(function(d) {
@@ -25,6 +23,6 @@ function ID(offset) {
 }
 
 function fileByFileName(filename) {
-  return rem.media.files.findOne({filename: filename});
+  return db.media.files.findOne({filename: filename});
 }
 

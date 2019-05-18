@@ -12,6 +12,7 @@ pycommon = {editable = true,path = "./../pycommon"}
 pillow = "==5.4.1"
 
 [dev-packages]
+pycommon = {editable = true,extras = ["test"],path = "./../pycommon"}
 
 [requires]
 python_version = "3.7"

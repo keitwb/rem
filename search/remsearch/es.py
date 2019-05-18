@@ -35,13 +35,26 @@ async def delete_from_index_by_id(esclient, index, es_id):
     await _do_op_with_retry(func)
 
 
-async def _do_op_with_retry(index_func):
+async def _do_op_with_retry(op_func):
     while True:
         try:
-            resp = await index_func()
+            resp = await op_func()
             logger.debug("Response from ES: %s", resp)
-            return
+            return resp
         except elasticsearch.ElasticsearchException as e:
-            logger.error("Error running index function %s: %s", index_func, e)
+            logger.error("Error running index function %s: %s", op_func, e)
         # TODO: implement binary backoff with max wait?
         await asyncio.sleep(5)
+
+
+async def check_reindex_needed(esclient, index):
+    """
+    Returns True if we need to reindex everything in ElasticSearch.  This can happen upon initial
+    deployment of the app or if ES happens to lose all its data.
+    """
+    return (
+        await _do_op_with_retry(
+            p(esclient.get, index="initialization", doc_type="_doc", id=index, ignore=404)
+        )
+        is None
+    )
