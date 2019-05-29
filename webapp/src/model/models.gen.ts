@@ -34,7 +34,7 @@ export interface InsurancePolicy {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -42,11 +42,11 @@ export interface InsurancePolicy {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: string;
+    modifiedDate?: Date;
     description?:  string;
-    endDate?:      string;
+    endDate?:      Date;
     mediaIds?:     ObjectID[];
-    startDate?:    string;
+    startDate?:    Date;
 }
 
 /**
@@ -76,7 +76,7 @@ export interface Lease {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -84,13 +84,13 @@ export interface Lease {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: string;
+    modifiedDate?: Date;
     description?:  string;
     leaseType?:    LeaseType;
     lessees?:      ObjectID[];
     notes?:        Note[];
     rate?:         number;
-    startDate?:    string;
+    startDate?:    Date;
     termLength?:   number;
     termUnit?:     TermUnit;
 }
@@ -119,7 +119,7 @@ export interface Note {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -127,7 +127,7 @@ export interface Note {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: string;
+    modifiedDate?: Date;
     media?:        ObjectID[];
     note?:         string;
     title?:        string;
@@ -155,7 +155,7 @@ export interface Media {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -163,13 +163,13 @@ export interface Media {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: string;
+    modifiedDate?: Date;
     chunkSize?:    number;
     contentType?:  string;
     filename?:     string;
     length?:       number;
     md5?:          string;
-    uploadDate?:   string;
+    uploadDate?:   Date;
     metadata?:     Metadata;
 }
 
@@ -191,7 +191,7 @@ export interface MongoDoc {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -199,7 +199,7 @@ export interface MongoDoc {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: string;
+    modifiedDate?: Date;
 }
 
 /**
@@ -219,7 +219,7 @@ export interface Party {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -227,7 +227,7 @@ export interface Party {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: string;
+    modifiedDate?: Date;
     address?:      string;
     city?:         string;
     name?:         string;
@@ -260,7 +260,7 @@ export interface Property {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -268,7 +268,7 @@ export interface Property {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: string;
+    modifiedDate?: Date;
     acreage?:      number;
     /**
      * WKT of the boundary of the property
@@ -310,7 +310,7 @@ export enum PropType {
 
 export interface TaxBill {
     buildingAssessedCents?: number;
-    dueDate?:               string;
+    dueDate?:               Date;
     landAssessedCents?:     number;
     lineItems?:             LineItem[];
     miscAssessedCents?:     number;
@@ -325,11 +325,11 @@ export interface LineItem {
 
 export interface Payment {
     amountCents?: number;
-    paymentDate?: string;
+    paymentDate?: Date;
 }
 
 export interface TaxPropInfo {
-    assessmentDate?:         string;
+    assessmentDate?:         Date;
     buildingAppraisedCents?: number;
     landAppraisedCents?:     number;
     legalDescription?:       string;
@@ -360,7 +360,7 @@ export interface User {
     /**
      * The date the object was first created
      */
-    createdDate?: string;
+    createdDate?: Date;
     /**
      * The id of the user that last modified this object
      */
@@ -368,7 +368,7 @@ export interface User {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?:   string;
+    modifiedDate?:   Date;
     disabled:        boolean;
     email?:          string;
     firstName?:      string;
