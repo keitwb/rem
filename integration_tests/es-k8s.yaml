@@ -1,25 +1,21 @@
-{{ if false }} {{/* Disable the es statefulset */}}
+---
 apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
   name: es
   labels:
     app: es
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    release: "{{ .Release.Name }}"
-    heritage: "{{ .Release.Service }}"
 spec:
   # This needs to be more advanced to support more than one instance
   replicas: 1
   selector:
     matchLabels:
       app: es
-      release: "{{ .Release.Name }}"
+  serviceName: es
   template:
     metadata:
       labels:
         app: es
-        release: "{{ .Release.Name }}"
     spec:
       initContainers:
       - name: init-sysctl
@@ -39,12 +35,14 @@ spec:
           mountPath: /usr/share/elasticsearch/data
       containers:
       - name: es
-        image: quay.io/rem/es:{{ default .Values.defaultTag .Values.esImageTag }}
-        environment:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
+        env:
         - name: ES_JAVA_OPTS
-          value: "-Xms512m -Xmx512m"
-        - name: cluster.name
-          value: rem
+          value: "-Xms256m -Xmx256m"
+        - name: node.name
+          value: es01
+        - name: cluster.initial_master_nodes
+          value: es01
         imagePullPolicy: Always
         readinessProbe:
           tcpSocket:
@@ -58,20 +56,17 @@ spec:
           mountPath: /usr/share/elasticsearch/data
       volumes:
         - name: ephemeral
-          # Run ES out of ephemeral memory since our indexer app automatically reindexes from Mongo
-          # if we lose things.  Probably change this to a persistent disk at some point for better
-          # availability.
-          emptyDir:
-            medium: Memory
-  {{if not .Values.esEphemeralDisk}}
-  volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: {{ default "" .Values.esStorageClassName }}
-      resources:
-        requests:
-          storage: {{ default "8Gi" .Values.esStorageRequest }}
-  {{end}}
-{{end}}
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: es
+spec:
+  selector:
+    app: es
+  type: NodePort
+  ports:
+  - name: tcp
+    port: 9200
+    targetPort: 9200

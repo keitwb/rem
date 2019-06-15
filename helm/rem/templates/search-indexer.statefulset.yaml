@@ -26,6 +26,8 @@ spec:
         env:
         - name: MONGO_URI
           value: {{required "mongoUri required" .Values.mongoUri}}
+        - name: MONGO_DATABASE
+          value: {{.Values.mongoDatabase}}
         - name: ES_HOST
           value: {{required "esHost required" .Values.esHost}}
         - name: ES_PORT

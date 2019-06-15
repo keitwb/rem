@@ -9,10 +9,10 @@ import logging
 from functools import partial as p
 
 import aiohttp
-import elasticsearch_async
 import pymongo
 from motor.motor_asyncio import AsyncIOMotorClient
 
+import elasticsearch_async
 from remcommon import watch
 from remcommon.models_gen import CollectionName
 
@@ -130,6 +130,8 @@ async def index_collection(mongo_db, tika_client, esclient, collection):
     activity on record.  It should be called after the watch stream has already started but before
     changes are actually being processed, so that nothing is missed.
     """
+    logger.info("Indexing whole collection: %s", collection)
+
     if is_gridfs_collection(collection):
         index_func = p(
             text.index_gridfs_file,

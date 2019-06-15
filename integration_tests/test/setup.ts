@@ -39,6 +39,10 @@ async function setup() {
   }
 }
 
+process.on("unhandledRejection", ex => {
+  throw ex;
+});
+
 setup().then(run);
 
 afterEach(async function() {

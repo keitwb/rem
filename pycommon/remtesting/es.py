@@ -18,7 +18,7 @@ async def run_elasticsearch():
     Runs ES with a simple setup and yield a client configured to talk to it
     """
     async with run_container(
-        "docker.elastic.co/elasticsearch/elasticsearch-oss:6.6.1",
+        "docker.elastic.co/elasticsearch/elasticsearch-oss:7.1.1",
         environment={"discovery.type": "single-node", "ES_JAVA_OPTS": "-Xms128m -Xmx128m"},
         wait_for_port=9200,
     ) as es_cont:

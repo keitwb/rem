@@ -26,6 +26,8 @@ spec:
         env:
         - name: MONGO_URI
           value: {{required "mongoUri required" .Values.mongoUri}}
+        - name: MONGO_DATABASE
+          value: {{.Values.mongoDatabase}}
         - name: INSTANCE_NAME
           valueFrom:
             fieldRef:

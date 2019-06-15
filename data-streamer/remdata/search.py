@@ -20,9 +20,7 @@ async def handle_search(es_client, message):
             result = await es_client.search(index=index, body=body, request_timeout=5)
         elif action == "getFields":
             mappings = await es_client.indices.get_mapping(index=index, request_timeout=5)
-            result = {
-                "fields": [k for i in mappings.values() for k in i["mappings"]["_doc"]["properties"].keys()]
-            }
+            result = {"fields": [k for i in mappings.values() for k in i["mappings"]["properties"].keys()]}
         await message.send_response(result)
     except elasticsearch.exceptions.ElasticsearchException as e:
         await message.send_error(str(e))

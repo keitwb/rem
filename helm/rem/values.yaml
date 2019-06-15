@@ -18,6 +18,9 @@ tikaImageTag:
 # Required.  Should be the mongo connection URI string, e.g. 'mongodb://...'.
 mongoUri:
 
+# The database within Mongo to use
+mongoDatabase: rem
+
 # Required.  The hostname to the elasticsearch instance.
 esHost:
 # Elasticsearch port to connect to

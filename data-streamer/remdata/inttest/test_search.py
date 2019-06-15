@@ -31,7 +31,7 @@ async def test_do_match_search():
                 )
             )
             resp = ujson.loads(await ws_client.recv())
-            assert resp.get("hits", {}).get("total") == 1
+            assert resp.get("hits", {}).get("total", {}).get("value") == 1
             assert resp["hits"]["hits"][0]["_id"] == "b"
 
 

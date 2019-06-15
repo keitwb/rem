@@ -8,17 +8,18 @@ pipeline {
                     agent {
                         dockerfile {
                             dir 'integration_tests'
-                            args '-v $HOME/.npm:/root/.npm -v /var/run/docker.sock:/var/run/docker.sock'
+                            args '-v /var/run/docker.sock:/var/run/docker.sock'
                         }
                     }
                     environment {
                         QUAY_IO_BOT = credentials("quay-rem-jenkins")
+                        MONGO_URI = credentials("int-test-mongo-url")
                     }
                     steps { dir('integration_tests') {
                         withCredentials([[$class: "FileBinding", credentialsId: 'rem-int-tests-kubeconfig', variable: 'KUBECONFIG']]) {
                             sh '''
                               docker login -u="$QUAY_IO_BOT_USR" -p="$QUAY_IO_BOT_PSW" quay.io
-                              npm install
+                              ln -s /app/node_modules $(pwd)/node_modules
 
                               JUNIT_REPORT_PATH="report.xml" ./run.sh
                             '''

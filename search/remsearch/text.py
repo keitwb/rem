@@ -36,9 +36,10 @@ async def index_gridfs_file(tika_client, esclient, mongo_db, mongo_doc, collecti
     text = await _get_file_text(tika_client, mongo_doc["_id"], bucket_name, mongo_db)
     mongo_doc["text"] = text
 
-    for k, v in mongo_doc["metadata"].items():
-        mongo_doc[k] = v
-    del mongo_doc["metadata"]
+    if "metadata" in mongo_doc:
+        for k, v in mongo_doc["metadata"].items():
+            mongo_doc[k] = v
+        del mongo_doc["metadata"]
 
     await es.index_document(esclient, bucket_name, mongo_doc)
 
