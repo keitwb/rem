@@ -1,5 +1,8 @@
 {
   "settings": {
+    "index": {
+      "max_ngram_diff": 12
+    },
     "analysis": {
       "analyzer": {
         "default": {
@@ -24,11 +27,10 @@
     }
   },
   "mappings": {
-    "_doc": {
       "properties": {
         "name": {
           "type": "text",
-					"term_vector": "with_positions_offsets",
+          "term_vector": "with_positions_offsets",
           "fields": {
             "keyword": {
               "type":  "keyword",
@@ -38,7 +40,7 @@
         },
         "description": {
           "type": "text",
-					"term_vector": "with_positions_offsets",
+          "term_vector": "with_positions_offsets",
           "fields": {
             "keyword": {
               "type":  "keyword",
@@ -48,7 +50,7 @@
         },
         "city": {
           "type": "text",
-					"term_vector": "with_positions_offsets",
+          "term_vector": "with_positions_offsets",
           "fields": {
             "keyword": {
               "type":  "keyword",
@@ -61,7 +63,7 @@
         },
         "state": {
           "type": "text",
-					"term_vector": "with_positions_offsets",
+          "term_vector": "with_positions_offsets",
           "fields": {
             "keyword": {
               "type":  "keyword",
@@ -74,7 +76,7 @@
         },
         "county": {
           "type": "text",
-					"term_vector": "with_positions_offsets",
+          "term_vector": "with_positions_offsets",
           "fields": {
             "keyword": {
               "type":  "keyword",
@@ -87,7 +89,7 @@
         },
         "tags": {
           "type": "text",
-					"term_vector": "with_positions_offsets",
+          "term_vector": "with_positions_offsets",
           "fields": {
             "keyword": {
               "type":  "keyword",
@@ -99,6 +101,5 @@
           }
         }
       }
-    }
   }
 }
