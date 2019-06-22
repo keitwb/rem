@@ -1,7 +1,7 @@
 // Parties
-rem.createCollection("parties");
+db.createCollection("parties");
 
-rem.runCommand({
+db.runCommand({
    collMod:"parties",
    validator:{ $or: [
      { "type": { $in: ["person", "company"] } }

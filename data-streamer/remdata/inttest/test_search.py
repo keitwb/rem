@@ -10,7 +10,6 @@ from .util import open_stream, start_test_server
 
 # pylint: disable=missing-docstring
 @pytest.mark.asyncio
-@pytest.mark.timeout(60)
 async def test_do_match_search():
     async with start_test_server() as [ws_port, _, es_client]:
         props_to_index = [
@@ -32,12 +31,11 @@ async def test_do_match_search():
                 )
             )
             resp = ujson.loads(await ws_client.recv())
-            assert resp.get("hits", {}).get("total") == 1
+            assert resp.get("hits", {}).get("total", {}).get("value") == 1
             assert resp["hits"]["hits"][0]["_id"] == "b"
 
 
 @pytest.mark.asyncio
-@pytest.mark.timeout(30)
 async def test_get_field_names():
     async with start_test_server() as [ws_port, _, es_client]:
         props_to_index = [
@@ -52,4 +50,4 @@ async def test_get_field_names():
             await ws_client.send(ujson.dumps({"index": "properties", "action": "getFields"}))
             resp = ujson.loads(await ws_client.recv())
 
-            assert set(resp.get("fields")) == set(["name", "county"])
+            assert set(["name", "county"]) <= set(resp.get("fields"))

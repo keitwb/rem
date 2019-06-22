@@ -4,7 +4,6 @@ Utils for setting up tests and doing assertions
 # pylint: disable=not-async-context-manager
 
 import asyncio
-from functools import partial as p
 from contextlib import asynccontextmanager
 
 import elasticsearch
@@ -12,7 +11,7 @@ import elasticsearch
 from remsearch import watch
 from remtesting.containers import container_ip, run_container
 from remtesting.es import run_elasticsearch
-from remtesting.mongo import run_mongo
+from remtesting.mongo import collection_watches, run_mongo
 from remtesting.wait import wait_for_async, wait_for_shutdown
 
 TIKA_IMAGE = "logicalspark/docker-tikaserver:1.18"
@@ -26,21 +25,6 @@ async def get_es_doc(es_client, index, doc_id):
         return await es_client.get(doc_type="_doc", index=index, id=str(doc_id))
     except (elasticsearch.NotFoundError, elasticsearch.exceptions.TransportError):
         return False
-
-
-async def watch_is_active(mongo_client, instances):
-    """
-    Returns True when the watches are all active by checking Mongo directly for change stream
-    commands.  There should be one change stream op per collection per instance.
-    """
-    ops = await mongo_client.rem.current_op()
-    change_streams = [
-        ip
-        for ip in ops["inprog"]
-        if ip.get("originatingCommand", {}).get("pipeline")
-        and "$changeStream" in ip["originatingCommand"]["pipeline"][0]
-    ]
-    return len(change_streams) >= len(watch.COLLECTIONS_TO_INDEX) * instances
 
 
 async def get_es_indexing_stats(index_name, es_client):
@@ -63,7 +47,7 @@ async def run_watchers(event_loop, mongo_client, es_client, tika_container=None,
         event_loop.create_task(
             watch.watch_indexed_collections(
                 "test-%d" % i,
-                mongo_loc=mongo_client.address,
+                mongo_uri="mongodb://%s:%d" % mongo_client.address,
                 es_hosts=es_client.transport.hosts,
                 tika_loc=(tika_host, 9998),
             )
@@ -72,9 +56,11 @@ async def run_watchers(event_loop, mongo_client, es_client, tika_container=None,
     ]
 
     try:
-        assert await wait_for_async(
-            p(watch_is_active, mongo_client, instances)
-        ), "change streams never activated"
+
+        async def watches_active():
+            return len(await collection_watches(mongo_client)) >= instances * len(watch.COLLECTIONS_TO_INDEX)
+
+        assert await wait_for_async(watches_active), "change streams never activated"
 
         yield
     finally:

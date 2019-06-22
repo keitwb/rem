@@ -24,10 +24,10 @@ spec:
         image: quay.io/rem/tax-info:{{ default .Values.defaultTag .Values.taxInfoImageTag }}
         imagePullPolicy: Always
         env:
-        - name: MONGO_HOSTNAME
-          value: mongo
-        - name: MONGO_PORT
-          value: "27017"
+        - name: MONGO_URI
+          value: {{required "mongoUri required" .Values.mongoUri}}
+        - name: MONGO_DATABASE
+          value: {{.Values.mongoDatabase}}
         - name: INSTANCE_NAME
           valueFrom:
             fieldRef:

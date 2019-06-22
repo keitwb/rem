@@ -2,11 +2,10 @@
 Utils for the integration tests
 """
 import asyncio
-from contextlib import asynccontextmanager, closing
 import socket
+from contextlib import asynccontextmanager, closing
 
 import websockets
-
 from remdata.core import make_app
 from remtesting.es import run_elasticsearch
 from remtesting.mongo import run_mongo
@@ -19,7 +18,7 @@ async def start_test_server():
     """
     async with run_mongo() as mongo_client:
         async with run_elasticsearch() as es_client:
-            app = make_app(mongo_client.address, es_client.transport.hosts)
+            app = make_app("mongodb://%s:%d" % mongo_client.address, es_client.transport.hosts)
 
             started = asyncio.Event()
 
@@ -41,7 +40,6 @@ async def start_test_server():
                     yield [assigned_port, mongo_client, es_client]
                 finally:
                     server_task.cancel()
-                    sock.close()
 
 
 @asynccontextmanager

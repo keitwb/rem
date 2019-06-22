@@ -1,7 +1,7 @@
 // Leases
-rem.createCollection("leases");
+db.createCollection("leases");
 
-rem.runCommand({
+db.runCommand({
    collMod:"leases",
    validator:{ $and: [
      {

@@ -145,6 +145,6 @@ USER_EMAIL = "email"
 USER_FIRST_NAME = "firstName"
 USER_LAST_NAME = "lastName"
 USER_PASSWORD_HASHED = "passwordHashed"
-USER_SESSION_IDS = "sessionIDs"
+USER_SESSION_IDS = "sessionIds"
 USER_USERNAME = "username"
 

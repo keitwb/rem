@@ -15,13 +15,13 @@ from PIL import Image
 logger = logging.getLogger(__name__)
 
 
-def make_app(mongo_loc, db_name="rem"):
+def make_app(mongo_uri, db_name="rem"):
     """
     Run the server until exit
     """
     logger.info("Starting thumbnail server")
     # Use a single mongo client for every connection
-    mongo_client = AsyncIOMotorClient(*mongo_loc, document_class=RawBSONDocument)
+    mongo_client = AsyncIOMotorClient(mongo_uri, document_class=RawBSONDocument)
 
     mongo_db = mongo_client[db_name]
 

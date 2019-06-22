@@ -2,9 +2,10 @@ import datetime
 
 import aiohttp
 import pytest
-from remcommon.models_gen import LineItem, Payment, TaxPropInfo, TaxBill
 
+from remcommon.models_gen import LineItem, Payment, TaxBill, TaxPropInfo
 from remtaxinfo.util.adapter import PinNotFoundError
+
 from ..cumberland_nc import CumberlandNCTaxInfo
 from .fixtures import load_fixture
 
@@ -64,15 +65,14 @@ async def test_tax_bill(aresponses):
 
     tax_bill = await CumberlandNCTaxInfo().get_tax_bill("123-456-7890-", 2018, aiohttp.ClientSession())
 
-    print(tax_bill)
     assert tax_bill == TaxBill(
         line_items=[
-            LineItem("COUNTY WIDE", 66876),
-            LineItem("RECREATION", 4185),
-            LineItem("HOPE MILLS", 38502),
-            LineItem("HM REFUSE TX", 21600),
-            LineItem("HM STRWRES", 4800),
-            LineItem("SW USER FEE", 5600),
+            LineItem(description="COUNTY WIDE", amount_cents=66876),
+            LineItem(description="RECREATION", amount_cents=4185),
+            LineItem(description="HOPE MILLS", amount_cents=38502),
+            LineItem(description="HM REFUSE TX", amount_cents=21600),
+            LineItem(description="HM STRWRES", amount_cents=4800),
+            LineItem(description="SW USER FEE", amount_cents=5600),
         ],
         payments=[
             Payment(amount_cents=41563, payment_date=datetime.datetime(2018, 9, 24)),
@@ -83,4 +83,5 @@ async def test_tax_bill(aresponses):
         land_assessed_cents=0,
         building_assessed_cents=None,
         misc_assessed_cents=None,
+        due_date=None,
     )

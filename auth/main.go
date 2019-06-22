@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -36,7 +35,10 @@ func main() {
 
 	initMetrics()
 
-	mongoURL := fmt.Sprintf("mongodb://%s:%s", getenv("MONGO_HOSTNAME", "mongo"), getenv("MONGO_PORT", "27017"))
+	mongoURL := os.Getenv("MONGO_URI")
+	if mongoURL == "" {
+		panic("MONGO_URI not specified")
+	}
 
 	opt := options.Client()
 	opt.SetSingle(true)

@@ -9,8 +9,9 @@ from contextlib import asynccontextmanager
 from functools import partial as p
 
 import pytest
+
 from remcommon import watch
-from remtesting.mongo import run_mongo
+from remtesting.mongo import collection_watches, run_mongo
 from remtesting.wait import wait_for_async, wait_for_shutdown
 
 ObservedChange = namedtuple("ObservedChange", ["instance_index", "change"])
@@ -27,6 +28,10 @@ async def run_watchers_with_mongo(event_loop, collection, service="test", instan
             watcher_yields,
         ]:
             yield [mongo_db, watcher_yields]
+
+
+async def watches_are_active(mongo_client, instances):
+    return len(await collection_watches(mongo_client)) >= instances
 
 
 @asynccontextmanager
@@ -50,27 +55,12 @@ async def run_watchers(event_loop, mongo_client, collection, service="test", ins
 
     try:
         assert await wait_for_async(
-            p(watch_is_active, mongo_client, instance_count)
+            p(watches_are_active, mongo_client, instance_count)
         ), "change streams never activated"
 
         yield [mongo_db, watcher_yields]
     finally:
         await asyncio.gather(*[wait_for_shutdown(t) for t in watcher_tasks], loop=event_loop)
-
-
-async def watch_is_active(mongo_client, instance_count):
-    """
-    Returns True when the watches are all active by checking Mongo directly for change stream
-    commands.  There should be one change stream op per collection per instance.
-    """
-    ops = await mongo_client.rem.current_op()
-    change_streams = [
-        ip
-        for ip in ops["inprog"]
-        if ip.get("originatingCommand", {}).get("pipeline")
-        and "$changeStream" in ip["originatingCommand"]["pipeline"][0]
-    ]
-    return len(change_streams) >= instance_count
 
 
 # pylint: disable=missing-docstring

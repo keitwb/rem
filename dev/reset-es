@@ -16,7 +16,7 @@ kubectl wait --for=condition=Ready -l app=es pod
 kubectl exec es-0 -- /opt/setup/setup-indexes.sh
 
 # Delete the search index claims so the search indexers will reindex everything
-kubectl exec mongo-0 -- mongo rem --eval 'db.search_index_claims.deleteMany({});'
+kubectl exec mongo-0 -- mongo rem --eval 'db.watch_claims.deleteMany({});'
 
 kubectl delete pod -l app=search-indexer --wait
 kubectl wait --for=condition=Ready -l app=search-indexer pod

@@ -1,33 +1,31 @@
 #!/bin/bash
 
 # Loads a set of fixtures that can be used for development or integration testing.
+# MONGO_URI should include the database name if provided at all.
 
-set -euxo pipefail
+set -xeuo pipefail
 
-MONGO_DB=${MONGO_DB-"rem"}
-MONGO_HOST=${MONGO_HOST-"mongo"}
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-mongo="mongo ${MONGO_HOST}:27017/${MONGO_DB}"
+MONGO_URI=${MONGO_URI-"mongodb://127.0.0.1:27017/${MONGO_DATABASE-rem}"}
 
-while true; do
-  if $mongo --eval 'db.getCollectionNames()'; then
-    break;
-  fi
-  echo "Sleeping for 5 seconds waiting for mongo to come up" >&2
-  sleep 5
-done
+mongo="mongo ${MONGO_URI}"
 
-cd /opt/dev/media
-for f in $(find /opt/dev/media -type f | xargs -L 1 basename)
-do
-  mime_type=$(file --mime-type $f | awk '{print $2}')
-  mongofiles put --host $MONGO_HOST:27017 --replace --prefix media --type $mime_type --db $MONGO_DB $f
-done
+# Load all media files using mongofiles
+(
+  cd $SCRIPT_DIR/media
 
-cd /opt/dev
-$mongo /opt/dev/media.js
-$mongo /opt/dev/properties.js
-$mongo /opt/dev/leases.js
-$mongo /opt/dev/notes.js
-$mongo /opt/dev/parties.js
-$mongo /opt/dev/users.js
+  for f in $(find . -type f)
+  do
+    mime_type=$(file --mime-type $f | awk '{print $2}')
+    mongofiles --db "${MONGO_URI##*/}" --uri $MONGO_URI --replace --prefix media --type $mime_type put $(basename $f)
+  done
+)
+
+cd $SCRIPT_DIR
+$mongo $SCRIPT_DIR/media.js
+$mongo $SCRIPT_DIR/properties.js
+$mongo $SCRIPT_DIR/leases.js
+$mongo $SCRIPT_DIR/notes.js
+$mongo $SCRIPT_DIR/parties.js
+$mongo $SCRIPT_DIR/users.js

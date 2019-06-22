@@ -26,9 +26,11 @@ spec:
         ports:
         - containerPort: 8080
         env:
-        - name: MONGO_HOSTNAME
-          value: mongo
-        - name: MONGO_PORT
-          value: "27017"
+        - name: MONGO_URI
+          value: {{required "mongoUri required" .Values.mongoUri}}
+        - name: MONGO_DATABASE
+          value: {{.Values.mongoDatabase}}
         - name: ES_HOST
-          value: es
+          value: {{required "esHost required" .Values.esHost}}
+        - name: ES_PORT
+          value: "{{.Values.esPort}}"

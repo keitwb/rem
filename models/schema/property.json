@@ -18,7 +18,7 @@
            "type": "object",
            "properties": {
              "id": { "$ref": "./common.json#/definitions/oid" },
-             "portion": { "type": "integer" }
+             "portion": { "type": "number" }
            }
          }
        },
@@ -30,8 +30,8 @@
        "latitude": { "type": "number" },
        "longitude": { "type": "number" },
        "boundary": { "type": "string", "description": "WKT of the boundary of the property" },
-       "desiredRentCents": { "type": "number" },
-       "desiredSalesPriceDollars": { "type": "number" },
+       "desiredRentCents": { "type": "integer" },
+       "desiredSalesPriceDollars": { "type": "integer" },
        "noteIds": {
          "type": "array",
          "items": { "$ref": "common.json#/definitions/oid" }
@@ -70,10 +70,10 @@
              "neighborhood": {"type": "string" },
              "zoning": {"type": "string" },
              "legalDescription": {"type": "string" },
-             "totalAppraisedCents": {"type": "number" },
-             "landAppraisedCents": {"type": "number" },
-             "buildingAppraisedCents": {"type": "number" },
-             "miscAppraisedCents": {"type": "number" },
+             "totalAppraisedCents": {"type": "integer" },
+             "landAppraisedCents": {"type": "integer" },
+             "buildingAppraisedCents": {"type": "integer" },
+             "miscAppraisedCents": {"type": "integer" },
              "assessmentDate": {"type": "string", "format": "date-time" }
            }
          }
@@ -88,10 +88,10 @@
            "additionalProperties": {
              "type": "object",
              "properties": {
-               "totalAssessedCents": { "type": "number" },
-               "landAssessedCents": { "type": "number" },
-               "buildingAssessedCents": { "type": "number" },
-               "miscAssessedCents": { "type": "number" },
+               "totalAssessedCents": { "type": "integer" },
+               "landAssessedCents": { "type": "integer" },
+               "buildingAssessedCents": { "type": "integer" },
+               "miscAssessedCents": { "type": "integer" },
                "dueDate": { "type": "string", "format": "date" },
                "lineItems": {
                  "type": "array",
@@ -99,7 +99,7 @@
                    "type": "object",
                    "properties": {
                      "description": {"type": "string"},
-                     "amountCents": {"type": "number"}
+                     "amountCents": {"type": "integer"}
                    }
                  }
                },
@@ -109,7 +109,7 @@
                    "type": "object",
                    "properties": {
                       "paymentDate": {"type": "string", "format": "date-time"},
-                      "amountCents": {"type": "number"}
+                      "amountCents": {"type": "integer"}
                    }
                  }
                }

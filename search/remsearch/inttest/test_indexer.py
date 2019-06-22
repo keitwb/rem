@@ -79,9 +79,11 @@ async def test_resumes_from_last_change_on_restart(event_loop):
 
             assert await wait_for_async(has_new_field_in_es), "updated city field did not get indexed"
 
-        assert (await get_es_indexing_stats("properties", es_client))[
-            "index_total"
-        ] == 2, "Only 2 indexing operations should happen"
+        # 3 can happen if claim isn't finalized before first watcher is shut down
+        assert (await get_es_indexing_stats("properties", es_client))["index_total"] in [
+            2,
+            3,
+        ], "Only 2 or 3 indexing operations should happen"
 
 
 # pylint: disable=missing-docstring

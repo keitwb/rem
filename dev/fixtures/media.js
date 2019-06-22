@@ -24,7 +24,7 @@ fileMetadata.forEach(function(o) {
   Object.assign(fileDoc, o);
 
   print("Updating file metadata to " + JSON.stringify(fileDoc) + " for " + o.filename);
-  if (rem.media.files.updateOne({ _id: fileDoc._id }, {$set: fileDoc}).modifiedCount != 1) {
+  if (db.media.files.updateOne({ _id: fileDoc._id }, {$set: fileDoc}).modifiedCount != 1) {
     throw 'File not found: ' + o.filename;
   }
 });

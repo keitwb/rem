@@ -11,12 +11,23 @@ defaultTag: latest
 tikaReplicas: 1
 tikaImageTag:
 
-mongoReplicas: 1
-mongoImageTag:
-mongoEphemeralDisk: false
+#mongoReplicas: 1
+#mongoImageTag:
+#mongoEphemeralDisk: false
 
-esReplicas: 1
-esImageTag:
+# Required.  Should be the mongo connection URI string, e.g. 'mongodb://...'.
+mongoUri:
+
+# The database within Mongo to use
+mongoDatabase: rem
+
+# Required.  The hostname to the elasticsearch instance.
+esHost:
+# Elasticsearch port to connect to
+esPort: 9200
+
+#esReplicas: 1
+#esImageTag:
 
 searchIndexerReplicas: 1
 searchIndexerImageTag:
