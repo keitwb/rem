@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: parceldata
+  labels:
+    app: parceldata
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.parcelDataReplicas | default "1" }}
+  selector:
+    matchLabels:
+      app: parceldata
+      release: "{{ .Release.Name }}"
+  template:
+    metadata:
+      labels:
+        app: parceldata
+        release: "{{ .Release.Name }}"
+    spec:
+      containers:
+      - name: parceldata
+        image: quay.io/rem/parceldata:{{default .Values.defaultTag  .Values.parcelDataImageTag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: SHAPEFILE_BASE
+          value: /opt/shapefiles
+        volumeMounts:
+        - mountPath: /opt/shapefiles
+          name: shapefiles
+      volumes:
+      - name: shapefiles
+        hostPath:
+          path: /opt/shapefiles
+          type: Directory

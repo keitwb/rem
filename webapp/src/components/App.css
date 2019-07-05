@@ -1,0 +1,15 @@
+.container {
+  /*display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  */
+}
+
+.top-bar {
+  grid-column: span 12;
+  margin: 0;
+}
+
+.main {
+  grid-column: span 12;
+  margin: 8px;
+}

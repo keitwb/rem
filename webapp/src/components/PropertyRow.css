@@ -1,0 +1,10 @@
+.row {
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+}
+
+.row > div {
+  flex: 33.333%;
+  padding: 0.2em 1em;
+}

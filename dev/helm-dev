@@ -5,4 +5,14 @@ set -x
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-helm upgrade --install --recreate-pods --values $SCRIPT_DIR/helm-dev.yaml --set defaultTag=$USER --set esHost="$ES_HOST" --set "mongoUri=${MONGO_URI//,/\\,}" remdev $SCRIPT_DIR/../helm/rem
+MONGO_URI=${MONGO_URI-$(cat $SCRIPT_DIR/.mongo-uri)}
+ES_HOST=${ES_HOST-$(cat $SCRIPT_DIR/.es-host)}
+KUBECONFIG_LOCAL=$(cat $SCRIPT_DIR/.kubeconfig)
+KUBECONFIG_LOCAL=${KUBECONFIG_LOCAL-$KUBECONFIG}
+
+recreate_flag="--recreate-pods"
+if [[ -n $NO_RECREATE_PODS ]]; then
+  recreate_flag=
+fi
+
+helm upgrade --install $recreate_flag --kubeconfig $KUBECONFIG_LOCAL --values $SCRIPT_DIR/helm-dev.yaml --set defaultTag=$USER --set esHost="$ES_HOST" --set "mongoUri=${MONGO_URI//,/\\,}" remdev $SCRIPT_DIR/../helm/rem

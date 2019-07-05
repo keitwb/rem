@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 
 import { splitLimit } from "@/util/string";
 
@@ -9,10 +9,7 @@ interface Props {
   val: string;
   onChange: (key: string, val: string) => void;
   suggestor: Suggestor;
-}
-
-interface State {
-  filterText: string;
+  placeholder: string;
 }
 
 export function parseFilter(f: string): [string, string] {
@@ -25,31 +22,27 @@ export function parseFilter(f: string): [string, string] {
  * This component uses the state technique described at
  * https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key
  */
-export default class FilterEditor extends React.Component<Props, State> {
-  public readonly state: State = {
-    filterText: this.deriveFilterText(),
-  };
+export default function FilterEditor({ name, val, onChange, suggestor, placeholder }: Props) {
+  const [filterText, setFilterText] = useState(deriveFilterText());
 
-  public render() {
-    return (
-      <div>
-        <SuggestedInput
-          suggestor={this.props.suggestor}
-          value={this.state.filterText}
-          onEnterPressed={() => this.processText()}
-          onEscapePressed={() => this.props.onChange(this.props.name, this.props.val)}
-          onChange={val => this.setState({ filterText: val })}
-        />
-      </div>
-    );
+  function deriveFilterText() {
+    return `${name}${val ? ": " + val : ""}`;
   }
 
-  private deriveFilterText() {
-    return `${this.props.name}${this.props.val ? ": " + this.props.val : ""}`;
+  function processText(s: string) {
+    const [key, value] = parseFilter(s);
+    setFilterText(s);
+    onChange(key, value);
+    return;
   }
-
-  private processText() {
-    const [key, val] = parseFilter(this.state.filterText);
-    this.props.onChange(key, val);
-  }
+  return (
+    <div>
+      <SuggestedInput
+        suggestor={suggestor}
+        defaultValue={filterText}
+        placeholder={placeholder}
+        onChange={v => processText(v)}
+      />
+    </div>
+  );
 }

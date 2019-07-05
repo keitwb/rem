@@ -8,19 +8,20 @@ import (
 	"time"
 
 	"github.com/keitwb/rem/auth/internal"
+	"github.com/keitwb/rem/auth/internal/metrics"
 	"github.com/keitwb/rem/gocommon"
-	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/mongodb/mongo-go-driver/mongo/options"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-lib/metrics/prometheus"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func getenv(name, defaultVal string) string {
 	if val, ok := os.LookupEnv(name); ok {
 		return val
 	}
+
 	return defaultVal
 }
 
@@ -30,10 +31,11 @@ func main() {
 		if err != nil {
 			panic("Could not initialize tracing and metrics: " + err.Error())
 		}
+
 		defer closer.Close()
 	}
 
-	initMetrics()
+	go metrics.ServeMetrics()
 
 	mongoURL := os.Getenv("MONGO_URI")
 	if mongoURL == "" {
@@ -41,19 +43,30 @@ func main() {
 	}
 
 	opt := options.Client()
-	opt.SetSingle(true)
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	client, err := mongo.Connect(ctx, mongoURL, opt)
-	cancel()
+	//opt.SetSingle(true)
+	opt.SetConnectTimeout(15 * time.Second)
+	opt.ApplyURI(mongoURL)
+
+	client, err := mongo.Connect(context.Background(), opt)
 	if err != nil {
 		panic("could not connect to Mongo server: " + err.Error())
 	}
+
 	logrus.WithField("mongoURL", mongoURL).Info("Connected to Mongo")
 
-	userCache := internal.NewUserCache(client.Database(getenv("MONGO_DATABASE", "rem")).Collection(string(gocommon.Users)))
-	userCache.StartWatcher()
+	dbName := getenv("MONGO_DATABASE", "rem")
+
+	logrus.Infof("Using database %s", dbName)
+
+	userCache := internal.NewUserCache(client.Database(dbName).Collection(string(gocommon.Users)))
+	if err := userCache.StartWatcher(); err != nil {
+		panic("could not watch users: " + err.Error())
+	}
 
 	server := internal.NewServer(userCache)
+
+	logrus.Infof("Listening on %s", server.Addr)
+
 	if err = server.ListenAndServe(); err != http.ErrServerClosed {
 		panic("server closed unexpectedly: " + err.Error())
 	}
@@ -61,14 +74,11 @@ func main() {
 
 func initTracer() (io.Closer, error) {
 	metricsFactory := prometheus.New()
+
 	conf, err := config.FromEnv()
 	if err != nil {
 		return nil, err
 	}
-	return conf.InitGlobalTracer("auth", config.Metrics(metricsFactory))
-}
 
-func initMetrics() {
-	http.Handle("/metrics", promhttp.Handler())
-	go http.ListenAndServe(":2112", nil)
+	return conf.InitGlobalTracer("auth", config.Metrics(metricsFactory))
 }

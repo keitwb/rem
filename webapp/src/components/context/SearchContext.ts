@@ -1,5 +1,7 @@
 import * as React from "react";
 
-const SearchContext = React.createContext(null);
+import { SearchClient } from "@/backend/search";
+
+const SearchContext = React.createContext<SearchClient>(null);
 
 export default SearchContext;

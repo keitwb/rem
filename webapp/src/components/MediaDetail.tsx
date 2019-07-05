@@ -1,25 +1,29 @@
+import { ObjectID } from "bson";
 import * as React from "react";
 
-import Config from "@/config/config";
+import * as Config from "@/config/config";
 import { CollectionName, Media } from "@/model/models.gen";
 
-import { connectOneModelById } from "./connectModels";
+import useModel from "./hooks/useModel";
 
-const MediaDetail: React.SFC<{ instance: Media }> = ({ instance }) => {
-  if (!instance) {
+const MediaDetail: React.SFC<{ media: Media }> = ({ media }) => {
+  if (!media) {
     return <div>Loading...</div>;
   }
 
   const conf = Config.fromLocalStorage();
   return (
     <React.Fragment>
-      {instance.filename ? <div>{instance.filename}</div> : null}
-      <div>{instance.metadata.description}</div>
-      <a href={`${conf.dbStreamURL}/media-download/${instance._id.toHexString()}`}>Download</a>
+      {media.filename ? <div>{media.filename}</div> : null}
+      <div>{media.metadata.description}</div>
+      <a href={`${conf.dbStreamURL}/media-download/${media._id.toHexString()}`}>Download</a>
     </React.Fragment>
   );
 };
 
 export default MediaDetail;
 
-export const MediaDetailConnected = connectOneModelById(CollectionName.MediaFiles, MediaDetail);
+export const MediaDetailById: React.SFC<{ id: ObjectID }> = ({ id }) => {
+  const media = useModel(CollectionName.MediaFiles, id);
+  return <MediaDetail media={media} />;
+};

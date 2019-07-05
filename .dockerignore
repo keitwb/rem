@@ -3,6 +3,7 @@ tmp/
 /**/node_modules/**
 /webapp/tmp/**
 **/virtualenv/
+**/venv/
 **/build/
 **/dist/
 **/pip-wheel-metadata/

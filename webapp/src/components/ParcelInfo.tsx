@@ -16,7 +16,7 @@ const ParcelInfo: React.SFC<Props> = ({ property, pin }) => {
       {taxPropInfo.legalDescription ? <div>Legal Description: {taxPropInfo.legalDescription}</div> : null}
 
       {Object.keys(property.taxBills || {}).map(year => (
-        <TaxBill property={property} pin={pin} year={year} />
+        <TaxBill key={year} property={property} pin={pin} year={year} />
       ))}
     </div>
   );

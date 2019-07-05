@@ -9,13 +9,23 @@ interface Props {
   name: string;
   val: string;
   isEditing: boolean;
+  placeholder: string;
   suggestor: Suggestor;
   onClick: () => void;
   onChange: (name: string, val: string) => void;
   onDelete: () => void;
 }
 
-const EditableFilterItem: React.SFC<Props> = ({ name, val, isEditing, suggestor, onClick, onChange, onDelete }) =>
+const EditableFilterItem: React.SFC<Props> = ({
+  name,
+  val,
+  isEditing,
+  placeholder,
+  suggestor,
+  onClick,
+  onChange,
+  onDelete,
+}) =>
   isEditing ? (
     // key is needed to reset state when name/val changes
     <FilterEditor
@@ -24,6 +34,7 @@ const EditableFilterItem: React.SFC<Props> = ({ name, val, isEditing, suggestor,
       key={`${name}:${val}`}
       suggestor={suggestor}
       onChange={(newName: string, newVal: string) => onChange(newName, newVal)}
+      placeholder={placeholder}
     />
   ) : (
     <FilterItem onClick={onClick} name={name} val={val} onDelete={onDelete} />

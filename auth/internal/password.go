@@ -9,6 +9,7 @@ func checkPassword(password string, user *gocommon.User) bool {
 	if user.PasswordHashed == nil {
 		return false
 	}
+
 	return bcrypt.CompareHashAndPassword([]byte(*user.PasswordHashed), []byte(password)) == nil
 }
 
@@ -17,7 +18,9 @@ func setPassword(password string, user *gocommon.User) error {
 	if err != nil {
 		return err
 	}
+
 	hashedStr := string(hashed)
 	user.PasswordHashed = &hashedStr
+
 	return nil
 }

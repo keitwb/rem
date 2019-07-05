@@ -4,6 +4,6 @@
   "title": "CollectionName",
   "description": "A set of Mongo collection names for the various models",
   "allOf": [
-    { "enum": ["properties", "leases", "parties", "media.files", "notes", "users"] }
+    { "enum": ["properties", "leases", "parties", "media.files", "notes", "users", "insurancePolicies"] }
   ]
 }

@@ -15,6 +15,7 @@ export interface State {
   notes: ModelState<models.Note>;
   parties: ModelState<models.Party>;
   "media.files": ModelState<models.Media>;
+  insurancePolicies: ModelState<models.InsurancePolicy>;
 }
 
 export type CollectionName = keyof State;

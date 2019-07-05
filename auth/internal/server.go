@@ -1,11 +1,14 @@
 package internal
 
 import (
-	"encoding/json"
+	"errors"
 	"net/http"
+	"time"
 
 	"github.com/go-http-utils/logger"
 	"github.com/julienschmidt/httprouter"
+	"github.com/keitwb/rem/auth/internal/metrics"
+	"github.com/keitwb/rem/gocommon"
 	"github.com/opentracing-contrib/go-stdlib/nethttp"
 	"github.com/opentracing/opentracing-go"
 	"github.com/sirupsen/logrus"
@@ -17,7 +20,7 @@ type Server struct {
 	userCache *UserCache
 }
 
-const unauthorizedMsg = "Unauthorized"
+const unauthorizedMsg = "Incorrect username or password"
 const (
 	sessionCookieName = "sessionid"
 	// Session cookies last for 30 days
@@ -41,7 +44,8 @@ func NewServer(userCache *UserCache) *Server {
 	router.POST("/login", s.handleLogin)
 	router.POST("/logout", s.handleLogout)
 	router.POST("/set-password", s.handleSetPassword)
-	router.GET("/auth", s.handleAuth)
+	router.GET("/verify", s.handleVerify)
+
 	return s
 }
 
@@ -53,37 +57,37 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request, _ httproute
 
 	err := json.NewDecoder(r.Body).Decode(&data)
 	r.Body.Close()
+
 	if err != nil {
-		w.WriteHeader(400)
-		w.Write([]byte(err.Error()))
+		writeJSONError(w, "bad input", 400)
 		return
 	}
 
 	user, err := s.userCache.Get(data.Username)
 	if err != nil {
 		logrus.WithError(err).Error("Could not fetch user")
-		w.WriteHeader(500)
-		w.Write([]byte("Error looking up username"))
+		writeJSONError(w, "Error looking up username", 500)
+
 		return
 	}
 
 	if user == nil || user.Disabled || !checkPassword(data.Password, user) {
-		w.WriteHeader(403)
-		w.Write([]byte(unauthorizedMsg))
+		metrics.LoginFailures.Inc()
+		writeJSONError(w, unauthorizedMsg, 403)
+
 		return
 	}
 
 	sid, err := generateSessionID()
 	if err != nil {
 		logrus.WithError(err).Error("Could not generate session id")
-		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+		writeJSONError(w, err.Error(), 500)
+
 		return
 	}
 
 	if err := AddSessionID(s.userCache.userColl, user, sid); err != nil {
-		w.WriteHeader(500)
-		w.Write([]byte(err.Error()))
+		writeJSONError(w, err.Error(), 500)
 		return
 	}
 
@@ -91,61 +95,68 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request, _ httproute
 		Name:     sessionCookieName,
 		Value:    sid,
 		MaxAge:   sessionCookieMaxAge,
+		Path:     "/",
 		HttpOnly: true,
 	})
-	w.WriteHeader(200)
-	w.Write([]byte("Logged in"))
+	writeJSON(w, map[string]interface{}{
+		"userId": user.ID.Hex(),
+	}, 200)
 }
 
 func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	sessionID := determineSessionID(r)
-	if sessionID == "" {
-		w.WriteHeader(403)
-		w.Write([]byte("No session id in request"))
-		return
-	}
-
-	user, err := s.userCache.GetBySessionID(sessionID)
+	user, err := s.getUserFromSession(r)
 	if err != nil {
-		w.WriteHeader(403)
-		w.Write([]byte("Session id not active"))
+		writeJSONError(w, err.Error(), 403)
 		return
 	}
 
 	if err := RemoveSessions(s.userCache.userColl, user); err != nil {
 		logrus.WithError(err).Error("couldn't delete session")
-		w.WriteHeader(500)
-		w.Write([]byte("Problem deleting session: " + err.Error()))
+		writeJSONError(w, "Problem deleting session: "+err.Error(), 500)
+
 		return
 	}
 
-	w.WriteHeader(200)
-	w.Write([]byte("Logged out"))
+	http.SetCookie(w, &http.Cookie{
+		Name:     sessionCookieName,
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Time{},
+		HttpOnly: true,
+	})
+
+	writeJSON(w, map[string]interface{}{"message": "Logged out"}, 200)
 }
 
-func (s *Server) handleAuth(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (s *Server) getUserFromSession(r *http.Request) (*gocommon.User, error) {
 	sessionID := determineSessionID(r)
 	if sessionID == "" {
-		w.WriteHeader(403)
-		w.Write([]byte("No session id in request"))
-		return
+		return nil, errors.New("no session id in request")
 	}
 
 	user, err := s.userCache.GetBySessionID(sessionID)
 	if err != nil {
-		w.WriteHeader(403)
-		w.Write([]byte("Session id not active"))
+		return nil, errors.New("session id not active")
+	}
+
+	return user, nil
+}
+
+func (s *Server) handleVerify(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	user, err := s.getUserFromSession(r)
+	if err != nil {
+		writeJSONError(w, err.Error(), 403)
 		return
 	}
 
 	if user.Disabled {
-		w.WriteHeader(403)
-		w.Write([]byte("User disabled"))
+		writeJSONError(w, "User disabled", 403)
 		return
 	}
 
-	w.WriteHeader(200)
-	w.Write([]byte("Valid session"))
+	writeJSON(w, map[string]interface{}{
+		"userId": user.ID.Hex(),
+	}, 200)
 }
 
 func determineSessionID(r *http.Request) string {
@@ -154,25 +165,32 @@ func determineSessionID(r *http.Request) string {
 			return cookie.Value
 		}
 	}
+
 	return ""
 }
 
 func (s *Server) handleSetPassword(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	//	var data struct {
-	//		NewPassword string `json:"newPassword"`
-	//	}
-	//	err := json.NewDecoder(r.Body).Decode(&data)
-	//	r.Body.Close()
-	//	if err != nil {
-	//		w.WriteHeader(400)
-	//		w.Write([]byte(err.Error()))
-	//		return
-	//	}
-	//
-	//	if err := setPassword(data.NewPassword, user); err != nil {
-	//		w.WriteHeader(500)
-	//		w.Write([]byte("Could not set password"))
-	//		return
-	//	}
+	user, err := s.getUserFromSession(r)
+	if err != nil {
+		writeJSONError(w, err.Error(), 403)
+		return
+	}
 
+	var data struct {
+		NewPassword string `json:"newPassword"`
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&data)
+
+	r.Body.Close()
+
+	if err != nil {
+		writeJSONError(w, err.Error(), 400)
+		return
+	}
+
+	if err := setPassword(data.NewPassword, user); err != nil {
+		writeJSONError(w, "Could not set password", 500)
+		return
+	}
 }

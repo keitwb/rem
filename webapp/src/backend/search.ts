@@ -24,16 +24,17 @@ export interface Hits<T> {
 
 export interface SearchResults<T> {
   readonly hits: Hits<T>;
+  readonly error: string;
 }
 
 export interface CompletionResult {
   readonly suggest: {
-    [index: string]: {
+    [index: string]: Array<{
       options: Array<{
         text: string;
         _id: string;
       }>;
-    };
+    }>;
   };
 }
 
@@ -70,21 +71,27 @@ export class SearchClient {
     return await this.ws.doSimpleRequest<GetFieldsResult>({ action: "getFields", index });
   }
 
-  public async suggest(field: string, index: string, prefix: string): Promise<string[]> {
+  public async suggest(field: string, index: string, prefix: string, size = 10): Promise<string[]> {
     const reqBody = {
       index,
-      suggest: {
-        current: {
-          completion: {
-            field: `${field}.completion`,
+      action: "search",
+      body: {
+        _source: "suggest",
+        suggest: {
+          current: {
+            completion: {
+              skip_duplicates: true,
+              field: `${field}.suggest`,
+              size,
+            },
+            prefix,
           },
-          prefix,
         },
       },
     };
 
     const resp = await this.ws.doSimpleRequest<CompletionResult>(reqBody);
-    return resp.suggest.current.options.map(o => o.text);
+    return resp.suggest.current[0].options.map(o => o.text);
   }
 }
 

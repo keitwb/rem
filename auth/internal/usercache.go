@@ -7,13 +7,15 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/keitwb/rem/gocommon"
-	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
-	"github.com/mongodb/mongo-go-driver/mongo"
 	"github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const sessionIDField = "sessionIDs"
+const findTimeout = 30 * time.Second
 
 // UserCache is a cache of the set of users in Mongo.  It is thread-safe.
 type UserCache struct {
@@ -35,15 +37,20 @@ func NewUserCache(userColl *mongo.Collection) *UserCache {
 }
 
 type changeDoc struct {
-	FullDocument  *gocommon.User
-	OperationType string
-	DocumentKey   *primitive.ObjectID
+	FullDocument  *gocommon.User `bson:"fullDocument"`
+	OperationType string         `bson:"operationType"`
+	DocumentKey   struct {
+		ID *primitive.ObjectID `bson:"_id"`
+	} `bson:"documentKey"`
 }
 
 // StartWatcher will start a change stream for users so that changes (e.g. login/logout) will be
 // distributed to all instances of this service.
 func (uc *UserCache) StartWatcher() error {
-	changeStream, err := uc.userColl.Watch(context.Background(), nil)
+	changeStream, err := uc.userColl.Watch(
+		context.Background(),
+		mongo.Pipeline{},
+		options.ChangeStream().SetFullDocument(options.UpdateLookup))
 	if err != nil {
 		return err
 	}
@@ -66,6 +73,7 @@ func (uc *UserCache) StartWatcher() error {
 			uc.processChangeToUser(&change)
 		}
 	}()
+
 	return nil
 }
 
@@ -77,7 +85,7 @@ func (uc *UserCache) processChangeToUser(change *changeDoc) {
 	case "update", "replace":
 		user := change.FullDocument
 		if user == nil {
-			logrus.Errorf("User %s doesn't have a username", user.ID)
+			logrus.Error("User change doesn't have a document")
 			return
 		}
 
@@ -92,7 +100,7 @@ func (uc *UserCache) processChangeToUser(change *changeDoc) {
 
 		uc.replaceUser(user)
 	case "delete":
-		if change.DocumentKey == nil {
+		if change.DocumentKey.ID == nil {
 			logrus.WithField("change", spew.Sdump(change)).Errorf("User delete change event didn't have documentKey")
 			return
 		}
@@ -100,7 +108,7 @@ func (uc *UserCache) processChangeToUser(change *changeDoc) {
 		uc.Lock()
 		defer uc.Unlock()
 
-		uc.removeUserByID(*change.DocumentKey)
+		uc.removeUserByID(*change.DocumentKey.ID)
 	case "drop", "rename", "dropDatabase", "invalidate":
 		// A drop or rename of the user collection is pretty catastrophic
 		panic("cannot continue with users collection: " + change.OperationType)
@@ -113,6 +121,7 @@ func (uc *UserCache) replaceUser(user *gocommon.User) {
 
 	uc.userByID[user.ID] = user
 	uc.userByName[user.Username] = user
+
 	for _, sid := range user.SessionIDs {
 		uc.userBySessionID[sid] = user
 	}
@@ -130,6 +139,7 @@ func (uc *UserCache) removeUserByID(id primitive.ObjectID) {
 
 	delete(uc.userByID, id)
 	delete(uc.userByName, user.Username)
+
 	for _, sid := range user.SessionIDs {
 		delete(uc.userBySessionID, sid)
 	}
@@ -172,6 +182,7 @@ func (uc *UserCache) Get(username string) (*gocommon.User, error) {
 		if err == mongo.ErrNoDocuments {
 			return nil, nil
 		}
+
 		return nil, err
 	}
 
@@ -184,9 +195,11 @@ func (uc *UserCache) Get(username string) (*gocommon.User, error) {
 }
 
 func getFromMongo(userColl *mongo.Collection, username string) (*gocommon.User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 7*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), findTimeout)
 	res := userColl.FindOne(ctx, bson.D{{"username", username}})
+
 	cancel()
+
 	if res.Err() != nil {
 		return nil, res.Err()
 	}

@@ -27,7 +27,7 @@ module.exports = (env, argv) => {
     devtool: "source-map",
 
     resolve: {
-      extensions: [".ts", ".tsx", ".js", ".json"],
+      extensions: [".ts", ".tsx", ".js", ".json", ".css"],
       alias: {
         "@": path.resolve(__dirname, "src"),
       },
@@ -35,42 +35,62 @@ module.exports = (env, argv) => {
 
     module: {
       rules: [
-        { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
-        { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
         {
           test: /\.(css)$/,
+          exclude: [/node_modules/],
           use: [
             {
               loader: "style-loader", // inject CSS to page
             },
             {
               loader: "css-loader", // translates CSS into CommonJS modules
-            },
-          ],
-        },
-        {
-          test: /\.(scss)$/,
-          use: [
-            {
-              loader: "style-loader", // inject CSS to page
-            },
-            {
-              loader: "css-loader", // translates CSS into CommonJS modules
+              options: {
+                importLoaders: 1,
+                localsConvention: "camelCase",
+                modules: {
+                  mode: "local",
+                  localIdentName: "[path][name]__[local]",
+                },
+              },
             },
             {
               loader: "postcss-loader", // Run post css actions
               options: {
                 plugins: function() {
                   // post css plugins, can be exported to postcss.config.js
-                  return [require("precss"), require("autoprefixer")];
+                  return [require("autoprefixer")];
                 },
               },
             },
+          ],
+        },
+        {
+          test: /\.css/,
+          include: [/node_modules/],
+          use: [
             {
-              loader: "sass-loader", // compiles Sass to CSS
+              loader: "style-loader", // inject CSS to page
+            },
+            {
+              loader: "css-loader", // translates CSS into CommonJS modules
             },
           ],
         },
+        {
+          test: /\.(woff(2)?|ttf|eot)(\?v=\d+\.\d+\.\d+)?$/,
+          use: [
+            {
+              loader: "file-loader",
+              options: {
+                name: "[name].[ext]",
+                outputPath: "assets/",
+              },
+            },
+          ],
+        },
+        { test: /\.svg$/, loader: "svg-inline-loader" },
+        { test: /\.tsx?$/, loader: "awesome-typescript-loader" },
+        { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
       ],
     },
 
@@ -82,6 +102,12 @@ module.exports = (env, argv) => {
       //publicPath,
       hot: false,
       overlay: true,
+      proxy: {
+        "/auth": {
+          target: "http://localhost:8080",
+          pathRewrite: { "^/auth": "" },
+        },
+      },
     },
 
     optimization: {
@@ -100,7 +126,7 @@ module.exports = (env, argv) => {
           default: {
             name: "app",
             minChunks: 1,
-            priority: -20,
+            priority: 0,
             reuseExistingChunk: true,
           },
         },

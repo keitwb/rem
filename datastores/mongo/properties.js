@@ -7,3 +7,5 @@ db.runCommand({
    ]},
    validationLevel:"strict"
 });
+
+db.properties.createIndex({ name: 1 }, {unique: true});

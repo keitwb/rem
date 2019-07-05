@@ -1,0 +1,11 @@
+.root {
+  position: absolute;
+}
+
+.root > div {
+  padding: 0 1em;
+}
+
+.selected {
+  background-color: var(--primary-color-light);
+}

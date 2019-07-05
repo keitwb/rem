@@ -10,6 +10,7 @@
        "name": { "type": "string" },
        "description": { "type": "string" },
        "acreage": { "type": "number" },
+       "city": { "type": "string" },
        "county": { "type": "string" },
        "state": { "type": "string", "pattern": "^[A-Z]{2}$" },
        "owners": {
@@ -27,8 +28,10 @@
          "items": { "type": "string" }
        },
        "propType": { "enum": ["residential", "commercial", "industrial", "land" ] },
-       "latitude": { "type": "number" },
-       "longitude": { "type": "number" },
+       "gisRefreshRequested": {
+         "type": "boolean",
+         "description": "If set to true, the GIS parcel information for this property should be refreshed"
+       },
        "boundary": { "type": "string", "description": "WKT of the boundary of the property" },
        "desiredRentCents": { "type": "integer" },
        "desiredSalesPriceDollars": { "type": "integer" },

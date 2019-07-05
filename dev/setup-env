@@ -1,0 +1,11 @@
+#!/bin/bash
+
+_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+export MONGO_URI=$(cat $_SCRIPT_DIR/.mongo-uri)
+echo "Using MONGO_URI=$MONGO_URI"
+
+export ES_HOST=$(cat $_SCRIPT_DIR/.es-host)
+echo "Using ES_HOST=$ES_HOST"
+
+unset _SCRIPT_DIR

@@ -7,12 +7,21 @@ from datetime import datetime
 import pymongo
 
 from remcommon import fieldnames_gen as fields
+from remcommon.models_gen import CollectionName
 
 from .json import BSONDocForJSON, maybe_convert_to_object_id
 
 logger = logging.getLogger(__name__)
 
-ALLOWED_COLLECTIONS = ["properties", "notes", "leases", "media.files", "users"]
+ALLOWED_COLLECTIONS = [
+    CollectionName.PROPERTIES.value,
+    CollectionName.NOTES.value,
+    CollectionName.LEASES.value,
+    CollectionName.MEDIA_FILES.value,
+    CollectionName.USERS.value,
+    CollectionName.PARTIES.value,
+    CollectionName.INSURANCE_POLICIES.value,
+]
 
 
 async def handle_data_access(mongo_db, message):
@@ -74,7 +83,7 @@ async def do_get_by_id(collection, message):
         await cursor.close()
 
 
-async def do_upsert(collection, message):
+async def do_upsert(collection: pymongo.collection.Collection, message):
     """
     Update a doc in Mongo or creates it if not present.
     """

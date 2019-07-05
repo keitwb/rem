@@ -1,16 +1,18 @@
+import { ObjectID } from "bson";
 import * as React from "react";
-import { BrowserRouter, Link, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 
-import Config from "@/config/config";
 import { logger } from "@/util/log";
 
 import BadRoute from "./BadRoute";
 import ConfigEditor from "./ConfigEditor";
-import SearchContext from "./context/SearchContext";
-import { PropertyDetailConnected } from "./PropertyDetail";
+import PropertyCreate from "./PropertyCreate";
+import { PropertyDetailById } from "./PropertyDetail";
 import PropertyOverview from "./PropertyOverview";
-import SearchBar from "./SearchBar";
 import TagDetail from "./TagDetail";
+import TopBar from "./TopBar";
+
+import styles from "./App.css";
 
 export default class App extends React.Component {
   public componentDidCatch(error: Error, info: React.ErrorInfo): void {
@@ -20,32 +22,29 @@ export default class App extends React.Component {
   public render() {
     return (
       <BrowserRouter>
-        <div className="container">
-          <SearchContext.Consumer>{searchClient => <SearchBar searchClient={searchClient} />}</SearchContext.Consumer>
-          <Switch>
-            <Route path="/config" render={() => <ConfigEditor config={Config.fromLocalStorage()} />} />
-            <Route
-              path="/tag/:tag"
-              render={({ match }) => {
-                return <TagDetail tag={match.params.tag} />;
-              }}
-            />
-            <Route
-              path="/property/:id"
-              render={({ match }) => {
-                return <PropertyDetailConnected id={match.params.id} />;
-              }}
-            />
-            <Route exact path="/" component={PropertyOverview} />
-            <Route component={BadRoute} />
-          </Switch>
-          <div className="d-flex justify-content-center">
-            <Link className="font-weight-light px-1" to="/">
-              Home
-            </Link>
-            <Link className="font-weight-light px-1" to="/config">
-              Config
-            </Link>
+        <div className={styles.container}>
+          <div className={styles.topBar}>
+            <TopBar />
+          </div>
+          <div className={styles.main}>
+            <Switch>
+              <Route path="/config" render={() => <ConfigEditor />} />
+              <Route
+                path="/tag/:tag"
+                render={({ match }) => {
+                  return <TagDetail tag={match.params.tag} />;
+                }}
+              />
+              <Route exact path="/property/new" component={PropertyCreate} />
+              <Route
+                path="/property/:id"
+                render={({ match }) => {
+                  return <PropertyDetailById id={new ObjectID(match.params.id)} />;
+                }}
+              />
+              <Route exact path="/" component={PropertyOverview} />
+              <Route component={BadRoute} />
+            </Switch>
           </div>
         </div>
       </BrowserRouter>

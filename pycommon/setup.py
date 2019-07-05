@@ -11,6 +11,7 @@ TEST_DEPS = [
     "pytest-asyncio==0.10.0",
     "pytest-xdist==1.23.0",
     "pytest-timeout==1.3.3",
+    "python-language-server",
 ]
 
 # yapf: disable

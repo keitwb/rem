@@ -13,6 +13,9 @@ searchIndexerReplicas: 2
 # Disable the webapp and run it locally
 webappReplicas: 0
 
+enableCORS: true
+corsAllowOrigin: http://localhost:9000
+
 tlsCert: |
   -----BEGIN CERTIFICATE-----
   MIIC+TCCAeGgAwIBAgIJAP/HSAP6eND7MA0GCSqGSIb3DQEBBQUAMBMxETAPBgNV

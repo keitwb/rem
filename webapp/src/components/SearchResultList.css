@@ -1,0 +1,9 @@
+.root {
+  border: 1px solid hsl(0, 0%, 70%);
+  padding-top: 0.5em;
+}
+
+.result-type-name {
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}

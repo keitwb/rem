@@ -30,13 +30,16 @@ export default class FilterBar extends React.Component<Props, State> {
             onChange={(newK, newV) => this.updateFilter(i, newK, newV)}
             onDelete={() => this.updateFilter(i, null, null)}
             isEditing={this.state.editingIndex === i}
+            placeholder="Add filter"
             key={`${k}:${v}`}
             name={k}
             val={v}
           />
         ))}
-        <div onClick={() => this.addNewFilter()} className="btn btn-outline-primary btn-sm">
-          Add Filter
+        <div>
+          <div onClick={() => this.addNewFilter()} className="btn btn-outline-primary btn-sm">
+            Add Filter
+          </div>
         </div>
       </div>
     );

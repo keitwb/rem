@@ -1,7 +1,7 @@
 import { Action, Dispatch } from "redux";
 
 import { isDelete, isInsert, isReplace, isUpdate, watchCollection } from "@/backend/watcher";
-import Config from "@/config/config";
+import * as Config from "@/config/config";
 import { CollectionName } from "@/model/models.gen";
 import * as dbActions from "@/store/db/actions";
 import { logger } from "@/util/log";

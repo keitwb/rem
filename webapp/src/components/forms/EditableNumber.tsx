@@ -1,9 +1,8 @@
 import toNumber from "lodash-es/toNumber";
 
-import EditableField from "./EditableField";
+import makeEditableField from "./EditableField";
 
-export default class EditableNumber extends EditableField<number> {
-  protected convertValue(val: string): number {
-    return val !== "" ? toNumber(val) : null;
-  }
-}
+const EditableNumber = makeEditableField<number>(function convertValue(val: string): number {
+  return val !== "" ? toNumber(val) : null;
+});
+export default EditableNumber;

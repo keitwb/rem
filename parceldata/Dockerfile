@@ -1,13 +1,24 @@
-FROM debian:9
+FROM python:3.7 as builder
 
-WORKDIR /app/parceldata
-CMD ["python3", "-m", "remparceldata"]
+WORKDIR /opt/venv
 
 RUN apt update &&\
-    apt install -y python3-pip python3-gdal
+    apt install -y python3-pip libgdal-dev
 
-COPY protobuf/python/ /app/protobuf/python/
-COPY parceldata/requirements.txt ./
-RUN pip3 install -r requirements.txt
+RUN python3 -m venv .
 
+RUN . ./bin/activate && pip install 'GDAL<='$(gdal-config --version) --global-option=build_ext --global-option="-I/usr/include/gdal"
+
+COPY parceldata/requirements.txt /tmp/requirements.txt
+
+RUN . ./bin/activate && pip install -r /tmp/requirements.txt
+
+FROM python:3.7
+
+WORKDIR /opt/parceldata
+CMD ["/opt/venv/bin/python", "-m", "remparceldata"]
+
+RUN apt update && apt install -y libgdal20
+
+COPY --from=builder /opt/venv /opt/venv
 COPY parceldata/ ./

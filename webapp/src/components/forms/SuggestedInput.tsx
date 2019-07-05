@@ -1,62 +1,75 @@
-import * as React from "react";
+import React, { useImperativeHandle, useRef, useState } from "react";
 
 import SuggestionList from "./SuggestionList";
+
+import styles from "./SuggestedInput.css";
 
 export type Suggestor = (input: string) => Promise<string[]>;
 
 interface Props {
   suggestor: Suggestor;
-  onEnterPressed: () => void;
-  onEscapePressed: () => void;
-  onChange: (val: string) => void;
-  value: string;
+  onChange?: (val: string) => void;
+  name?: string;
+  defaultValue?: string;
   className?: string;
-}
-
-interface State {
-  suggestions: string[];
+  placeholder?: string;
+  size?: number;
 }
 
 /**
- * This is a "controlled component" that provides a text input that shows suggestions as the user is
- * typing.
+ * This is an "uncontrolled component" that provides a text input that shows suggestions as the user
+ * is typing.
  */
-export default class SuggestedInput extends React.Component<Props, State> {
-  public readonly state: State = {
-    suggestions: [],
-  };
+const SuggestedInput = React.forwardRef<HTMLInputElement, Props>(
+  ({ suggestor, name, size, onChange, defaultValue, className, placeholder }, forwardedRef) => {
+    const ref = useRef<HTMLInputElement>();
 
-  public render() {
+    useImperativeHandle(forwardedRef, () => ref.current);
+
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    function onSelect(val: string) {
+      setShowSuggestions(false);
+      if (ref.current) {
+        ref.current.value = val;
+      }
+      if (onChange) {
+        onChange(val);
+      }
+    }
+
+    async function processChange(val: string) {
+      if (ref.current) {
+        ref.current.value = val;
+      }
+      setSuggestions(await suggestor(val));
+      setShowSuggestions(true);
+      if (onChange) {
+        onChange(val);
+      }
+    }
+
     return (
-      <React.Fragment>
+      <div className={styles.root}>
         <input
           autoFocus
-          className={this.props.className}
+          className={className}
+          size={size}
           type="text"
-          onChange={e => this.processChange(e.target.value)}
-          value={this.props.value}
+          autoComplete="off"
+          placeholder={placeholder}
+          name={name}
+          ref={ref}
+          defaultValue={defaultValue}
+          // Don't submit the form when suggestions are open
+          onKeyDown={e => showSuggestions && e.key === "Enter" && e.preventDefault()}
+          onChange={e => processChange(e.target.value)}
         />
-        <SuggestionList
-          onEnterPressed={this.props.onEnterPressed}
-          onEscapePressed={this.props.onEscapePressed}
-          suggestions={this.state.suggestions}
-          onSelect={val => this.updateValue(val)}
-        />
-      </React.Fragment>
+        {showSuggestions ? <SuggestionList suggestions={suggestions} onSelect={onSelect} /> : null}
+      </div>
     );
   }
+);
 
-  private updateValue(val: string) {
-    this.props.onChange(val);
-    this.setState({
-      suggestions: [],
-    });
-  }
-
-  private async processChange(val: string) {
-    this.props.onChange(val);
-    this.setState({
-      suggestions: await this.props.suggestor(val),
-    });
-  }
-}
+export default SuggestedInput;

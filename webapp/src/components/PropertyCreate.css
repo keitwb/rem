@@ -1,0 +1,24 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.root label {
+  padding: 0.5em 0;
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+}
+
+.root input[name="name"] {
+  width: 20em;
+}
+
+.root input[name="county"] {
+  width: 12em;
+}
+
+.root select[name="state"] {
+  width: 5em;
+}

@@ -1,0 +1,28 @@
+.root {
+  position: relative;
+}
+
+.root form {
+}
+
+.root input {
+  padding: 0.5em 0.5em;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid black;
+  border-radius: 2px;
+}
+
+.root input:focus {
+  box-shadow: 0 0 0 4px hsl(var(--primary-color-hue), 90%, 50%, 0.2);
+}
+
+.results {
+  position: absolute;
+  width: 100%;
+  background-color: hsl(var(--primary-color-hue), 90%, 98%, 0.95);
+}
+
+.error {
+  color: var(--error-color);
+}

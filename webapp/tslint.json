@@ -8,6 +8,7 @@
 		"interface-name": false,
     "object-literal-key-quotes": [true, "as-needed"],
     "cognitive-complexity": [true, 20],
+    "object-literal-sort-keys": false,
     "trailing-comma": [
       true,
       {

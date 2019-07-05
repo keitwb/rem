@@ -5,6 +5,8 @@ import { Highlight, SearchHit } from "@/backend/search";
 import { CollectionName } from "@/model/models.gen";
 import { capitalize, truncate } from "@/util/string";
 
+import styles from "./SearchResultItem.css";
+
 interface Props {
   hit: SearchHit<any>;
   onSelect: () => void;
@@ -14,7 +16,7 @@ const SearchResultItem: React.SFC<Props> = ({ hit, onSelect }) => {
   let content;
   let pathCollection;
 
-  switch (hit._index) {
+  switch (hit._index.replace(/-.*/, "")) {
     case CollectionName.Properties:
       pathCollection = "property";
       content = hit._source.name;
@@ -35,8 +37,8 @@ const SearchResultItem: React.SFC<Props> = ({ hit, onSelect }) => {
       throw new Error(`Unknown search index result type: ${hit._index}`);
   }
   return (
-    <Link onClick={onSelect} className="no-link-underline" to={`/${pathCollection}/${hit._id}`}>
-      <div className="bg-light-hover px-1">
+    <Link onClick={onSelect} className="no-link-colors no-link-underline" to={`/${pathCollection}/${hit._id}`}>
+      <div className={`${styles.item} bg-light-hover`}>
         {truncate(content, 40)}
         {highlightContent(hit.highlight)}
       </div>

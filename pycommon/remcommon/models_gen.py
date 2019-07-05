@@ -19,6 +19,7 @@ from bson.objectid import ObjectId
 #     result = media_from_dict(json.loads(json_string))
 #     result = mongo_doc_from_dict(json.loads(json_string))
 #     result = note_from_dict(json.loads(json_string))
+#     result = parcel_info_from_dict(json.loads(json_string))
 #     result = party_from_dict(json.loads(json_string))
 #     result = property_from_dict(json.loads(json_string))
 #     result = user_from_dict(json.loads(json_string))
@@ -87,18 +88,19 @@ def from_int(x: Any) -> int:
     return x
 
 
-def from_dict(f: Callable[[Any], T], x: Any) -> Dict[str, T]:
-    assert isinstance(x, dict)
-    return { k: f(v) for (k, v) in x.items() }
-
-
 def from_bool(x: Any) -> bool:
     assert isinstance(x, bool)
     return x
 
 
+def from_dict(f: Callable[[Any], T], x: Any) -> Dict[str, T]:
+    assert isinstance(x, dict)
+    return { k: f(v) for (k, v) in x.items() }
+
+
 class CollectionName(Enum):
     """A set of Mongo collection names for the various models"""
+    INSURANCE_POLICIES = "insurancePolicies"
     LEASES = "leases"
     MEDIA_FILES = "media.files"
     NOTES = "notes"
@@ -132,27 +134,27 @@ class OID:
 @dataclass
 class InsurancePolicy:
     """An insurance policy that applies to one or more properties"""
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
     """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
+    created_by: Optional[ObjectId] = None
     """The date the object was first created"""
-    created_date: Optional[datetime]
+    created_date: Optional[datetime] = None
     """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
+    last_modified_by: Optional[ObjectId] = None
     """The date of the last update to the object"""
-    modified_date: Optional[datetime]
-    description: Optional[str]
-    end_date: Optional[datetime]
-    media_ids: Optional[List[ObjectId]]
-    start_date: Optional[datetime]
+    modified_date: Optional[datetime] = None
+    description: Optional[str] = None
+    end_date: Optional[datetime] = None
+    media_ids: Optional[List[ObjectId]] = None
+    start_date: Optional[datetime] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'InsurancePolicy':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
@@ -161,12 +163,12 @@ class InsurancePolicy:
         end_date = from_union([(lambda x: x), from_none], obj.get("endDate"))
         media_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("mediaIds"))
         start_date = from_union([(lambda x: x), from_none], obj.get("startDate"))
-        return InsurancePolicy(error, id, created_by, created_date, last_modified_by, modified_date, description, end_date, media_ids, start_date)
+        return InsurancePolicy(id, error, created_by, created_date, last_modified_by, modified_date, description, end_date, media_ids, start_date)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
@@ -189,26 +191,26 @@ class LeaseType(Enum):
 @dataclass
 class Note:
     """A note that gives an update on an item"""
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
     """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
+    created_by: Optional[ObjectId] = None
     """The date the object was first created"""
-    created_date: Optional[datetime]
+    created_date: Optional[datetime] = None
     """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
+    last_modified_by: Optional[ObjectId] = None
     """The date of the last update to the object"""
-    modified_date: Optional[datetime]
-    media: Optional[List[ObjectId]]
-    note: Optional[str]
-    title: Optional[str]
+    modified_date: Optional[datetime] = None
+    media: Optional[List[ObjectId]] = None
+    note: Optional[str] = None
+    title: Optional[str] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Note':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
@@ -216,12 +218,12 @@ class Note:
         media = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("media"))
         note = from_union([from_str, from_none], obj.get("note"))
         title = from_union([from_str, from_none], obj.get("title"))
-        return Note(error, id, created_by, created_date, last_modified_by, modified_date, media, note, title)
+        return Note(id, error, created_by, created_date, last_modified_by, modified_date, media, note, title)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
@@ -241,31 +243,31 @@ class TermUnit(Enum):
 @dataclass
 class Lease:
     """A lease for one or more properties"""
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
     """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
+    created_by: Optional[ObjectId] = None
     """The date the object was first created"""
-    created_date: Optional[datetime]
+    created_date: Optional[datetime] = None
     """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
+    last_modified_by: Optional[ObjectId] = None
     """The date of the last update to the object"""
-    modified_date: Optional[datetime]
-    description: Optional[str]
-    lease_type: Optional[LeaseType]
-    lessees: Optional[List[ObjectId]]
-    notes: Optional[List[Note]]
-    rate: Optional[float]
-    start_date: Optional[datetime]
-    term_length: Optional[float]
-    term_unit: Optional[TermUnit]
+    modified_date: Optional[datetime] = None
+    description: Optional[str] = None
+    lease_type: Optional[LeaseType] = None
+    lessees: Optional[List[ObjectId]] = None
+    notes: Optional[List[Note]] = None
+    rate: Optional[float] = None
+    start_date: Optional[datetime] = None
+    term_length: Optional[float] = None
+    term_unit: Optional[TermUnit] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Lease':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
@@ -278,12 +280,12 @@ class Lease:
         start_date = from_union([(lambda x: x), from_none], obj.get("startDate"))
         term_length = from_union([from_float, from_none], obj.get("termLength"))
         term_unit = from_union([TermUnit, from_none], obj.get("termUnit"))
-        return Lease(error, id, created_by, created_date, last_modified_by, modified_date, description, lease_type, lessees, notes, rate, start_date, term_length, term_unit)
+        return Lease(id, error, created_by, created_date, last_modified_by, modified_date, description, lease_type, lessees, notes, rate, start_date, term_length, term_unit)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
@@ -301,8 +303,8 @@ class Lease:
 
 @dataclass
 class Metadata:
-    description: Optional[str]
-    tags: Optional[List[str]]
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Metadata':
@@ -321,30 +323,30 @@ class Metadata:
 @dataclass
 class Media:
     """A media file that is associated with a property, lease, note, etc."""
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
     """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
+    created_by: Optional[ObjectId] = None
     """The date the object was first created"""
-    created_date: Optional[datetime]
+    created_date: Optional[datetime] = None
     """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
+    last_modified_by: Optional[ObjectId] = None
     """The date of the last update to the object"""
-    modified_date: Optional[datetime]
-    chunk_size: Optional[float]
-    content_type: Optional[str]
-    filename: Optional[str]
-    length: Optional[float]
-    md5: Optional[str]
-    upload_date: Optional[datetime]
-    metadata: Optional[Metadata]
+    modified_date: Optional[datetime] = None
+    chunk_size: Optional[float] = None
+    content_type: Optional[str] = None
+    filename: Optional[str] = None
+    length: Optional[float] = None
+    md5: Optional[str] = None
+    upload_date: Optional[datetime] = None
+    metadata: Optional[Metadata] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Media':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
@@ -356,12 +358,12 @@ class Media:
         md5 = from_union([from_str, from_none], obj.get("md5"))
         upload_date = from_union([(lambda x: x), from_none], obj.get("uploadDate"))
         metadata = from_union([Metadata.from_dict, from_none], obj.get("metadata"))
-        return Media(error, id, created_by, created_date, last_modified_by, modified_date, chunk_size, content_type, filename, length, md5, upload_date, metadata)
+        return Media(id, error, created_by, created_date, last_modified_by, modified_date, chunk_size, content_type, filename, length, md5, upload_date, metadata)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
@@ -378,37 +380,66 @@ class Media:
 
 @dataclass
 class MongoDoc:
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
     """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
+    created_by: Optional[ObjectId] = None
     """The date the object was first created"""
-    created_date: Optional[datetime]
+    created_date: Optional[datetime] = None
     """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
+    last_modified_by: Optional[ObjectId] = None
     """The date of the last update to the object"""
-    modified_date: Optional[datetime]
+    modified_date: Optional[datetime] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'MongoDoc':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
         modified_date = from_union([(lambda x: x), from_none], obj.get("modifiedDate"))
-        return MongoDoc(error, id, created_by, created_date, last_modified_by, modified_date)
+        return MongoDoc(id, error, created_by, created_date, last_modified_by, modified_date)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
         result["modifiedDate"] = from_union([lambda x: x.isoformat(), from_none], self.modified_date)
+        return result
+
+
+@dataclass
+class ParcelInfo:
+    """Information about a specific parcel"""
+    acreage: Optional[float] = None
+    boundary_wkt: Optional[str] = None
+    owner_name: Optional[str] = None
+    pin_number: Optional[str] = None
+    street_address: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ParcelInfo':
+        assert isinstance(obj, dict)
+        acreage = from_union([from_float, from_none], obj.get("acreage"))
+        boundary_wkt = from_union([from_str, from_none], obj.get("boundaryWKT"))
+        owner_name = from_union([from_str, from_none], obj.get("ownerName"))
+        pin_number = from_union([from_str, from_none], obj.get("pinNumber"))
+        street_address = from_union([from_str, from_none], obj.get("streetAddress"))
+        return ParcelInfo(acreage, boundary_wkt, owner_name, pin_number, street_address)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["acreage"] = from_union([to_float, from_none], self.acreage)
+        result["boundaryWKT"] = from_union([from_str, from_none], self.boundary_wkt)
+        result["ownerName"] = from_union([from_str, from_none], self.owner_name)
+        result["pinNumber"] = from_union([from_str, from_none], self.pin_number)
+        result["streetAddress"] = from_union([from_str, from_none], self.street_address)
         return result
 
 
@@ -422,32 +453,32 @@ class Party:
     """A person or organization/company that interacts with real estate in some way, e.g. owner,
     lessee, contractors, etc.
     """
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
     """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
+    created_by: Optional[ObjectId] = None
     """The date the object was first created"""
-    created_date: Optional[datetime]
+    created_date: Optional[datetime] = None
     """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
+    last_modified_by: Optional[ObjectId] = None
     """The date of the last update to the object"""
-    modified_date: Optional[datetime]
-    address: Optional[str]
-    city: Optional[str]
-    name: Optional[str]
-    notes: Optional[Note]
-    phone: Optional[str]
-    state: Optional[str]
-    sub_parties: Optional[List['Party']]
-    type: Optional[TypeEnum]
-    zipcode: Optional[str]
+    modified_date: Optional[datetime] = None
+    address: Optional[str] = None
+    city: Optional[str] = None
+    name: Optional[str] = None
+    notes: Optional[Note] = None
+    phone: Optional[str] = None
+    state: Optional[str] = None
+    sub_parties: Optional[List['Party']] = None
+    type: Optional[TypeEnum] = None
+    zipcode: Optional[str] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Party':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
@@ -461,12 +492,12 @@ class Party:
         sub_parties = from_union([lambda x: from_list(Party.from_dict, x), from_none], obj.get("subParties"))
         type = from_union([TypeEnum, from_none], obj.get("type"))
         zipcode = from_union([from_str, from_none], obj.get("zipcode"))
-        return Party(error, id, created_by, created_date, last_modified_by, modified_date, address, city, name, notes, phone, state, sub_parties, type, zipcode)
+        return Party(id, error, created_by, created_date, last_modified_by, modified_date, address, city, name, notes, phone, state, sub_parties, type, zipcode)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
@@ -485,8 +516,8 @@ class Party:
 
 @dataclass
 class Owner:
-    id: Optional[ObjectId]
-    portion: Optional[float]
+    id: Optional[ObjectId] = None
+    portion: Optional[float] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Owner':
@@ -511,8 +542,8 @@ class PropType(Enum):
 
 @dataclass
 class LineItem:
-    amount_cents: Optional[int]
-    description: Optional[str]
+    amount_cents: Optional[int] = None
+    description: Optional[str] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'LineItem':
@@ -530,8 +561,8 @@ class LineItem:
 
 @dataclass
 class Payment:
-    amount_cents: Optional[int]
-    payment_date: Optional[datetime]
+    amount_cents: Optional[int] = None
+    payment_date: Optional[datetime] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Payment':
@@ -549,13 +580,13 @@ class Payment:
 
 @dataclass
 class TaxBill:
-    building_assessed_cents: Optional[int]
-    due_date: Optional[datetime]
-    land_assessed_cents: Optional[int]
-    line_items: Optional[List[LineItem]]
-    misc_assessed_cents: Optional[int]
-    payments: Optional[List[Payment]]
-    total_assessed_cents: Optional[int]
+    building_assessed_cents: Optional[int] = None
+    due_date: Optional[datetime] = None
+    land_assessed_cents: Optional[int] = None
+    line_items: Optional[List[LineItem]] = None
+    misc_assessed_cents: Optional[int] = None
+    payments: Optional[List[Payment]] = None
+    total_assessed_cents: Optional[int] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'TaxBill':
@@ -583,19 +614,19 @@ class TaxBill:
 
 @dataclass
 class TaxPropInfo:
-    assessment_date: Optional[datetime]
-    building_appraised_cents: Optional[int]
-    land_appraised_cents: Optional[int]
-    legal_description: Optional[str]
-    misc_appraised_cents: Optional[int]
-    neighborhood: Optional[str]
-    owner_address: Optional[str]
-    owner_name: Optional[str]
-    property_class: Optional[str]
-    situs_address: Optional[str]
-    tax_district: Optional[str]
-    total_appraised_cents: Optional[int]
-    zoning: Optional[str]
+    assessment_date: Optional[datetime] = None
+    building_appraised_cents: Optional[int] = None
+    land_appraised_cents: Optional[int] = None
+    legal_description: Optional[str] = None
+    misc_appraised_cents: Optional[int] = None
+    neighborhood: Optional[str] = None
+    owner_address: Optional[str] = None
+    owner_name: Optional[str] = None
+    property_class: Optional[str] = None
+    situs_address: Optional[str] = None
+    tax_district: Optional[str] = None
+    total_appraised_cents: Optional[int] = None
+    zoning: Optional[str] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'TaxPropInfo':
@@ -636,61 +667,62 @@ class TaxPropInfo:
 @dataclass
 class Property:
     """A set of one or more parcels that constitute a single logic piece of real estate"""
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
     """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
+    created_by: Optional[ObjectId] = None
     """The date the object was first created"""
-    created_date: Optional[datetime]
+    created_date: Optional[datetime] = None
     """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
+    last_modified_by: Optional[ObjectId] = None
     """The date of the last update to the object"""
-    modified_date: Optional[datetime]
-    acreage: Optional[float]
+    modified_date: Optional[datetime] = None
+    acreage: Optional[float] = None
     """WKT of the boundary of the property"""
-    boundary: Optional[str]
-    contact_ids: Optional[List[ObjectId]]
-    county: Optional[str]
-    description: Optional[str]
-    desired_rent_cents: Optional[int]
-    desired_sales_price_dollars: Optional[int]
-    insurance_policy_ids: Optional[List[ObjectId]]
-    latitude: Optional[float]
-    lease_ids: Optional[List[ObjectId]]
-    longitude: Optional[float]
-    media_ids: Optional[List[ObjectId]]
-    name: Optional[str]
-    note_ids: Optional[List[ObjectId]]
-    owners: Optional[List[Owner]]
-    pin_numbers: Optional[List[str]]
-    prop_type: Optional[PropType]
-    state: Optional[str]
-    tags: Optional[List[str]]
-    tax_bills: Optional[Dict[str, Dict[str, TaxBill]]]
-    tax_prop_info: Optional[Dict[str, TaxPropInfo]]
-    tax_refresh_requested: Optional[bool]
+    boundary: Optional[str] = None
+    city: Optional[str] = None
+    contact_ids: Optional[List[ObjectId]] = None
+    county: Optional[str] = None
+    description: Optional[str] = None
+    desired_rent_cents: Optional[int] = None
+    desired_sales_price_dollars: Optional[int] = None
+    """If set to true, the GIS parcel information for this property should be refreshed"""
+    gis_refresh_requested: Optional[bool] = None
+    insurance_policy_ids: Optional[List[ObjectId]] = None
+    lease_ids: Optional[List[ObjectId]] = None
+    media_ids: Optional[List[ObjectId]] = None
+    name: Optional[str] = None
+    note_ids: Optional[List[ObjectId]] = None
+    owners: Optional[List[Owner]] = None
+    pin_numbers: Optional[List[str]] = None
+    prop_type: Optional[PropType] = None
+    state: Optional[str] = None
+    tags: Optional[List[str]] = None
+    tax_bills: Optional[Dict[str, Dict[str, TaxBill]]] = None
+    tax_prop_info: Optional[Dict[str, TaxPropInfo]] = None
+    tax_refresh_requested: Optional[bool] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'Property':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
         modified_date = from_union([(lambda x: x), from_none], obj.get("modifiedDate"))
         acreage = from_union([from_float, from_none], obj.get("acreage"))
         boundary = from_union([from_str, from_none], obj.get("boundary"))
+        city = from_union([from_str, from_none], obj.get("city"))
         contact_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("contactIds"))
         county = from_union([from_str, from_none], obj.get("county"))
         description = from_union([from_str, from_none], obj.get("description"))
         desired_rent_cents = from_union([from_int, from_none], obj.get("desiredRentCents"))
         desired_sales_price_dollars = from_union([from_int, from_none], obj.get("desiredSalesPriceDollars"))
+        gis_refresh_requested = from_union([from_bool, from_none], obj.get("gisRefreshRequested"))
         insurance_policy_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("insurancePolicyIds"))
-        latitude = from_union([from_float, from_none], obj.get("latitude"))
         lease_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("leaseIds"))
-        longitude = from_union([from_float, from_none], obj.get("longitude"))
         media_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("mediaIds"))
         name = from_union([from_str, from_none], obj.get("name"))
         note_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("noteIds"))
@@ -702,27 +734,27 @@ class Property:
         tax_bills = from_union([lambda x: from_dict(lambda x: from_dict(TaxBill.from_dict, x), x), from_none], obj.get("taxBills"))
         tax_prop_info = from_union([lambda x: from_dict(TaxPropInfo.from_dict, x), from_none], obj.get("taxPropInfo"))
         tax_refresh_requested = from_union([from_bool, from_none], obj.get("taxRefreshRequested"))
-        return Property(error, id, created_by, created_date, last_modified_by, modified_date, acreage, boundary, contact_ids, county, description, desired_rent_cents, desired_sales_price_dollars, insurance_policy_ids, latitude, lease_ids, longitude, media_ids, name, note_ids, owners, pin_numbers, prop_type, state, tags, tax_bills, tax_prop_info, tax_refresh_requested)
+        return Property(id, error, created_by, created_date, last_modified_by, modified_date, acreage, boundary, city, contact_ids, county, description, desired_rent_cents, desired_sales_price_dollars, gis_refresh_requested, insurance_policy_ids, lease_ids, media_ids, name, note_ids, owners, pin_numbers, prop_type, state, tags, tax_bills, tax_prop_info, tax_refresh_requested)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
         result["modifiedDate"] = from_union([lambda x: x.isoformat(), from_none], self.modified_date)
         result["acreage"] = from_union([to_float, from_none], self.acreage)
         result["boundary"] = from_union([from_str, from_none], self.boundary)
+        result["city"] = from_union([from_str, from_none], self.city)
         result["contactIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.contact_ids)
         result["county"] = from_union([from_str, from_none], self.county)
         result["description"] = from_union([from_str, from_none], self.description)
         result["desiredRentCents"] = from_union([from_int, from_none], self.desired_rent_cents)
         result["desiredSalesPriceDollars"] = from_union([from_int, from_none], self.desired_sales_price_dollars)
+        result["gisRefreshRequested"] = from_union([from_bool, from_none], self.gis_refresh_requested)
         result["insurancePolicyIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.insurance_policy_ids)
-        result["latitude"] = from_union([to_float, from_none], self.latitude)
         result["leaseIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.lease_ids)
-        result["longitude"] = from_union([to_float, from_none], self.longitude)
         result["mediaIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.media_ids)
         result["name"] = from_union([from_str, from_none], self.name)
         result["noteIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.note_ids)
@@ -740,58 +772,58 @@ class Property:
 @dataclass
 class User:
     """A user in the system"""
-    """A placeholder where errors concerning the object can go"""
-    error: Optional[str]
     id: ObjectId
-    """The id of the user that created this object"""
-    created_by: Optional[ObjectId]
-    """The date the object was first created"""
-    created_date: Optional[datetime]
-    """The id of the user that last modified this object"""
-    last_modified_by: Optional[ObjectId]
-    """The date of the last update to the object"""
-    modified_date: Optional[datetime]
     disabled: bool
-    email: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    password_hashed: Optional[str]
-    session_ids: Optional[List[str]]
     username: str
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
+    """The id of the user that created this object"""
+    created_by: Optional[ObjectId] = None
+    """The date the object was first created"""
+    created_date: Optional[datetime] = None
+    """The id of the user that last modified this object"""
+    last_modified_by: Optional[ObjectId] = None
+    """The date of the last update to the object"""
+    modified_date: Optional[datetime] = None
+    email: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    password_hashed: Optional[str] = None
+    session_ids: Optional[List[str]] = None
 
     @staticmethod
     def from_dict(obj: Any) -> 'User':
         assert isinstance(obj, dict)
-        error = from_union([from_str, from_none], obj.get("_error"))
         id = (lambda x: x)(obj.get("_id"))
+        disabled = from_bool(obj.get("disabled"))
+        username = from_str(obj.get("username"))
+        error = from_union([from_str, from_none], obj.get("_error"))
         created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
         created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
         modified_date = from_union([(lambda x: x), from_none], obj.get("modifiedDate"))
-        disabled = from_bool(obj.get("disabled"))
         email = from_union([from_str, from_none], obj.get("email"))
         first_name = from_union([from_str, from_none], obj.get("firstName"))
         last_name = from_union([from_str, from_none], obj.get("lastName"))
         password_hashed = from_union([from_str, from_none], obj.get("passwordHashed"))
         session_ids = from_union([lambda x: from_list(from_str, x), from_none], obj.get("sessionIds"))
-        username = from_str(obj.get("username"))
-        return User(error, id, created_by, created_date, last_modified_by, modified_date, disabled, email, first_name, last_name, password_hashed, session_ids, username)
+        return User(id, disabled, username, error, created_by, created_date, last_modified_by, modified_date, email, first_name, last_name, password_hashed, session_ids)
 
     def to_dict(self) -> dict:
         result: dict = {}
-        result["_error"] = from_union([from_str, from_none], self.error)
         result["_id"] = to_class(ObjectId, self.id)
+        result["disabled"] = from_bool(self.disabled)
+        result["username"] = from_str(self.username)
+        result["_error"] = from_union([from_str, from_none], self.error)
         result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
         result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
         result["modifiedDate"] = from_union([lambda x: x.isoformat(), from_none], self.modified_date)
-        result["disabled"] = from_bool(self.disabled)
         result["email"] = from_union([from_str, from_none], self.email)
         result["firstName"] = from_union([from_str, from_none], self.first_name)
         result["lastName"] = from_union([from_str, from_none], self.last_name)
         result["passwordHashed"] = from_union([from_str, from_none], self.password_hashed)
         result["sessionIds"] = from_union([lambda x: from_list(from_str, x), from_none], self.session_ids)
-        result["username"] = from_str(self.username)
         return result
 
 
@@ -849,6 +881,14 @@ def note_from_dict(s: Any) -> Note:
 
 def note_to_dict(x: Note) -> Any:
     return to_class(Note, x)
+
+
+def parcel_info_from_dict(s: Any) -> ParcelInfo:
+    return ParcelInfo.from_dict(s)
+
+
+def parcel_info_to_dict(x: ParcelInfo) -> Any:
+    return to_class(ParcelInfo, x)
 
 
 def party_from_dict(s: Any) -> Party:

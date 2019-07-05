@@ -249,7 +249,9 @@ good-names=d,
            e,
            ex,
            s,
+		   app,
            logger,
+           loop,
            Run,
            _
 

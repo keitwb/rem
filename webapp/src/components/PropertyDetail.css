@@ -1,0 +1,22 @@
+.container {
+  display: inline-flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.prop-name {
+  font-size: 150%;
+  font-weight: bold;
+}
+
+.location {
+  display: flex;
+  text-color: hsl(0, 0%, 30%);
+  font-weight: bold;
+}
+
+.location > :nth-child(1) {
+}
+
+.location > :nth-child(2) {
+}

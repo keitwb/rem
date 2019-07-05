@@ -1,5 +1,6 @@
+from typing import Any, Dict
+
 from osgeo import ogr, osr
-from typing import Dict, Any
 
 from . import exceptions
 from .util import single_quote_if_string

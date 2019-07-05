@@ -1,69 +1,49 @@
-import * as React from "react";
+import React, { useState } from "react";
 
-import Config from "@/config/config";
+import Config, { fromLocalStorage, toLocalStorage } from "@/config/config";
 
-interface State {
-  config: Config;
+import styles from "./ConfigEditor.css";
+
+const formItems = [
+  { title: "DB Stream URL", value: "dbStreamURL" },
+  { title: "Change Stream URL", value: "changeStreamURL" },
+  { title: "Search Stream URL", value: "searchStreamURL" },
+  { title: "Auth URL", value: "authURL" },
+];
+
+function useConfig(): [Config, (c: Config) => void] {
+  const [config, setConfig] = useState(fromLocalStorage());
+
+  return [
+    config,
+    (newConfig: Config) => {
+      toLocalStorage(newConfig);
+      return setConfig(newConfig);
+    },
+  ];
 }
 
-export default class ConfigEditor extends React.Component<any, State> {
-  constructor(props: any) {
-    super(props);
-    this.state = {
-      config: Config.fromLocalStorage(),
-    };
-  }
+export default function ConfigEditor() {
+  const [config, setConfig] = useConfig();
 
-  public render() {
-    return (
-      <div className="container">
-        <h1 className="mt-3">App Config</h1>
-        <p className="lead">Set the URLs that the app uses for various backend services</p>
-        <form>
-          <div className="form-group row align-items-center">
-            <label className="col-sm-2 col-form-label">DB Stream URL:</label>
-            <div className="col-sm-5">
-              <input
-                type="text"
-                className="form-control"
-                value={this.state.config.dbStreamURL}
-                onChange={e => {
-                  this.state.config.dbStreamURL = e.target.value;
-                  this.forceUpdate();
-                }}
-              />
-            </div>
+  return (
+    <div className={styles.root}>
+      <h1 className="header">App Config</h1>
+      <p>Set the URLs that the app uses for various backend services</p>
+      <form className={styles.form}>
+        {formItems.map(fi => (
+          <div key={fi.value}>
+            <label>{fi.title}:</label>
+            <input
+              type="text"
+              value={config[fi.value]}
+              onChange={e => {
+                setConfig({ ...config, [fi.value]: e.target.value });
+              }}
+            />
           </div>
-          <div className="form-group row align-items-center">
-            <label className="col-sm-2 col-form-label">Change Stream URL:</label>
-            <div className="col-sm-5">
-              <input
-                type="text"
-                className="form-control"
-                value={this.state.config.changeStreamURL}
-                onChange={e => {
-                  this.state.config.changeStreamURL = e.target.value;
-                  this.forceUpdate();
-                }}
-              />
-            </div>
-          </div>
-          <div className="form-group row align-items-center">
-            <label className="col-sm-2 col-form-label">Search Stream URL:</label>
-            <div className="col-sm-5">
-              <input
-                type="text"
-                className="form-control"
-                value={this.state.config.searchStreamURL}
-                onChange={e => {
-                  this.state.config.searchStreamURL = e.target.value;
-                  this.forceUpdate();
-                }}
-              />
-            </div>
-          </div>
-        </form>
-      </div>
-    );
-  }
+        ))}
+      </form>
+    </div>
+  );
 }

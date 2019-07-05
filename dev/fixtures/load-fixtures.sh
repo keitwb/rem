@@ -29,3 +29,4 @@ $mongo $SCRIPT_DIR/leases.js
 $mongo $SCRIPT_DIR/notes.js
 $mongo $SCRIPT_DIR/parties.js
 $mongo $SCRIPT_DIR/users.js
+$mongo $SCRIPT_DIR/insurancePolicies.js

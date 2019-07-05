@@ -1,0 +1,38 @@
+.root {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+}
+
+.root:hover {
+  border: 1px solid black;
+}
+
+.root input {
+  flex: 2;
+}
+
+.edit {
+  display: flex;
+}
+
+.error {
+  border: 1px solid var(--error-color);
+}
+
+.edit-button {
+  display: flex;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  cursor: pointer;
+}
+
+.edit-button svg {
+  align-self: flex-end;
+}
+
+.edit-border {
+  border: 1px solid black;
+  z-index: -1;
+}

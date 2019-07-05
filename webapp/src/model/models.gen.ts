@@ -10,6 +10,7 @@ import { ObjectID } from "bson";
  * A set of Mongo collection names for the various models
  */
 export enum CollectionName {
+    InsurancePolicies = "insurancePolicies",
     Leases = "leases",
     MediaFiles = "media.files",
     Notes = "notes",
@@ -203,6 +204,17 @@ export interface MongoDoc {
 }
 
 /**
+ * Information about a specific parcel
+ */
+export interface ParcelInfo {
+    acreage?:       number;
+    boundaryWKT?:   string;
+    ownerName?:     string;
+    pinNumber?:     string;
+    streetAddress?: string;
+}
+
+/**
  * A person or organization/company that interacts with real estate in some way, e.g. owner,
  * lessee, contractors, etc.
  */
@@ -274,26 +286,29 @@ export interface Property {
      * WKT of the boundary of the property
      */
     boundary?:                 string;
+    city?:                     string;
     contactIds?:               ObjectID[];
     county?:                   string;
     description?:              string;
     desiredRentCents?:         number;
     desiredSalesPriceDollars?: number;
-    insurancePolicyIds?:       ObjectID[];
-    latitude?:                 number;
-    leaseIds?:                 ObjectID[];
-    longitude?:                number;
-    mediaIds?:                 ObjectID[];
-    name?:                     string;
-    noteIds?:                  ObjectID[];
-    owners?:                   Owner[];
-    pinNumbers?:               string[];
-    propType?:                 PropType;
-    state?:                    string;
-    tags?:                     string[];
-    taxBills?:                 { [key: string]: { [key: string]: TaxBill } };
-    taxPropInfo?:              { [key: string]: TaxPropInfo };
-    taxRefreshRequested?:      boolean;
+    /**
+     * If set to true, the GIS parcel information for this property should be refreshed
+     */
+    gisRefreshRequested?: boolean;
+    insurancePolicyIds?:  ObjectID[];
+    leaseIds?:            ObjectID[];
+    mediaIds?:            ObjectID[];
+    name?:                string;
+    noteIds?:             ObjectID[];
+    owners?:              Owner[];
+    pinNumbers?:          string[];
+    propType?:            PropType;
+    state?:               string;
+    tags?:                string[];
+    taxBills?:            { [key: string]: { [key: string]: TaxBill } };
+    taxPropInfo?:         { [key: string]: TaxPropInfo };
+    taxRefreshRequested?: boolean;
 }
 
 export interface Owner {

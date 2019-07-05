@@ -12,27 +12,31 @@ function pageRelativeWebSocketPath(path: string): string {
   return (l.protocol === "https:" ? "wss://" : "ws://") + l.host + path;
 }
 
-let localConfig: Config;
+function pageRelativePath(path: string): string {
+  const l = window.location;
+  return (l.protocol === "https:" ? "https://" : "http://") + l.host + path;
+}
 
-export default class Config {
-  // Make a Config instance based on values stored in local storage, updating the values in local
-  // storage if they are modified.
-  public static fromLocalStorage(): Config {
-    localConfig = new Config();
+export default interface Config {
+  dbStreamURL: string;
+  changeStreamURL: string;
+  searchStreamURL: string;
+  authURL: string;
+}
 
-    return new Proxy(localConfig, {
-      get: (obj, prop) => {
-        return getFromLocalStorage(prop as string, obj[prop]);
-      },
-      set: (obj, prop, value) => {
-        localStorage.setItem(prop as string, JSON.stringify(value));
-        obj[prop] = value;
-        return true;
-      },
-    });
-  }
+const defaults: Config = {
+  changeStreamURL: pageRelativeWebSocketPath("/stream/changes"),
+  dbStreamURL: pageRelativeWebSocketPath("/stream/db"),
+  searchStreamURL: pageRelativeWebSocketPath("/stream/search"),
+  authURL: pageRelativePath("/auth"),
+};
 
-  public dbStreamURL = pageRelativeWebSocketPath("/stream/db");
-  public changeStreamURL = pageRelativeWebSocketPath("/stream/changes");
-  public searchStreamURL = pageRelativeWebSocketPath("/stream/search");
+export function fromLocalStorage(): Config {
+  return Object.keys(defaults).reduce((acc, k) => ({ ...acc, [k]: getFromLocalStorage(k, defaults[k]) }), {}) as Config;
+}
+
+export function toLocalStorage(c: Config) {
+  Object.keys(c).forEach(k => {
+    localStorage.setItem(k, JSON.stringify(c[k]));
+  });
 }

@@ -1,12 +1,12 @@
-import * as React from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import "ol/ol.css";
 
-import uniqueId from "lodash-es/uniqueId";
-import TileLayer from "ol/layer/tile";
-import { default as OLMap } from "ol/map";
-import OSM from "ol/source/osm";
-import View from "ol/view";
+import { Extent } from "ol/extent";
+import TileLayer from "ol/layer/Tile";
+import { default as OLMap } from "ol/Map";
+import OSM from "ol/source/OSM";
+import View from "ol/View";
 
 import * as models from "@/model/models.gen";
 
@@ -14,34 +14,43 @@ interface Props {
   properties: models.Property[];
 }
 
-export default class Map extends React.Component<Props> {
-  // private map: Map;
-  private mapId: string;
+export const Map: React.SFC<Props> = ({ properties }) => {
+  const [map, setMap] = useState<OLMap>(null);
+  const mapRef = useRef(null);
 
-  constructor(props: Props) {
-    super(props);
-
-    this.mapId = uniqueId("map-");
-  }
-
-  public componentDidMount() {
-    // tslint:disable:no-unused-expression
-    // this.map =
-    new OLMap({
-      layers: [
-        new TileLayer({
-          source: new OSM(),
+  useEffect(() => {
+    setMap(
+      new OLMap({
+        layers: [
+          new TileLayer({
+            source: new OSM(),
+          }),
+        ],
+        target: mapRef.current,
+        view: new View({
+          center: [-11718716.28195593, 4869217.172379018], // Boulder
+          zoom: 13,
+          // extent: getBounds(properties),
         }),
-      ],
-      target: this.mapId,
-      view: new View({
-        center: [0, 0],
-        zoom: 7,
-      }),
-    });
-  }
+      })
+    );
+  }, []);
 
-  public render() {
-    return <div id={this.mapId} className="w-100" />;
-  }
+  useEffect(() => {
+    if (!map) {
+      return;
+    }
+    map.setView(
+      new View({
+        extent: getBounds(properties),
+      })
+    );
+  }, [properties]);
+
+  return <div ref={mapRef} style={{ width: "100%", height: "500px" }} />;
+};
+export default Map;
+
+function getBounds(_: models.Property[]): Extent {
+  return null;
 }

@@ -1,7 +1,6 @@
-import EditableField from "./EditableField";
+import makeEditableField from "./EditableField";
 
-export default class EditableText extends EditableField<string> {
-  protected convertValue(val: string): string {
-    return val;
-  }
-}
+const EditableText = makeEditableField<string>(function convertValue(val: string): string {
+  return val;
+});
+export default EditableText;

@@ -11,6 +11,7 @@ upsert("properties", [
     county:       "Pender",
     state:        "NC",
     owners:       [{id: ID(1), portion: 50}, {id: ID(2), portion: 50}],
+    insurancePolicyIds: [ID(100), ID(101)],
     pinNumbers:   ["123-45-678"],
     noteIds:      [ID(1), ID(2)],
     leaseIds:     [ID(1), ID(2)],

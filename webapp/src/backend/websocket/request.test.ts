@@ -63,7 +63,7 @@ describe("RequestWebSocket Client", () => {
         );
       });
 
-      const messages = [] as object[];
+      const messages = [] as any[];
       for await (const part of rs.doRequest({ testing: "yes" })) {
         messages.push(part);
       }
@@ -117,7 +117,7 @@ describe("RequestWebSocket Client", () => {
 
       const first = new Promise(resolve => {
         setTimeout(async () => {
-          const messages = [] as object[];
+          const messages = [] as any[];
           for await (const part of firstReq) {
             messages.push(part);
           }
@@ -127,7 +127,7 @@ describe("RequestWebSocket Client", () => {
 
       const second = new Promise(resolve => {
         setTimeout(async () => {
-          const messages = [] as object[];
+          const messages = [] as any[];
           for await (const part of secondReq) {
             messages.push(part);
           }

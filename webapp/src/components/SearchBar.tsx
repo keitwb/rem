@@ -1,96 +1,69 @@
-import * as debounce from "debounce";
-import * as React from "react";
-import OutsideClickHandler from "react-outside-click-handler";
+import debounce from "debounce";
+import React, { useRef, useState } from "react";
 
-import { SearchClient, SearchResults } from "@/backend/search";
+import { SearchClient } from "@/backend/search";
+import useKeyPress from "@/components/hooks/useKeyPress";
+import useOutsideClick from "@/components/hooks/useOutsideClick";
 import { withErr } from "@/util/errors";
-import { addDocEvent, UnregisterEventFunc } from "@/util/events";
 
 import SearchResultList from "./SearchResultList";
+
+import styles from "./SearchBar.css";
 
 interface Props {
   searchClient: SearchClient;
 }
 
-interface State {
-  results: SearchResults<any>;
-  err: Error;
-  searching: boolean;
-  showResults: boolean;
-}
+const SearchBar: React.SFC<Props> = ({ searchClient }: Props) => {
+  const [showResults, setShowResults] = useState(false);
+  const [, setSearching] = useState(false);
+  const [err, setErr] = useState(null);
+  const [results, setResults] = useState(null);
+  const ref = useRef();
 
-export default class SearchBar extends React.Component<Props, State> {
-  public readonly state: State = {
-    err: null,
-    results: null,
-    searching: false,
-    showResults: true,
-  };
+  const doSearchDebounced = debounce((q: string) => doSearch(q), 100);
+  useOutsideClick(
+    ref,
+    () => {
+      setShowResults(false);
+    },
+    [showResults]
+  );
 
-  private unregisterKeydown: UnregisterEventFunc;
+  useKeyPress(
+    "Escape",
+    () => {
+      setShowResults(false);
+      setErr(null);
+    },
+    [showResults]
+  );
 
-  public componentDidMount() {
-    this.unregisterKeydown = addDocEvent("keydown", e => this.processKey(e.key));
-  }
-
-  public componentWillUnmount() {
-    this.unregisterKeydown();
-  }
-
-  public render() {
-    const doSearchDebounced = debounce((q: string) => this.doSearch(q), 100);
-
-    return (
-      <OutsideClickHandler onOutsideClick={() => this.hideResults()}>
-        <div className="w-50 position-relative">
-          <form className="w-100">
-            <input
-              type="text"
-              className="w-100 p-2 border border-secondary"
-              placeholder="Search"
-              onChange={e => doSearchDebounced(e.target.value)}
-            />
-          </form>
-          {this.state.showResults ? (
-            <div className="bg-light position-absolute w-100 on-top">
-              <div className="shadow-sm">
-                {this.state.results ? (
-                  <SearchResultList onSelect={() => this.hideResults()} results={this.state.results} />
-                ) : null}
-              </div>
-            </div>
-          ) : null}
-        </div>
-      </OutsideClickHandler>
-    );
-  }
-
-  private processKey(k: string) {
-    if (k === "Escape") {
-      this.setState({
-        showResults: false,
-      });
-    }
-  }
-
-  private hideResults() {
-    this.setState({
-      showResults: false,
-    });
-  }
-
-  private async doSearch(query: string) {
-    this.setState({ searching: true });
-    const [results, err] = await withErr(this.props.searchClient.queryByString(query));
-    this.setState({ searching: false, showResults: true });
-    if (err) {
-      this.setState({
-        err,
-      });
+  async function doSearch(query: string) {
+    setErr(null);
+    setSearching(true);
+    const [searchResults, error] = await withErr(searchClient.queryByString(query));
+    setSearching(false);
+    if (error) {
+      setErr(error.message);
       return;
     }
-    this.setState({
-      results,
-    });
+    setShowResults(true);
+    setResults(searchResults);
   }
-}
+
+  return (
+    <div ref={ref} className={styles.root}>
+      <form>
+        <input type="text" placeholder="Global Search" onChange={e => doSearchDebounced(e.target.value)} />
+      </form>
+      <div className={styles.results}>
+        {err ? <span className={styles.error}>{err}</span> : null}
+        {showResults && results ? <SearchResultList onSelect={() => setShowResults(false)} results={results} /> : null}
+        {showResults && !results ? <div>No results found</div> : null}
+      </div>
+    </div>
+  );
+};
+
+export default SearchBar;

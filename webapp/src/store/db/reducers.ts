@@ -12,6 +12,7 @@ export const initialState: State = {
   parties: defaultModelState,
   properties: defaultModelState,
   users: defaultModelState,
+  insurancePolicies: defaultModelState,
 };
 
 export function reducer(state: State = initialState, action: ActionType<typeof dbActions>): State {

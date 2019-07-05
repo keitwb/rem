@@ -3,6 +3,7 @@
     "baseUrl": "src",
     "outDir": "./dist/",
     "lib": [ "dom", "es2017" ],
+    "esModuleInterop": true,
     "sourceMap": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
