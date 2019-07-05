@@ -18,7 +18,7 @@ mongo="mongo ${MONGO_URI}"
   for f in $(find . -type f)
   do
     mime_type=$(file --mime-type $f | awk '{print $2}')
-    mongofiles --db "${MONGO_URI##*/}" --uri $MONGO_URI --replace --prefix media --type $mime_type put $(basename $f)
+    mongofiles --db "${MONGO_DATABASE-${MONGO_URI##*/}}" --uri $MONGO_URI --replace --prefix media --type $mime_type put $(basename $f)
   done
 )
 
