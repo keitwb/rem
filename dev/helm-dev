@@ -1,7 +1,8 @@
 #!/bin/bash
 
 set -euo pipefail
+set -x
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-helm upgrade --install --values $SCRIPT_DIR/helm-dev.yaml --set defaultTag=$USER --set esHost=$ES_HOST --set mongoUri=$MONGO_URI remdev $SCRIPT_DIR/../helm/rem
+helm upgrade --install --recreate-pods --values $SCRIPT_DIR/helm-dev.yaml --set defaultTag=$USER --set esHost="$ES_HOST" --set "mongoUri=${MONGO_URI//,/\\,}" remdev $SCRIPT_DIR/../helm/rem
