@@ -37,7 +37,7 @@ async def run_elasticsearch():
 
 async def do_setup(es_ip):
     proc = await asyncio.create_subprocess_shell(
-        f"bash {ES_SETUP_DIR}/setup-indexes.sh",
+        f"{ES_SETUP_DIR}/setup-indexes",
         stdin=asyncio.subprocess.DEVNULL,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,

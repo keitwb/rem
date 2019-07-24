@@ -34,6 +34,10 @@ spec:
         - name: ephemeral
           mountPath: /usr/share/elasticsearch/data
       containers:
+      - name: es-setup
+        image: python:3.7-alpine
+        command: ["tail"]
+        args: ["-f", "/dev/null"]
       - name: es
         image: docker.elastic.co/elasticsearch/elasticsearch:7.1.1
         env:

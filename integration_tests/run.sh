@@ -61,8 +61,9 @@ setup_es() {
   wait_pod_ready es-0
 
   echo "Setting up indexes in ES"
-  $kubectl cp $SCRIPT_DIR/../datastores/es es-0:/opt
-  $kubectl exec es-0 -- bash /opt/es/setup-indexes.sh
+  $kubectl cp --container es-setup $SCRIPT_DIR/../datastores/es es-0:/opt
+  $kubectl exec --container es-setup es-0 -- pip install requests
+  $kubectl exec --container es-setup es-0 -- /opt/es/setup-indexes
 }
 setup_es
 
@@ -72,7 +73,7 @@ $helm upgrade \
   --values $SCRIPT_DIR/helm-values.yaml \
   --set-string defaultTag="$IMAGE_TAG" \
   --set-string ingressHost="$INGRESS_HOST" \
-  --set-string mongoUri="$MONGO_URI" \
+  --set-string mongoUri="${MONGO_URI//,/\\,}" \
   --set-string mongoDatabase="$TEST_DB" \
   --set-string esHost="es" \
   --wait \

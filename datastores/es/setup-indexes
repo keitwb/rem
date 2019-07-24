@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+
+import json
+import os
+import sys
+from pathlib import Path
+
+import requests
+
+SCRIPT_DIR = Path(__file__).parent.resolve()
+ES_HOST = os.environ.get("ES_HOST", "127.0.0.1")
+
+BASE_URL = f"http://{ES_HOST}:9200"
+
+print("Setting up ES indexes...")
+
+
+def process_index(index_alias):
+    print("Processing index $f")
+
+    alias_exists = does_index_exist(index_alias)
+
+    old_index = None
+    old_index_num = 0
+    if alias_exists:
+        try:
+            old_index = get_targets_of_alias(index_alias)[0]
+            assert f"{index_alias}-" in old_index, f"malformed index name: {old_index}"
+            if not does_index_exist(old_index):
+                old_index = None
+            else:
+                old_index_num = int(old_index.replace(f"{index_alias}-", ""))
+        except IndexError:
+            print(f"Alias {index_alias} had no target indeces")
+
+    new_index = f"{index_alias}-{old_index_num + 1}"
+    if does_index_exist(new_index):
+        raise RuntimeError(f"New index {new_index} already exists; please delete it first")
+    create_new_index(new_index, index_alias)
+
+    make_new_index_write_target(index_alias, new_index, old_index)
+
+    if old_index:
+        reindex(new_index, old_index)
+        remove_index_from_alias(old_index)
+
+
+def reindex(new_index, old_index):
+    resp = requests.post(
+        f"{BASE_URL}/_reindex",
+        json={
+            "source": {"index": old_index},
+            "dest": {
+                "index": new_index,
+                # Don't overwrite any docs that got indexed by the search-indexer service in the
+                # small amount of time that has passed since the new index was set as the write
+                # index.
+                "op_type": "create",
+            },
+        },
+    )
+    if resp.status_code != 200:
+        raise RuntimeError(f"Could not reindex {old_index} to {new_index}: {resp.text}")
+
+    print(f"Successfully reindexed {old_index} to {new_index}:\n{resp.text}")
+
+
+def does_index_exist(index):
+    index_url = f"{BASE_URL}/{index}"
+    resp = requests.head(f"{index_url}")
+    return resp.status_code == 200
+
+
+def get_targets_of_alias(alias):
+    resp = requests.get(f"{BASE_URL}/_alias/{alias}")
+    if resp.status_code != 200:
+        return []
+    return list(resp.json().keys())
+
+
+def make_new_index_write_target(index_alias, new_index, old_index):
+    action = {"actions": [{"add": {"index": new_index, "alias": index_alias, "is_write_index": True}}]}
+
+    if old_index:
+        action["actions"].append({"add": {"index": old_index, "alias": index_alias, "is_write_index": False}})
+
+    resp = requests.post(f"{BASE_URL}/_aliases", json=action)
+    if resp.status_code != 200:
+        raise RuntimeError(f"Could not make new index write target:\n{action}\nError: {resp.text}")
+
+
+def create_new_index(new_index_name, index_alias):
+    index_json_path = SCRIPT_DIR / f"{index_alias}.index.json"
+    doc = "{}"
+    if index_json_path.is_file():
+        doc = json.loads(index_json_path.read_text())
+
+    resp = requests.put(f"{BASE_URL}/{new_index_name}", json=doc)
+    if resp.status_code != 200:
+        raise RuntimeError(f"Could not create new index '{new_index_name}' with {doc}: {resp.text}")
+    print(f"Created index {new_index_name}")
+
+
+def remove_index_from_alias(old_index):
+    resp = requests.post(f"{BASE_URL}/_aliases", json={"actions": [{"remove_index": {"index": old_index}}]})
+    if resp.status_code != 200:
+        raise RuntimeError(f"Could not delete old index {old_index}: {resp.text}")
+    print(f"Removed index {old_index}")
+
+
+def run(indexes_to_process):
+    if not indexes_to_process:
+        indexes_to_process = [i.name.replace(".index.json", "") for i in SCRIPT_DIR.glob("*.json")]
+
+    print(f"Indexes: {indexes_to_process}")
+    for index in indexes_to_process:
+        process_index(index)
+
+    print("Done")
+
+
+if __name__ == "__main__":
+    run(sys.argv[1:])
