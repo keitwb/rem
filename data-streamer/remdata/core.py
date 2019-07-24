@@ -5,16 +5,17 @@ import asyncio
 import logging
 from functools import partial as p
 
-import elasticsearch_async
 from bson import BSON
 from bson.raw_bson import RawBSONDocument
 from motor.motor_asyncio import AsyncIOMotorClient
+
+import elasticsearch_async
 from sanic import Sanic
 
 from .changestream import send_changes
 from .dataaccess import handle_data_access
 from .json import JSONEncoder
-from .media import handle_media_upload, handle_media_download
+from .media import handle_media_download, handle_media_upload
 from .message import SocketMessage
 from .search import handle_search
 
@@ -27,7 +28,9 @@ def make_app(mongo_uri, es_hosts, db_name="rem"):
     """
     logger.info("Starting websocket server")
     # Use a single mongo client for every connection
-    mongo_client = AsyncIOMotorClient(mongo_uri, document_class=RawBSONDocument)
+    mongo_client = AsyncIOMotorClient(
+        mongo_uri, document_class=RawBSONDocument, maxPoolSize=20, waitQueueTimeoutMS=1000
+    )
 
     # Use a single ES client for every connection
     es_client = elasticsearch_async.AsyncElasticsearch(es_hosts, maxsize=20)
@@ -58,16 +61,22 @@ def make_ws_handler(handler, encoder):
     """
 
     async def ws_handler(_, ws):
-        async for raw_message in ws:
-            try:
-                obj = encoder.decode(raw_message)
-            except ValueError as e:
-                await ws.send(encoder.encode({"error": f"Could not decode message as JSON: {str(e)}"}))
-                return
+        tasks = []
+        try:
+            async for raw_message in ws:
+                try:
+                    obj = encoder.decode(raw_message)
+                except ValueError as e:
+                    await ws.send(encoder.encode({"error": f"Could not decode message as JSON: {str(e)}"}))
+                    return
 
-            message = SocketMessage(obj, ws, encoder)
-            # Handle the message async and keep on handling new messages without waiting for the
-            # handler for previous messages to complete.
-            asyncio.create_task(handler(message))
+                message = SocketMessage(obj, ws, encoder)
+                # Handle the message async and keep on handling new messages without waiting for the
+                # handler for previous messages to complete.
+                tasks.append(asyncio.create_task(handler(message)))
+        finally:
+            # Shut down all tasks spun up by this connection.
+            for task in tasks:
+                task.cancel()
 
     return ws_handler

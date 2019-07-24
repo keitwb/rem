@@ -1,10 +1,11 @@
 """
 Logic related to altering the main Mongo store
 """
-from datetime import datetime
 import logging
+from datetime import datetime
 
 import pymongo
+
 from remcommon import fieldnames_gen as fields
 
 from .json import BSONDocForJSON, maybe_convert_to_object_id
@@ -56,6 +57,7 @@ async def do_get_by_id(collection, message):
 
     try:
         prev_doc = None
+        logger.debug("Preparing to iterate cursor")
         async for doc in cursor:
             logger.debug("Got doc in cursor: %s", doc["_id"])
             if prev_doc:
