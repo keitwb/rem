@@ -1,0 +1,17 @@
+{
+  "settings": {
+    "index": {
+    },
+    "analysis": {
+    }
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "description": { "type": "text" },
+      "tags": { "type": "keyword" },
+      "leaseType": { "type": "keyword" },
+      "startDate": {"type": "date" }
+    }
+  }
+}

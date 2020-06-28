@@ -1,0 +1,6 @@
+aiohttp==3.4.4
+elasticsearch-async==6.2.0
+pymongo==3.7.1
+motor==2.0.0
+-e file:./../pycommon#egg=pycommon
+idna==2.7

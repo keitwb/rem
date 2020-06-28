@@ -25,11 +25,15 @@ const SearchResultItem: React.SFC<Props> = ({ hit, onSelect }) => {
       pathCollection = "lease";
       content = hit._source.description;
       break;
+    case CollectionName.Parties:
+      pathCollection = "party";
+      content = hit._source.name;
+      break;
     case CollectionName.Notes:
       pathCollection = "note";
       content = hit._source.note;
       break;
-    case CollectionName.MediaFiles:
+    case CollectionName.MediaFiles.replace(".files", ""):
       pathCollection = "media";
       content = `${hit._source.filename} - ${hit._source.description}`;
       break;
@@ -58,7 +62,7 @@ function highlightContent(highlight: Highlight): React.ReactNode {
     <div>
       {Object.keys(highlight).map(field => (
         <div key={field}>
-          <span className="font-weight-light font-italic">{capitalize(field)}:</span>{" "}
+          <span className="font-weight-light font-italic">{capitalize(field.replace(/\..*$/, ""))}:</span>{" "}
           {parseHighlightValue(highlight[field][0])}
         </div>
       ))}
@@ -70,7 +74,7 @@ function highlightContent(highlight: Highlight): React.ReactNode {
 // rendering technique.
 function parseHighlightValue(hi: string): React.ReactNode[] {
   return hi.split(/<\/?em>/).map((p, i) => (
-    <span key={i} className={i % 2 === 0 ? "" : "font-weight-bold"}>
+    <span key={i} style={{ fontWeight: i % 2 === 0 ? "normal" : "bold" }}>
       {p}
     </span>
   ));

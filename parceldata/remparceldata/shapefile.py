@@ -35,7 +35,8 @@ def get_features_by_field(data_source, field_name, field_value):
     # String values have to be single quoted
     layer.SetAttributeFilter("%s = %s" % (field_name, value))
 
-    features = [f for f in layer]
+    # Convert this to a regular list of features
+    features = [f for f in layer]  # pylint:disable=unnecessary-comprehension
 
     if not features:
         raise exceptions.NoFeatureError(

@@ -7,7 +7,7 @@ import { withErr } from "@/util/errors";
 
 import SearchContext from "./context/SearchContext";
 import FilterBar, { Filters } from "./filters/FilterBar";
-import Map from "./Map";
+import Map from "./map/Map";
 import { PropertyRowById } from "./PropertyRow";
 
 export const PropertyOverview: React.SFC<{}> = () => {
@@ -80,7 +80,7 @@ async function doQuery(filters: Filters, searchClient: SearchClient): Promise<[P
     query = { match_all: {} };
   }
 
-  const sort = ["county.keyword", "state.keyword", "name.keyword"];
+  const sort = ["county", "state", "name.keyword"];
 
   const [results, err] = await withErr(searchClient.query<Property>({ query, sort }, CollectionName.Properties));
   if (err) {

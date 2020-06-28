@@ -4,6 +4,7 @@ Integration tests of the indexer
 # pylint: disable=not-async-context-manager
 
 import asyncio
+from datetime import datetime
 from functools import partial as p
 
 import pytest
@@ -31,14 +32,35 @@ async def test_changes_get_indexed_in_es(event_loop):
 
         # Do an update in mongo and make sure it gets indexed
         await mongo_client.rem.properties.update_one(
-            {"_id": res.inserted_id}, {"$set": {"city": "Springfield"}}
+            {"_id": res.inserted_id},
+            {
+                "$set": {
+                    "city": "Springfield",
+                    "createdDate": datetime.now(),
+                    "parcelData": {
+                        "123-456": {
+                            "boundaryWKT": "POLYGON ((-78.675364401162 "
+                            "35.2071836707328,-78.6760101290252 35.2064221591994,-78.6753795215889 "
+                            "35.2072033792963,-78.675364401162 35.2071836707328))"
+                        }
+                    },
+                }
+            },
         )
 
         async def has_new_field_in_es():
             es_doc = await get_es_doc(es_client, index="properties", doc_id=res.inserted_id)
             return es_doc["_source"].get("city") == "Springfield"
 
+        async def has_transformed_field_in_es():
+            es_doc = await get_es_doc(es_client, index="properties", doc_id=res.inserted_id)
+            pd = es_doc["_source"].get("parcelData")
+            return len(pd) == 1 and pd[0].get("boundaryWKT").startswith("POLYGON")
+
         assert await wait_for_async(has_new_field_in_es), "updated city field did not get indexed"
+        assert await wait_for_async(
+            has_transformed_field_in_es
+        ), "updated parcelData field did not get indexed with proper transformation"
 
         # Do an delete in mongo and make sure it causes the ES record to be deleted
         await mongo_client.rem.properties.delete_one({"_id": res.inserted_id})
@@ -114,33 +136,3 @@ async def test_multiple_instances_coordinate(event_loop):
         assert (await get_es_indexing_stats("properties", es_client))[
             "index_total"
         ] == doc_count * 2, "Only 2 indexing operations per document should happen"
-
-
-# pylint: disable=missing-docstring
-@pytest.mark.asyncio
-async def test_preexisting_docs_get_indexed_once_if_no_prior_claims(event_loop):
-    async with run_mongo() as mongo_client, run_elasticsearch() as es_client:
-        res = await asyncio.gather(
-            mongo_client.rem.properties.insert_one({"name": "property1"}),
-            mongo_client.rem.properties.insert_one({"name": "property2"}),
-            mongo_client.rem.properties.insert_one({"name": "property3"}),
-        )
-
-        async with run_watchers(event_loop, mongo_client, es_client, instances=5):
-            for insert_result in res:
-                assert await wait_for_async(
-                    p(get_es_doc, es_client, index="properties", doc_id=insert_result.inserted_id),
-                    timeout_seconds=10,
-                )
-
-            res = await asyncio.gather(
-                mongo_client.rem.properties.insert_one({"name": "property4"}),
-                mongo_client.rem.properties.insert_one({"name": "property5"}),
-                mongo_client.rem.properties.insert_one({"name": "property6"}),
-            )
-
-            for insert_result in res:
-                assert await wait_for_async(
-                    p(get_es_doc, es_client, index="properties", doc_id=insert_result.inserted_id),
-                    timeout_seconds=10,
-                )

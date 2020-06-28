@@ -5,11 +5,10 @@ import asyncio
 import logging
 from functools import partial as p
 
+import elasticsearch_async
 from bson import BSON
 from bson.raw_bson import RawBSONDocument
 from motor.motor_asyncio import AsyncIOMotorClient
-
-import elasticsearch_async
 from sanic import Sanic
 
 from .changestream import send_changes
@@ -50,7 +49,7 @@ def setup_routes(app, mongo_db, es_client):
     app.add_websocket_route(make_ws_handler(p(send_changes, mongo_db), JSONEncoder), "/changes")
     app.add_websocket_route(make_ws_handler(p(handle_data_access, mongo_db), JSONEncoder), "/db")
     app.add_websocket_route(make_ws_handler(p(handle_search, es_client), JSONEncoder), "/search")
-    app.add_websocket_route(make_ws_handler(p(handle_media_upload, mongo_db), BSON), "/media-upload")
+    app.add_route(p(handle_media_upload, mongo_db), "/media-upload", methods=["PUT"])
     app.add_route(p(handle_media_download, mongo_db), "/media-download/<media_id>", methods=["GET"])
 
 

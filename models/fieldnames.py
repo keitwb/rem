@@ -8,6 +8,7 @@ models.
 import json
 import os
 import re
+import sys
 import subprocess
 
 
@@ -46,4 +47,7 @@ def make_constants(schema):
 
 
 if __name__ == "__main__":
-    make_constants(generate_json_schema())
+    try:
+        make_constants(generate_json_schema())
+    except subprocess.CalledProcessError as e :
+        sys.stderr.write("Failed to run: %s" % e.stderr)

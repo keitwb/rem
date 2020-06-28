@@ -6,6 +6,7 @@ import { logger } from "@/util/log";
 
 import BadRoute from "./BadRoute";
 import ConfigEditor from "./ConfigEditor";
+import MediaCreate from "./MediaCreate";
 import PropertyCreate from "./PropertyCreate";
 import { PropertyDetailById } from "./PropertyDetail";
 import PropertyOverview from "./PropertyOverview";
@@ -36,6 +37,12 @@ export default class App extends React.Component {
                 }}
               />
               <Route exact path="/property/new" component={PropertyCreate} />
+              <Route
+                path="/property/:id/add-media"
+                render={({ match }) => {
+                  return <MediaCreate propertyId={match.params.id} />;
+                }}
+              />
               <Route
                 path="/property/:id"
                 render={({ match }) => {

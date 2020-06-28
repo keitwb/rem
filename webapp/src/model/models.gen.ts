@@ -62,6 +62,69 @@ export interface OID {
 }
 
 /**
+ * An issue on a property
+ */
+export interface Issue {
+    /**
+     * A placeholder where errors concerning the object can go
+     */
+    _error?: string;
+    _id:     ObjectID;
+    /**
+     * The id of the user that created this object
+     */
+    createdBy?: ObjectID;
+    /**
+     * The date the object was first created
+     */
+    createdDate?: Date;
+    /**
+     * The id of the user that last modified this object
+     */
+    lastModifiedBy?: ObjectID;
+    /**
+     * The date of the last update to the object
+     */
+    modifiedDate?: Date;
+    description?:  string;
+    mediaIds?:     ObjectID[];
+    tags?:         string[];
+    title?:        string;
+    updates?:      Note[];
+}
+
+/**
+ * A note that gives an update on an item
+ */
+export interface Note {
+    /**
+     * A placeholder where errors concerning the object can go
+     */
+    _error?: string;
+    _id:     ObjectID;
+    /**
+     * The id of the user that created this object
+     */
+    createdBy?: ObjectID;
+    /**
+     * The date the object was first created
+     */
+    createdDate?: Date;
+    /**
+     * The id of the user that last modified this object
+     */
+    lastModifiedBy?: ObjectID;
+    /**
+     * The date of the last update to the object
+     */
+    modifiedDate?: Date;
+    media?:        ObjectID[];
+    note?:         string;
+    pinned?:       boolean;
+    title?:        string;
+}
+
+/**
  * A lease for one or more properties
  */
 export interface Lease {
@@ -102,36 +165,6 @@ export enum LeaseType {
     Nn = "NN",
     Nnn = "NNN",
     Option = "option",
-}
-
-/**
- * A note that gives an update on an item
- */
-export interface Note {
-    /**
-     * A placeholder where errors concerning the object can go
-     */
-    _error?: string;
-    _id:     ObjectID;
-    /**
-     * The id of the user that created this object
-     */
-    createdBy?: ObjectID;
-    /**
-     * The date the object was first created
-     */
-    createdDate?: Date;
-    /**
-     * The id of the user that last modified this object
-     */
-    lastModifiedBy?: ObjectID;
-    /**
-     * The date of the last update to the object
-     */
-    modifiedDate?: Date;
-    media?:        ObjectID[];
-    note?:         string;
-    title?:        string;
 }
 
 export enum TermUnit {
@@ -204,17 +237,6 @@ export interface MongoDoc {
 }
 
 /**
- * Information about a specific parcel
- */
-export interface ParcelInfo {
-    acreage?:       number;
-    boundaryWKT?:   string;
-    ownerName?:     string;
-    pinNumber?:     string;
-    streetAddress?: string;
-}
-
-/**
  * A person or organization/company that interacts with real estate in some way, e.g. owner,
  * lessee, contractors, etc.
  */
@@ -242,8 +264,8 @@ export interface Party {
     modifiedDate?: Date;
     address?:      string;
     city?:         string;
+    description?:  string;
     name?:         string;
-    notes?:        Note;
     phone?:        string;
     state?:        string;
     subParties?:   Party[];
@@ -280,40 +302,44 @@ export interface Property {
     /**
      * The date of the last update to the object
      */
-    modifiedDate?: Date;
-    acreage?:      number;
-    /**
-     * WKT of the boundary of the property
-     */
-    boundary?:                 string;
+    modifiedDate?:             Date;
+    acreage?:                  number;
     city?:                     string;
     contactIds?:               ObjectID[];
     county?:                   string;
     description?:              string;
     desiredRentCents?:         number;
     desiredSalesPriceDollars?: number;
+    insurancePolicyIds?:       ObjectID[];
+    leaseIds?:                 ObjectID[];
+    mediaIds?:                 ObjectID[];
+    name?:                     string;
+    noteIds?:                  ObjectID[];
+    owners?:                   Owner[];
+    parcelData?:               { [key: string]: ParcelDatum };
     /**
      * If set to true, the GIS parcel information for this property should be refreshed
      */
-    gisRefreshRequested?: boolean;
-    insurancePolicyIds?:  ObjectID[];
-    leaseIds?:            ObjectID[];
-    mediaIds?:            ObjectID[];
-    name?:                string;
-    noteIds?:             ObjectID[];
-    owners?:              Owner[];
-    pinNumbers?:          string[];
-    propType?:            PropType;
-    state?:               string;
-    tags?:                string[];
-    taxBills?:            { [key: string]: { [key: string]: TaxBill } };
-    taxPropInfo?:         { [key: string]: TaxPropInfo };
-    taxRefreshRequested?: boolean;
+    parcelDataRefreshRequested?: boolean;
+    pinNumbers?:                 string[];
+    propType?:                   PropType;
+    state?:                      string;
+    tags?:                       string[];
+    taxBills?:                   { [key: string]: { [key: string]: TaxBill } };
+    taxPropInfo?:                { [key: string]: TaxPropInfo };
+    taxRefreshRequested?:        boolean;
 }
 
 export interface Owner {
     id?:      ObjectID;
     portion?: number;
+}
+
+export interface ParcelDatum {
+    acreage?:       number;
+    boundaryWKT?:   string;
+    ownerName?:     string;
+    streetAddress?: string;
 }
 
 export enum PropType {

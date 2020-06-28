@@ -1,2 +1,4 @@
 .mongo-uri
 .es-host
+.tika-host
+.kubeconfig

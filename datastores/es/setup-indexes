@@ -9,14 +9,13 @@ import requests
 
 SCRIPT_DIR = Path(__file__).parent.resolve()
 ES_HOST = os.environ.get("ES_HOST", "127.0.0.1")
+ES_PORT = int(os.environ.get("ES_PORT", "9200"))
 
-BASE_URL = f"http://{ES_HOST}:9200"
-
-print("Setting up ES indexes...")
+BASE_URL = f"http://{ES_HOST}:{ES_PORT}"
 
 
 def process_index(index_alias):
-    print("Processing index $f")
+    print(f"Processing index '{index_alias}'")
 
     alias_exists = does_index_exist(index_alias)
 

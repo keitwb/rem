@@ -1,28 +1,30 @@
-from remparceldata.adapter import AdapterMeta
+from remparceldata.adapter import register_adapter
 
 
-class BladenNCAdapter(metaclass=AdapterMeta):
+@register_adapter
+class BladenNCAdapter:
     """
     Adapter for Bladen County, NC
     """
-    county = 'Bladen'
-    state = 'NC'
 
-    parcel_shapefile = 'TaxParcels.shp'
-    pin_field = 'PIN'
+    county = "Bladen"
+    state = "NC"
+
+    parcel_shapefile = "TaxParcels.shp"
+    pin_field = "PIN"
 
     @staticmethod
     def normalize_pin(pin):
-        return pin.replace('-', '')
+        return pin.replace("-", "").strip()
 
     @staticmethod
     def owner_name_from_parcel_fields(fields):
-        return fields['Name1']
+        return fields["Name1"]
 
     @staticmethod
     def acreage_from_parcel_fields(fields):
-        return fields['MapAcres']
+        return fields["MapAcres"]
 
     @staticmethod
     def street_address_from_parcel_fields(fields):
-        return fields['PhysStreet']
+        return fields["PhysStreet"]

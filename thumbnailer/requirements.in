@@ -1,0 +1,7 @@
+pymongo==3.7.1
+motor==2.0.0
+python-bsonjs==0.2.0
+sanic==19.12.2
+pillow==7.0.0
+wand==0.5.8
+-e file:../pycommon#egg=pycommon

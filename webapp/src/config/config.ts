@@ -18,17 +18,15 @@ function pageRelativePath(path: string): string {
 }
 
 export default interface Config {
-  dbStreamURL: string;
-  changeStreamURL: string;
-  searchStreamURL: string;
+  dataStreamURL: string;
   authURL: string;
+  thumbnailerURL: string;
 }
 
 const defaults: Config = {
-  changeStreamURL: pageRelativeWebSocketPath("/stream/changes"),
-  dbStreamURL: pageRelativeWebSocketPath("/stream/db"),
-  searchStreamURL: pageRelativeWebSocketPath("/stream/search"),
+  dataStreamURL: pageRelativeWebSocketPath("/stream"),
   authURL: pageRelativePath("/auth"),
+  thumbnailerURL: pageRelativePath("/thumbnailer"),
 };
 
 export function fromLocalStorage(): Config {

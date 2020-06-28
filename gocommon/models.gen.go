@@ -31,6 +31,35 @@ type OID struct {
 	OID string `bson:"$oid"`
 }
 
+// An issue on a property
+type Issue struct {
+	Error          *string              `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
+	ID             primitive.ObjectID   `bson:"_id"`
+	CreatedBy      *primitive.ObjectID  `bson:"createdBy,omitempty"`      // The id of the user that created this object
+	CreatedDate    time.Time            `bson:"createdDate,omitempty"`    // The date the object was first created
+	LastModifiedBy *primitive.ObjectID  `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
+	ModifiedDate   time.Time            `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+	Description    *string              `bson:"description,omitempty"`
+	MediaIDS       []primitive.ObjectID `bson:"mediaIds"`
+	Tags           []string             `bson:"tags"`
+	Title          *string              `bson:"title,omitempty"`
+	Updates        []Note               `bson:"updates"`
+}
+
+// A note that gives an update on an item
+type Note struct {
+	Error          *string              `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
+	ID             primitive.ObjectID   `bson:"_id"`
+	CreatedBy      *primitive.ObjectID  `bson:"createdBy,omitempty"`      // The id of the user that created this object
+	CreatedDate    time.Time            `bson:"createdDate,omitempty"`    // The date the object was first created
+	LastModifiedBy *primitive.ObjectID  `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
+	ModifiedDate   time.Time            `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+	Media          []primitive.ObjectID `bson:"media"`
+	Note           *string              `bson:"note,omitempty"`
+	Pinned         *bool                `bson:"pinned,omitempty"`
+	Title          *string              `bson:"title,omitempty"`
+}
+
 // A lease for one or more properties
 type Lease struct {
 	Error          *string              `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
@@ -47,19 +76,6 @@ type Lease struct {
 	StartDate      time.Time            `bson:"startDate,omitempty"`
 	TermLength     *float64             `bson:"termLength,omitempty"`
 	TermUnit       *TermUnit            `bson:"termUnit,omitempty"`
-}
-
-// A note that gives an update on an item
-type Note struct {
-	Error          *string              `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
-	ID             primitive.ObjectID   `bson:"_id"`
-	CreatedBy      *primitive.ObjectID  `bson:"createdBy,omitempty"`      // The id of the user that created this object
-	CreatedDate    time.Time            `bson:"createdDate,omitempty"`    // The date the object was first created
-	LastModifiedBy *primitive.ObjectID  `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
-	ModifiedDate   time.Time            `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
-	Media          []primitive.ObjectID `bson:"media"`
-	Note           *string              `bson:"note,omitempty"`
-	Title          *string              `bson:"title,omitempty"`
 }
 
 // A media file that is associated with a property, lease, note, etc.
@@ -93,15 +109,6 @@ type MongoDoc struct {
 	ModifiedDate   time.Time           `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
 }
 
-// Information about a specific parcel
-type ParcelInfo struct {
-	Acreage       *float64 `bson:"acreage,omitempty"`
-	BoundaryWKT   *string  `bson:"boundaryWKT,omitempty"`
-	OwnerName     *string  `bson:"ownerName,omitempty"`
-	PinNumber     *string  `bson:"pinNumber,omitempty"`
-	StreetAddress *string  `bson:"streetAddress,omitempty"`
-}
-
 // A person or organization/company that interacts with real estate in some way, e.g. owner,
 // lessee, contractors, etc.
 type Party struct {
@@ -113,8 +120,8 @@ type Party struct {
 	ModifiedDate   time.Time           `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
 	Address        *string             `bson:"address,omitempty"`
 	City           *string             `bson:"city,omitempty"`
+	Description    *string             `bson:"description,omitempty"`
 	Name           *string             `bson:"name,omitempty"`
-	Notes          *Note               `bson:"notes,omitempty"`
 	Phone          *string             `bson:"phone,omitempty"`
 	State          *string             `bson:"state,omitempty"`
 	SubParties     []Party             `bson:"subParties"`
@@ -124,39 +131,46 @@ type Party struct {
 
 // A set of one or more parcels that constitute a single logic piece of real estate
 type Property struct {
-	Error                    *string                       `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
-	ID                       primitive.ObjectID            `bson:"_id"`
-	CreatedBy                *primitive.ObjectID           `bson:"createdBy,omitempty"`      // The id of the user that created this object
-	CreatedDate              time.Time                     `bson:"createdDate,omitempty"`    // The date the object was first created
-	LastModifiedBy           *primitive.ObjectID           `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
-	ModifiedDate             time.Time                     `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
-	Acreage                  *float64                      `bson:"acreage,omitempty"`
-	Boundary                 *string                       `bson:"boundary,omitempty"` // WKT of the boundary of the property
-	City                     *string                       `bson:"city,omitempty"`
-	ContactIDS               []primitive.ObjectID          `bson:"contactIds"`
-	County                   *string                       `bson:"county,omitempty"`
-	Description              *string                       `bson:"description,omitempty"`
-	DesiredRentCents         *int64                        `bson:"desiredRentCents,omitempty"`
-	DesiredSalesPriceDollars *int64                        `bson:"desiredSalesPriceDollars,omitempty"`
-	GISRefreshRequested      *bool                         `bson:"gisRefreshRequested,omitempty"` // If set to true, the GIS parcel information for this property should be refreshed
-	InsurancePolicyIDS       []primitive.ObjectID          `bson:"insurancePolicyIds"`
-	LeaseIDS                 []primitive.ObjectID          `bson:"leaseIds"`
-	MediaIDS                 []primitive.ObjectID          `bson:"mediaIds"`
-	Name                     *string                       `bson:"name,omitempty"`
-	NoteIDS                  []primitive.ObjectID          `bson:"noteIds"`
-	Owners                   []Owner                       `bson:"owners"`
-	PinNumbers               []string                      `bson:"pinNumbers"`
-	PropType                 *PropType                     `bson:"propType,omitempty"`
-	State                    *string                       `bson:"state,omitempty"`
-	Tags                     []string                      `bson:"tags"`
-	TaxBills                 map[string]map[string]TaxBill `bson:"taxBills,omitempty"`
-	TaxPropInfo              map[string]TaxPropInfo        `bson:"taxPropInfo,omitempty"`
-	TaxRefreshRequested      *bool                         `bson:"taxRefreshRequested,omitempty"`
+	Error                      *string                       `bson:"_error,omitempty"` // A placeholder where errors concerning the object can go
+	ID                         primitive.ObjectID            `bson:"_id"`
+	CreatedBy                  *primitive.ObjectID           `bson:"createdBy,omitempty"`      // The id of the user that created this object
+	CreatedDate                time.Time                     `bson:"createdDate,omitempty"`    // The date the object was first created
+	LastModifiedBy             *primitive.ObjectID           `bson:"lastModifiedBy,omitempty"` // The id of the user that last modified this object
+	ModifiedDate               time.Time                     `bson:"modifiedDate,omitempty"`   // The date of the last update to the object
+	Acreage                    *float64                      `bson:"acreage,omitempty"`
+	City                       *string                       `bson:"city,omitempty"`
+	ContactIDS                 []primitive.ObjectID          `bson:"contactIds"`
+	County                     *string                       `bson:"county,omitempty"`
+	Description                *string                       `bson:"description,omitempty"`
+	DesiredRentCents           *int64                        `bson:"desiredRentCents,omitempty"`
+	DesiredSalesPriceDollars   *int64                        `bson:"desiredSalesPriceDollars,omitempty"`
+	InsurancePolicyIDS         []primitive.ObjectID          `bson:"insurancePolicyIds"`
+	LeaseIDS                   []primitive.ObjectID          `bson:"leaseIds"`
+	MediaIDS                   []primitive.ObjectID          `bson:"mediaIds"`
+	Name                       *string                       `bson:"name,omitempty"`
+	NoteIDS                    []primitive.ObjectID          `bson:"noteIds"`
+	Owners                     []Owner                       `bson:"owners"`
+	ParcelData                 map[string]ParcelDatum        `bson:"parcelData,omitempty"`
+	ParcelDataRefreshRequested *bool                         `bson:"parcelDataRefreshRequested,omitempty"` // If set to true, the GIS parcel information for this property should be refreshed
+	PinNumbers                 []string                      `bson:"pinNumbers"`
+	PropType                   *PropType                     `bson:"propType,omitempty"`
+	State                      *string                       `bson:"state,omitempty"`
+	Tags                       []string                      `bson:"tags"`
+	TaxBills                   map[string]map[string]TaxBill `bson:"taxBills,omitempty"`
+	TaxPropInfo                map[string]TaxPropInfo        `bson:"taxPropInfo,omitempty"`
+	TaxRefreshRequested        *bool                         `bson:"taxRefreshRequested,omitempty"`
 }
 
 type Owner struct {
 	ID      *primitive.ObjectID `bson:"id,omitempty"`
 	Portion *float64            `bson:"portion,omitempty"`
+}
+
+type ParcelDatum struct {
+	Acreage       *float64 `bson:"acreage,omitempty"`
+	BoundaryWKT   *string  `bson:"boundaryWKT,omitempty"`
+	OwnerName     *string  `bson:"ownerName,omitempty"`
+	StreetAddress *string  `bson:"streetAddress,omitempty"`
 }
 
 type TaxBill struct {

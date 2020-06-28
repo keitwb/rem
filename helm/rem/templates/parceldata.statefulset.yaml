@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: parceldata
   labels:
@@ -23,15 +23,23 @@ spec:
       - name: parceldata
         image: quay.io/rem/parceldata:{{default .Values.defaultTag  .Values.parcelDataImageTag }}
         imagePullPolicy: Always
-        ports:
-        - containerPort: 8080
         env:
         - name: SHAPEFILE_BASE
           value: /opt/shapefiles
+        - name: INSTANCE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: MONGO_URI
+          value: {{required "mongoUri required" .Values.mongoUri}}
+        - name: MONGO_DATABASE
+          value: {{.Values.mongoDatabase}}
         volumeMounts:
         - mountPath: /opt/shapefiles
           name: shapefiles
+          readOnly: true
       volumes:
+        # TODO: figure out best way to manage these.
       - name: shapefiles
         hostPath:
           path: /opt/shapefiles

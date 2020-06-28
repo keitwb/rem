@@ -1,24 +1,5 @@
 #!/bin/bash
 
-# Resets the ES search engine mappings and reindexes the docs from Mongo
-
-set -exuo pipefail
-
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd $SCRIPT_DIR/..
 
-PUSH=yes TAG=dev make es
-
-# If the volume is in memory this will wipe all data
-kubectl delete pod -l app=es --wait
-kubectl wait --for=condition=Ready -l app=es pod
-# Setup only needs to be run on one ES instance
-kubectl exec es-0 -- /opt/setup/setup-indexes.sh
-
-# Delete the search index claims so the search indexers will reindex everything
-kubectl exec mongo-0 -- mongo rem --eval 'db.watch_claims.deleteMany({});'
-
-kubectl delete pod -l app=search-indexer --wait
-kubectl wait --for=condition=Ready -l app=search-indexer pod
-
-echo "Elasticsearch indexes reset and reindexed"
+ES_HOST=${ES_HOST-$(cat $SCRIPT_DIR/.es-host)} $SCRIPT_DIR/../dev/es/setup-indexes

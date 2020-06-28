@@ -1,0 +1,20 @@
+{
+  "settings": {
+    "index": {
+    },
+    "analysis": {
+    }
+  },
+  "mappings": {
+      "dynamic": false,
+      "properties": {
+        "length": { "type": "long" },
+        "filename": { "type": "keyword" },
+        "contentType": { "type": "keyword" },
+        "uploadDate": { "type": "date" },
+        "description": { "type": "text" },
+        "tags": { "type": "keyword" },
+        "text": { "type": "text" }
+      }
+  }
+}

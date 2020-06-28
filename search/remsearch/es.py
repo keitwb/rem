@@ -5,9 +5,11 @@ ElasticSearch indexing logic for the Mongo changes.
 import asyncio
 import logging
 from functools import partial as p
+from json import dumps
 
 import elasticsearch
-from bson.json_util import dumps
+
+from .transform import transform
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +25,9 @@ async def index_document(esclient, index, mongo_doc):
     """
     es_id = str(mongo_doc["_id"])
     del mongo_doc["_id"]
-    await _do_op_with_retry(p(esclient.index, index=index, doc_type="_doc", id=es_id, body=dumps(mongo_doc)))
+    await _do_op_with_retry(
+        p(esclient.index, index=index, doc_type="_doc", id=es_id, body=dumps(transform(index, mongo_doc)))
+    )
 
 
 async def delete_from_index_by_id(esclient, index, es_id):

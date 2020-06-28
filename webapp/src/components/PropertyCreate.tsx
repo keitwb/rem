@@ -28,7 +28,6 @@ const PropertyCreate: React.SFC<{}> = () => {
     searchClient.suggest("county", CollectionName.Properties, input);
 
   const onSubmit = async (data: { [P in keyof Property]?: Property[P] }) => {
-    console.log(data);
     const updates: Array<ModelUpdate<Property>> = Object.keys(data).map(name =>
       set<Property>(name as keyof Property, data[name])
     );

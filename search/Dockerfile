@@ -1,15 +1,17 @@
 FROM python:3.7-slim-stretch as builder
 
 RUN apt update && apt install -y gcc
-RUN pip install pipenv==2018.11.26
 
 WORKDIR "/opt"
-ENV PIPENV_VENV_IN_PROJECT=1
 
 COPY pycommon/ ./pycommon/
-COPY search/Pipfile* ./search/
-RUN cd search; pipenv install --deploy
+COPY search/requirements.txt ./search/
+RUN python -m venv ./search/.venv
+RUN cd search && .venv/bin/python -m pip install -r requirements.txt
 COPY search/remsearch/ ./search/remsearch/
+
+RUN find ./search/.venv/ -name "*.pyc" -delete &&\
+    rm ./search/.venv/lib/python3.7/site-packages/mypyc_*.so
 
 FROM python:3.7-slim-stretch
 

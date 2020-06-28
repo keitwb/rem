@@ -1,9 +1,12 @@
 import { ObjectID } from "bson";
-import React from "react";
+import React, { useContext } from "react";
+import { useHistory } from "react-router-dom";
 
+import DataClientContext from "@/components/context/DataClientContext";
 import EditableText from "@/components/forms/EditableText";
 import { CollectionName, InsurancePolicy, Owner, Party, Property } from "@/model/models.gen";
 import { ModelUpdate, pull, push, set } from "@/model/updates";
+import { ensureArray } from "@/util/arrays";
 
 import useModel from "./hooks/useModel";
 import useModelList from "./hooks/useModelList";
@@ -20,8 +23,10 @@ interface Props {
   onUpdate: (updates: ModelUpdate<Property> | Array<ModelUpdate<Property>>) => void;
 }
 
-const PropertyDetail: React.SFC<Props> = ({ property, onUpdate }) =>
-  property ? (
+const PropertyDetail: React.SFC<Props> = ({ property, onUpdate }) => {
+  const history = useHistory();
+
+  return property ? (
     <div className={styles.container}>
       <EditableText
         className={styles.propName}
@@ -39,7 +44,7 @@ const PropertyDetail: React.SFC<Props> = ({ property, onUpdate }) =>
         </EditableText>
       </div>
       <div>
-        <button onClick={() => onUpdate(set<Property>("gisRefreshRequested", true))}>Refresh GIS Info</button>
+        <button onClick={() => onUpdate(set<Property>("parcelDataRefreshRequested", true))}>Refresh GIS Info</button>
       </div>
       <OwnerInfo owners={property.owners} />
       <InsuranceInfo policyIds={property.insurancePolicyIds} />
@@ -49,6 +54,7 @@ const PropertyDetail: React.SFC<Props> = ({ property, onUpdate }) =>
       </div>
       <div>
         <div>Media:</div>
+        <button onClick={() => history.push(`/property/${property._id.toString()}/add-media`)}>Add Media</button>
         <MediaListByIds ids={property.mediaIds} />
       </div>
       <div>
@@ -64,26 +70,31 @@ const PropertyDetail: React.SFC<Props> = ({ property, onUpdate }) =>
   ) : (
     <div>Not loaded yet</div>
   );
+};
 
 export default PropertyDetail;
 
 export const PropertyDetailById: React.SFC<{ id: ObjectID }> = ({ id }) => {
   const property = useModel(CollectionName.Properties, id);
+  const dataClient = useContext(DataClientContext);
   return (
     <PropertyDetail
       property={property}
       onUpdate={updates => {
-        console.log(updates);
+        dataClient.update(CollectionName.Properties, id, ensureArray(updates));
       }}
     />
   );
 };
 
 function OwnerInfo({ owners }: { owners: Owner[] }) {
+  if (!owners || !owners.length) {
+    return <div>No ownership information</div>;
+  }
   const ownerParties = useModelList<Party>(CollectionName.Parties, owners.map(o => o.id));
   const totalPortion = owners.reduce((acc, o) => acc + (o.portion || 0), 0.0);
 
-  return ownerParties && ownerParties.length > 0 ? (
+  return (
     <>
       <div>Owners:</div>
       {ownerParties.map((party, i) => (
@@ -93,8 +104,6 @@ function OwnerInfo({ owners }: { owners: Owner[] }) {
         </div>
       ))}
     </>
-  ) : (
-    <div>No ownership information</div>
   );
 }
 

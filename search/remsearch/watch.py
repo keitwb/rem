@@ -8,16 +8,15 @@ import asyncio
 import logging
 from functools import partial as p
 
-import aiohttp
+import elasticsearch_async
 import pymongo
 from motor.motor_asyncio import AsyncIOMotorClient
 
-import elasticsearch_async
 from remcommon import watch
 from remcommon.models_gen import CollectionName
 
 from . import es, text
-from .tikaclient import TikaClient
+from .tikaclient import open_tika_client
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +24,8 @@ COLLECTIONS_TO_INDEX = [
     CollectionName.PROPERTIES.value,
     CollectionName.PARTIES.value,
     CollectionName.LEASES.value,
-    CollectionName.NOTES.value,
+    # CollectionName.NOTES.value,
     CollectionName.MEDIA_FILES.value,
-    CollectionName.PARTIES.value,
 ]
 
 MAX_ES_INDEX_TASKS = 10
@@ -48,12 +46,10 @@ async def watch_indexed_collections(instance_name, mongo_uri, es_hosts, tika_loc
     mongo_db = mongo_client[mongo_database]
 
     # This is used for mapping files to text through Tika
-    async with aiohttp.ClientSession() as http_session:
+    async with open_tika_client(tika_loc) as tika_client:
         esclient = elasticsearch_async.AsyncElasticsearch(
             es_hosts, sniff_on_start=False, sniff_on_connection_fail=False
         )
-
-        tika_client = TikaClient(http_session, host=tika_loc[0], port=tika_loc[1])
 
         try:
             await asyncio.gather(
@@ -92,7 +88,8 @@ async def watch_collection(mongo_db, tika_client, esclient, collection, instance
     """
     async for change in watch.watch_collection(mongo_db, collection, SERVICE_NAME, instance_name):
         if change is watch.INITIAL_LEAD_WATCHER:
-            await index_collection(mongo_db, tika_client, esclient, collection)
+            # await index_collection(mongo_db, tika_client, esclient, collection)
+            pass
         else:
             await index_change(esclient, tika_client, change, mongo_db)
 

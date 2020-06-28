@@ -47,9 +47,10 @@ export default function makeEditableField<T>(converter: ValueConverter<T>) {
         const valErr = validator(newVal);
         if (valErr) {
           setError(error.toString());
-          return;
+          return false;
         }
       }
+      return true;
     }
 
     function doSave(): void {
@@ -71,7 +72,7 @@ export default function makeEditableField<T>(converter: ValueConverter<T>) {
         className={genClassName({ [styles.root]: true, [className]: true })}
         onMouseEnter={() => setShowEditButton(true)}
         onMouseLeave={() => setShowEditButton(false)}
-        onDoubleClick={() => toggleEditing()}
+        onDoubleClick={() => (!editing ? toggleEditing() : null)}
         onKeyDown={e => {
           if (!editing) {
             return;

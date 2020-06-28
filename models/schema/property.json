@@ -28,11 +28,6 @@
          "items": { "type": "string" }
        },
        "propType": { "enum": ["residential", "commercial", "industrial", "land" ] },
-       "gisRefreshRequested": {
-         "type": "boolean",
-         "description": "If set to true, the GIS parcel information for this property should be refreshed"
-       },
-       "boundary": { "type": "string", "description": "WKT of the boundary of the property" },
        "desiredRentCents": { "type": "integer" },
        "desiredSalesPriceDollars": { "type": "integer" },
        "noteIds": {
@@ -117,6 +112,23 @@
                  }
                }
              }
+           }
+         }
+       },
+       "parcelDataRefreshRequested": {
+         "type": "boolean",
+         "description": "If set to true, the GIS parcel information for this property should be refreshed"
+       },
+       "parcelData": {
+         "type": "object",
+         "name": "pin",
+         "additionalProperties": {
+           "type": "object",
+           "properties": {
+             "ownerName": { "type": "string" },
+             "acreage": { "type": "number" },
+             "streetAddress": { "type": "string" },
+             "boundaryWKT": { "type": "string" }
            }
          }
        },

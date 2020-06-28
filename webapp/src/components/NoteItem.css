@@ -1,0 +1,5 @@
+.root {
+  border: 1px solid hsl(var(--primary-color-hue), 20%, 80%);
+  border-radius: 5px;
+  padding: 0.5em;
+}

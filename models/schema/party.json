@@ -10,6 +10,7 @@
         { "$ref": "./common.json#/definitions/commonProps" },
         { "properties": {
            "name": { "type": "string" },
+           "description": { "type": "string" },
            "type": {"enum": ["person", "company"] },
            "subParties": {
              "type": "array",
@@ -20,7 +21,6 @@
            "city": {"type": "string" },
            "state": {"type": "string" },
            "zipcode": {"type": "string" },
-           "notes": {"$ref": "./note.json#" }
         }}
       ]
     }

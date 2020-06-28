@@ -17,7 +17,7 @@ async def startup():
     app = make_app(mongo_uri=os.environ.get("MONGO_URI"), db_name=os.environ.get("MONGO_DATABASE", "rem"))
 
     # This will complete upon startup and this function will return
-    await app.create_server(host="0.0.0.0", port=8080)
+    await app.create_server(host="0.0.0.0", port=8080, return_asyncio_server=True)
 
 
 asyncio.set_event_loop(uvloop.new_event_loop())

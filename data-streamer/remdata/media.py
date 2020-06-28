@@ -8,42 +8,41 @@ from gridfs.errors import NoFile
 from motor.motor_asyncio import AsyncIOMotorGridFSBucket
 from sanic import response
 
+import ujson
+
 MEDIA_BUCKET_NAME = "media"
 
 
-async def handle_media_upload(mongo_db, message):
+async def handle_media_upload(mongo_db, req):
     """
     Handles a single request for media uploads.  Updates to file metadata should be done through the
     normal collection update process.  Media upload gets a special handler because its messages are
-    easier to send as pure BSON.
+    easier to send as JSON + multi-part file encoding.
     """
-    _id = message.get("id")
-    if not _id:
-        await message.send_error("id must be provided")
-        return
+    if not req.files:
+        return response.text("Media upload must include one or more files")
 
-    filename = message.get("filename")
-    if not filename:
-        await message.send_error("filename must be provided")
-        return
+    file_info_by_name = ujson.loads(req.body)
 
-    bucket_name = message.get("bucketName", MEDIA_BUCKET_NAME)
-    content = message.get("content")
-    if not content:
-        await message.send_error("file content must be provided")
-        return
+    bucket = AsyncIOMotorGridFSBucket(mongo_db, MEDIA_BUCKET_NAME)
 
-    metadata = message.get("metadata")
+    for name, file in req.files.items():
+        file_info = file_info_by_name.get(name)
+        if not file_info:
+            return response.text("file information must be provided", status=400)
 
-    bucket = AsyncIOMotorGridFSBucket(mongo_db, bucket_name)
+        _id = file_info.get("id")
+        if not _id:
+            return response.text("id must be provided", status=400)
 
-    try:
-        await bucket.upload_from_stream_with_id(_id, filename, content, metadata=metadata)
-    except pymongo.errors.PyMongoError as e:
-        await message.send_error(f"Could not insert gridfs file: {str(e)}")
-        return
+        metadata = file_info.get("metadata", {})
 
-    await message.send_response({"id": _id})
+        try:
+            await bucket.upload_from_stream_with_id(_id, file.name, file.type, metadata=metadata)
+        except pymongo.errors.PyMongoError as e:
+            return response.text(f"Could not insert gridfs file: {str(e)}", status=500)
+
+    return response.json({"success": True})
 
 
 async def handle_media_download(mongo_db, _, media_id):

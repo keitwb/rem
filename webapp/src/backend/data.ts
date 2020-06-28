@@ -45,7 +45,6 @@ export class DataClient {
     if (result.upsertedId.toHexString() !== id.toHexString()) {
       throw new Error("Created doc id is not equal to generated id");
     }
-    console.log(result);
     return result.upsertedId;
   }
 

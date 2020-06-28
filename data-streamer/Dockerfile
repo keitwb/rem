@@ -1,19 +1,20 @@
-FROM python:3.7-slim-stretch as builder
+FROM python:3.8-slim-buster as builder
 
 RUN apt update && apt install -y gcc
-RUN pip install pipenv==2018.11.26
 
-WORKDIR "/opt"
-ENV PIPENV_VENV_IN_PROJECT=1
+WORKDIR "/opt/venv"
 
-COPY pycommon/ ./pycommon/
-COPY data-streamer/Pipfile* ./data-streamer/
-RUN cd data-streamer; pipenv install --deploy
-COPY data-streamer/remdata/ ./data-streamer/remdata/
+COPY pycommon/ /opt/pycommon/
 
-FROM python:3.7-slim-stretch
+COPY data-streamer/requirements.txt /tmp/requirements.txt
+RUN python3 -m venv .
+RUN . ./bin/activate && python3 -m pip install -r /tmp/requirements.txt
+
+COPY data-streamer/remdata/ /opt/data-streamer/remdata/
+
+FROM python:3.8-slim-buster
 
 WORKDIR "/opt/data-streamer"
-CMD [".venv/bin/python", "-m", "remdata"]
+CMD ["/opt/venv/bin/python", "-m", "remdata"]
 
 COPY --from=builder /opt/ /opt/

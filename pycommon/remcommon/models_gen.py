@@ -15,11 +15,11 @@ from bson.objectid import ObjectId
 #     result = collection_name_from_dict(json.loads(json_string))
 #     result = common_from_dict(json.loads(json_string))
 #     result = insurance_policy_from_dict(json.loads(json_string))
+#     result = issue_from_dict(json.loads(json_string))
 #     result = lease_from_dict(json.loads(json_string))
 #     result = media_from_dict(json.loads(json_string))
 #     result = mongo_doc_from_dict(json.loads(json_string))
 #     result = note_from_dict(json.loads(json_string))
-#     result = parcel_info_from_dict(json.loads(json_string))
 #     result = party_from_dict(json.loads(json_string))
 #     result = property_from_dict(json.loads(json_string))
 #     result = user_from_dict(json.loads(json_string))
@@ -68,6 +68,11 @@ def to_class(c: Type[T], x: Any) -> dict:
     return cast(Any, x).to_dict()
 
 
+def from_bool(x: Any) -> bool:
+    assert isinstance(x, bool)
+    return x
+
+
 def from_float(x: Any) -> float:
     assert isinstance(x, (float, int)) and not isinstance(x, bool)
     return float(x)
@@ -85,11 +90,6 @@ def to_float(x: Any) -> float:
 
 def from_int(x: Any) -> int:
     assert isinstance(x, int) and not isinstance(x, bool)
-    return x
-
-
-def from_bool(x: Any) -> bool:
-    assert isinstance(x, bool)
     return x
 
 
@@ -180,14 +180,6 @@ class InsurancePolicy:
         return result
 
 
-class LeaseType(Enum):
-    GROSS = "gross"
-    N = "N"
-    NN = "NN"
-    NNN = "NNN"
-    OPTION = "option"
-
-
 @dataclass
 class Note:
     """A note that gives an update on an item"""
@@ -204,6 +196,7 @@ class Note:
     modified_date: Optional[datetime] = None
     media: Optional[List[ObjectId]] = None
     note: Optional[str] = None
+    pinned: Optional[bool] = None
     title: Optional[str] = None
 
     @staticmethod
@@ -217,8 +210,9 @@ class Note:
         modified_date = from_union([(lambda x: x), from_none], obj.get("modifiedDate"))
         media = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("media"))
         note = from_union([from_str, from_none], obj.get("note"))
+        pinned = from_union([from_bool, from_none], obj.get("pinned"))
         title = from_union([from_str, from_none], obj.get("title"))
-        return Note(id, error, created_by, created_date, last_modified_by, modified_date, media, note, title)
+        return Note(id, error, created_by, created_date, last_modified_by, modified_date, media, note, pinned, title)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -230,8 +224,69 @@ class Note:
         result["modifiedDate"] = from_union([lambda x: x.isoformat(), from_none], self.modified_date)
         result["media"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.media)
         result["note"] = from_union([from_str, from_none], self.note)
+        result["pinned"] = from_union([from_bool, from_none], self.pinned)
         result["title"] = from_union([from_str, from_none], self.title)
         return result
+
+
+@dataclass
+class Issue:
+    """An issue on a property"""
+    id: ObjectId
+    """A placeholder where errors concerning the object can go"""
+    error: Optional[str] = None
+    """The id of the user that created this object"""
+    created_by: Optional[ObjectId] = None
+    """The date the object was first created"""
+    created_date: Optional[datetime] = None
+    """The id of the user that last modified this object"""
+    last_modified_by: Optional[ObjectId] = None
+    """The date of the last update to the object"""
+    modified_date: Optional[datetime] = None
+    description: Optional[str] = None
+    media_ids: Optional[List[ObjectId]] = None
+    tags: Optional[List[str]] = None
+    title: Optional[str] = None
+    updates: Optional[List[Note]] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'Issue':
+        assert isinstance(obj, dict)
+        id = (lambda x: x)(obj.get("_id"))
+        error = from_union([from_str, from_none], obj.get("_error"))
+        created_by = from_union([(lambda x: x), from_none], obj.get("createdBy"))
+        created_date = from_union([(lambda x: x), from_none], obj.get("createdDate"))
+        last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
+        modified_date = from_union([(lambda x: x), from_none], obj.get("modifiedDate"))
+        description = from_union([from_str, from_none], obj.get("description"))
+        media_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("mediaIds"))
+        tags = from_union([lambda x: from_list(from_str, x), from_none], obj.get("tags"))
+        title = from_union([from_str, from_none], obj.get("title"))
+        updates = from_union([lambda x: from_list(Note.from_dict, x), from_none], obj.get("updates"))
+        return Issue(id, error, created_by, created_date, last_modified_by, modified_date, description, media_ids, tags, title, updates)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["_id"] = to_class(ObjectId, self.id)
+        result["_error"] = from_union([from_str, from_none], self.error)
+        result["createdBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.created_by)
+        result["createdDate"] = from_union([lambda x: x.isoformat(), from_none], self.created_date)
+        result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
+        result["modifiedDate"] = from_union([lambda x: x.isoformat(), from_none], self.modified_date)
+        result["description"] = from_union([from_str, from_none], self.description)
+        result["mediaIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.media_ids)
+        result["tags"] = from_union([lambda x: from_list(from_str, x), from_none], self.tags)
+        result["title"] = from_union([from_str, from_none], self.title)
+        result["updates"] = from_union([lambda x: from_list(lambda x: to_class(Note, x), x), from_none], self.updates)
+        return result
+
+
+class LeaseType(Enum):
+    GROSS = "gross"
+    N = "N"
+    NN = "NN"
+    NNN = "NNN"
+    OPTION = "option"
 
 
 class TermUnit(Enum):
@@ -414,35 +469,6 @@ class MongoDoc:
         return result
 
 
-@dataclass
-class ParcelInfo:
-    """Information about a specific parcel"""
-    acreage: Optional[float] = None
-    boundary_wkt: Optional[str] = None
-    owner_name: Optional[str] = None
-    pin_number: Optional[str] = None
-    street_address: Optional[str] = None
-
-    @staticmethod
-    def from_dict(obj: Any) -> 'ParcelInfo':
-        assert isinstance(obj, dict)
-        acreage = from_union([from_float, from_none], obj.get("acreage"))
-        boundary_wkt = from_union([from_str, from_none], obj.get("boundaryWKT"))
-        owner_name = from_union([from_str, from_none], obj.get("ownerName"))
-        pin_number = from_union([from_str, from_none], obj.get("pinNumber"))
-        street_address = from_union([from_str, from_none], obj.get("streetAddress"))
-        return ParcelInfo(acreage, boundary_wkt, owner_name, pin_number, street_address)
-
-    def to_dict(self) -> dict:
-        result: dict = {}
-        result["acreage"] = from_union([to_float, from_none], self.acreage)
-        result["boundaryWKT"] = from_union([from_str, from_none], self.boundary_wkt)
-        result["ownerName"] = from_union([from_str, from_none], self.owner_name)
-        result["pinNumber"] = from_union([from_str, from_none], self.pin_number)
-        result["streetAddress"] = from_union([from_str, from_none], self.street_address)
-        return result
-
-
 class TypeEnum(Enum):
     COMPANY = "company"
     PERSON = "person"
@@ -466,8 +492,8 @@ class Party:
     modified_date: Optional[datetime] = None
     address: Optional[str] = None
     city: Optional[str] = None
+    description: Optional[str] = None
     name: Optional[str] = None
-    notes: Optional[Note] = None
     phone: Optional[str] = None
     state: Optional[str] = None
     sub_parties: Optional[List['Party']] = None
@@ -485,14 +511,14 @@ class Party:
         modified_date = from_union([(lambda x: x), from_none], obj.get("modifiedDate"))
         address = from_union([from_str, from_none], obj.get("address"))
         city = from_union([from_str, from_none], obj.get("city"))
+        description = from_union([from_str, from_none], obj.get("description"))
         name = from_union([from_str, from_none], obj.get("name"))
-        notes = from_union([Note.from_dict, from_none], obj.get("notes"))
         phone = from_union([from_str, from_none], obj.get("phone"))
         state = from_union([from_str, from_none], obj.get("state"))
         sub_parties = from_union([lambda x: from_list(Party.from_dict, x), from_none], obj.get("subParties"))
         type = from_union([TypeEnum, from_none], obj.get("type"))
         zipcode = from_union([from_str, from_none], obj.get("zipcode"))
-        return Party(id, error, created_by, created_date, last_modified_by, modified_date, address, city, name, notes, phone, state, sub_parties, type, zipcode)
+        return Party(id, error, created_by, created_date, last_modified_by, modified_date, address, city, description, name, phone, state, sub_parties, type, zipcode)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -504,8 +530,8 @@ class Party:
         result["modifiedDate"] = from_union([lambda x: x.isoformat(), from_none], self.modified_date)
         result["address"] = from_union([from_str, from_none], self.address)
         result["city"] = from_union([from_str, from_none], self.city)
+        result["description"] = from_union([from_str, from_none], self.description)
         result["name"] = from_union([from_str, from_none], self.name)
-        result["notes"] = from_union([lambda x: to_class(Note, x), from_none], self.notes)
         result["phone"] = from_union([from_str, from_none], self.phone)
         result["state"] = from_union([from_str, from_none], self.state)
         result["subParties"] = from_union([lambda x: from_list(lambda x: to_class(Party, x), x), from_none], self.sub_parties)
@@ -530,6 +556,31 @@ class Owner:
         result: dict = {}
         result["id"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.id)
         result["portion"] = from_union([to_float, from_none], self.portion)
+        return result
+
+
+@dataclass
+class ParcelDatum:
+    acreage: Optional[float] = None
+    boundary_wkt: Optional[str] = None
+    owner_name: Optional[str] = None
+    street_address: Optional[str] = None
+
+    @staticmethod
+    def from_dict(obj: Any) -> 'ParcelDatum':
+        assert isinstance(obj, dict)
+        acreage = from_union([from_float, from_none], obj.get("acreage"))
+        boundary_wkt = from_union([from_str, from_none], obj.get("boundaryWKT"))
+        owner_name = from_union([from_str, from_none], obj.get("ownerName"))
+        street_address = from_union([from_str, from_none], obj.get("streetAddress"))
+        return ParcelDatum(acreage, boundary_wkt, owner_name, street_address)
+
+    def to_dict(self) -> dict:
+        result: dict = {}
+        result["acreage"] = from_union([to_float, from_none], self.acreage)
+        result["boundaryWKT"] = from_union([from_str, from_none], self.boundary_wkt)
+        result["ownerName"] = from_union([from_str, from_none], self.owner_name)
+        result["streetAddress"] = from_union([from_str, from_none], self.street_address)
         return result
 
 
@@ -679,22 +730,21 @@ class Property:
     """The date of the last update to the object"""
     modified_date: Optional[datetime] = None
     acreage: Optional[float] = None
-    """WKT of the boundary of the property"""
-    boundary: Optional[str] = None
     city: Optional[str] = None
     contact_ids: Optional[List[ObjectId]] = None
     county: Optional[str] = None
     description: Optional[str] = None
     desired_rent_cents: Optional[int] = None
     desired_sales_price_dollars: Optional[int] = None
-    """If set to true, the GIS parcel information for this property should be refreshed"""
-    gis_refresh_requested: Optional[bool] = None
     insurance_policy_ids: Optional[List[ObjectId]] = None
     lease_ids: Optional[List[ObjectId]] = None
     media_ids: Optional[List[ObjectId]] = None
     name: Optional[str] = None
     note_ids: Optional[List[ObjectId]] = None
     owners: Optional[List[Owner]] = None
+    parcel_data: Optional[Dict[str, ParcelDatum]] = None
+    """If set to true, the GIS parcel information for this property should be refreshed"""
+    parcel_data_refresh_requested: Optional[bool] = None
     pin_numbers: Optional[List[str]] = None
     prop_type: Optional[PropType] = None
     state: Optional[str] = None
@@ -713,20 +763,20 @@ class Property:
         last_modified_by = from_union([(lambda x: x), from_none], obj.get("lastModifiedBy"))
         modified_date = from_union([(lambda x: x), from_none], obj.get("modifiedDate"))
         acreage = from_union([from_float, from_none], obj.get("acreage"))
-        boundary = from_union([from_str, from_none], obj.get("boundary"))
         city = from_union([from_str, from_none], obj.get("city"))
         contact_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("contactIds"))
         county = from_union([from_str, from_none], obj.get("county"))
         description = from_union([from_str, from_none], obj.get("description"))
         desired_rent_cents = from_union([from_int, from_none], obj.get("desiredRentCents"))
         desired_sales_price_dollars = from_union([from_int, from_none], obj.get("desiredSalesPriceDollars"))
-        gis_refresh_requested = from_union([from_bool, from_none], obj.get("gisRefreshRequested"))
         insurance_policy_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("insurancePolicyIds"))
         lease_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("leaseIds"))
         media_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("mediaIds"))
         name = from_union([from_str, from_none], obj.get("name"))
         note_ids = from_union([lambda x: from_list((lambda x: x), x), from_none], obj.get("noteIds"))
         owners = from_union([lambda x: from_list(Owner.from_dict, x), from_none], obj.get("owners"))
+        parcel_data = from_union([lambda x: from_dict(ParcelDatum.from_dict, x), from_none], obj.get("parcelData"))
+        parcel_data_refresh_requested = from_union([from_bool, from_none], obj.get("parcelDataRefreshRequested"))
         pin_numbers = from_union([lambda x: from_list(from_str, x), from_none], obj.get("pinNumbers"))
         prop_type = from_union([PropType, from_none], obj.get("propType"))
         state = from_union([from_str, from_none], obj.get("state"))
@@ -734,7 +784,7 @@ class Property:
         tax_bills = from_union([lambda x: from_dict(lambda x: from_dict(TaxBill.from_dict, x), x), from_none], obj.get("taxBills"))
         tax_prop_info = from_union([lambda x: from_dict(TaxPropInfo.from_dict, x), from_none], obj.get("taxPropInfo"))
         tax_refresh_requested = from_union([from_bool, from_none], obj.get("taxRefreshRequested"))
-        return Property(id, error, created_by, created_date, last_modified_by, modified_date, acreage, boundary, city, contact_ids, county, description, desired_rent_cents, desired_sales_price_dollars, gis_refresh_requested, insurance_policy_ids, lease_ids, media_ids, name, note_ids, owners, pin_numbers, prop_type, state, tags, tax_bills, tax_prop_info, tax_refresh_requested)
+        return Property(id, error, created_by, created_date, last_modified_by, modified_date, acreage, city, contact_ids, county, description, desired_rent_cents, desired_sales_price_dollars, insurance_policy_ids, lease_ids, media_ids, name, note_ids, owners, parcel_data, parcel_data_refresh_requested, pin_numbers, prop_type, state, tags, tax_bills, tax_prop_info, tax_refresh_requested)
 
     def to_dict(self) -> dict:
         result: dict = {}
@@ -745,20 +795,20 @@ class Property:
         result["lastModifiedBy"] = from_union([lambda x: to_class(ObjectId, x), from_none], self.last_modified_by)
         result["modifiedDate"] = from_union([lambda x: x.isoformat(), from_none], self.modified_date)
         result["acreage"] = from_union([to_float, from_none], self.acreage)
-        result["boundary"] = from_union([from_str, from_none], self.boundary)
         result["city"] = from_union([from_str, from_none], self.city)
         result["contactIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.contact_ids)
         result["county"] = from_union([from_str, from_none], self.county)
         result["description"] = from_union([from_str, from_none], self.description)
         result["desiredRentCents"] = from_union([from_int, from_none], self.desired_rent_cents)
         result["desiredSalesPriceDollars"] = from_union([from_int, from_none], self.desired_sales_price_dollars)
-        result["gisRefreshRequested"] = from_union([from_bool, from_none], self.gis_refresh_requested)
         result["insurancePolicyIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.insurance_policy_ids)
         result["leaseIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.lease_ids)
         result["mediaIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.media_ids)
         result["name"] = from_union([from_str, from_none], self.name)
         result["noteIds"] = from_union([lambda x: from_list(lambda x: to_class(ObjectId, x), x), from_none], self.note_ids)
         result["owners"] = from_union([lambda x: from_list(lambda x: to_class(Owner, x), x), from_none], self.owners)
+        result["parcelData"] = from_union([lambda x: from_dict(lambda x: to_class(ParcelDatum, x), x), from_none], self.parcel_data)
+        result["parcelDataRefreshRequested"] = from_union([from_bool, from_none], self.parcel_data_refresh_requested)
         result["pinNumbers"] = from_union([lambda x: from_list(from_str, x), from_none], self.pin_numbers)
         result["propType"] = from_union([lambda x: to_enum(PropType, x), from_none], self.prop_type)
         result["state"] = from_union([from_str, from_none], self.state)
@@ -851,6 +901,14 @@ def insurance_policy_to_dict(x: InsurancePolicy) -> Any:
     return to_class(InsurancePolicy, x)
 
 
+def issue_from_dict(s: Any) -> Issue:
+    return Issue.from_dict(s)
+
+
+def issue_to_dict(x: Issue) -> Any:
+    return to_class(Issue, x)
+
+
 def lease_from_dict(s: Any) -> Lease:
     return Lease.from_dict(s)
 
@@ -881,14 +939,6 @@ def note_from_dict(s: Any) -> Note:
 
 def note_to_dict(x: Note) -> Any:
     return to_class(Note, x)
-
-
-def parcel_info_from_dict(s: Any) -> ParcelInfo:
-    return ParcelInfo.from_dict(s)
-
-
-def parcel_info_to_dict(x: ParcelInfo) -> Any:
-    return to_class(ParcelInfo, x)
 
 
 def party_from_dict(s: Any) -> Party:

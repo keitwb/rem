@@ -1,0 +1,2 @@
+shapely==1.6.4
+-e file:../pycommon#egg=pycommon

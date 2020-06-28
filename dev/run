@@ -9,3 +9,5 @@ export ES_HOST=$(cat $_SCRIPT_DIR/.es-host)
 echo "Using ES_HOST=$ES_HOST"
 
 unset _SCRIPT_DIR
+
+exec $@

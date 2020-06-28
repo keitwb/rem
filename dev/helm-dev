@@ -11,7 +11,7 @@ KUBECONFIG_LOCAL=$(cat $SCRIPT_DIR/.kubeconfig)
 KUBECONFIG_LOCAL=${KUBECONFIG_LOCAL-$KUBECONFIG}
 
 recreate_flag="--recreate-pods"
-if [[ -n $NO_RECREATE_PODS ]]; then
+if [[ -n ${NO_RECREATE_PODS-} ]]; then
   recreate_flag=
 fi
 

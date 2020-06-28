@@ -1,16 +1,17 @@
-from remparceldata.adapter import AdapterMeta
+from remparceldata.adapter import register_adapter
 
 
-class RobesonNCAdapter(metaclass=AdapterMeta):
-    county = 'Robeson'
-    state = 'NC'
+@register_adapter
+class RobesonNCAdapter:
+    county = "Robeson"
+    state = "NC"
 
-    parcel_shapefile = 'Parcelsw_Ownership092017.shp'
-    pin_field = 'PIN_NUMBER'
+    parcel_shapefile = "Parcelsw_Ownership092017.shp"
+    pin_field = "PIN_NUMBER"
 
     @staticmethod
     def normalize_pin(pin):
-        return pin.replace('-', '')
+        return pin.replace("-", "").strip()
 
     @staticmethod
     def owner_name_from_parcel_fields(fields):
@@ -18,8 +19,8 @@ class RobesonNCAdapter(metaclass=AdapterMeta):
 
     @staticmethod
     def acreage_from_parcel_fields(fields):
-        return fields['CALCULATED']
+        return fields["CALCULATED"]
 
     @staticmethod
     def street_address_from_parcel_fields(fields):
-        return fields['PHYSTRADR']
+        return fields["PHYSTRADR"]

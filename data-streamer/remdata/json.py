@@ -1,17 +1,17 @@
 """
 Support for converting PyMongo objects to and from JSON for sending through websockets
 """
-from bson import json_util
-from bson.objectid import ObjectId
+import ujson
 
 import bsonjs
-import ujson
+from bson import json_util
+from bson.objectid import ObjectId
 
 
 class BSONDocForJSON:
     """
-    This wraps a BSON doc from PyMongo and makes it automatically encoded to JSON when used in a larger JSON
-    document.
+    This wraps a BSON doc from PyMongo and makes it automatically encoded to JSON when used in a
+    larger JSON document.
     """
 
     __slots__ = ["raw_doc"]

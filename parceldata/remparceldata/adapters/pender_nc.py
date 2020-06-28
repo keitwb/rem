@@ -1,25 +1,26 @@
-from remparceldata.adapter import AdapterMeta
+from remparceldata.adapter import register_adapter
 
 
-class PenderNCAdapter(metaclass=AdapterMeta):
-    county = 'Pender'
-    state = 'NC'
+@register_adapter
+class PenderNCAdapter:
+    county = "Pender"
+    state = "NC"
 
-    parcel_shapefile = 'Parcels.shp'
-    pin_field = 'PIN'
+    parcel_shapefile = "Parcels.shp"
+    pin_field = "PIN"
 
     @staticmethod
     def normalize_pin(pin):
-        return pin.replace('-', '')
+        return pin.replace("-", "").strip()
 
     @staticmethod
     def owner_name_from_parcel_fields(fields):
-        return fields['NAME']
+        return fields["NAME"]
 
     @staticmethod
     def acreage_from_parcel_fields(fields):
-        return fields['CALCACRES']
+        return fields["CALCACRES"]
 
     @staticmethod
     def street_address_from_parcel_fields(fields):
-        return fields['PROPERTY_A']
+        return fields["PROPERTY_A"]

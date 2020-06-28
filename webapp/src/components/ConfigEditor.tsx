@@ -5,10 +5,9 @@ import Config, { fromLocalStorage, toLocalStorage } from "@/config/config";
 import styles from "./ConfigEditor.css";
 
 const formItems = [
-  { title: "DB Stream URL", value: "dbStreamURL" },
-  { title: "Change Stream URL", value: "changeStreamURL" },
-  { title: "Search Stream URL", value: "searchStreamURL" },
+  { title: "Data Stream URL", value: "dataStreamURL" },
   { title: "Auth URL", value: "authURL" },
+  { title: "Thumbnailer URL", value: "thumbnailerURL" },
 ];
 
 function useConfig(): [Config, (c: Config) => void] {

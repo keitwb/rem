@@ -32,7 +32,7 @@ async def get_es_indexing_stats(index_name, es_client):
     Returns indexing stats about a particular index
     """
     index_props = await es_client.indices.stats(index=index_name, metric="indexing")
-    return index_props["indices"][index_name]["total"]["indexing"]
+    return index_props["indices"][f"{index_name}-1"]["total"]["indexing"]
 
 
 @asynccontextmanager

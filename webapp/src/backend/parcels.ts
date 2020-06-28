@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 
-import { ParcelInfo } from "@/model/models.gen";
+import { ParcelDatum } from "@/model/models.gen";
 
 export class ParcelDataClient {
   private gisBaseURL: string;
@@ -15,7 +15,7 @@ export class ParcelDataClient {
     });
   }
 
-  public async getParcelInfo(state: string, county: string, pinNumber: string): Promise<[ParcelInfo, Error]> {
+  public async getParcelInfo(state: string, county: string, pinNumber: string): Promise<[ParcelDatum, Error]> {
     const resp = await this.http.get(`${this.gisBaseURL}/v1/parcel/${state}/${county}/${pinNumber}`);
     if (resp.status === 200) {
       return [resp.data, null];

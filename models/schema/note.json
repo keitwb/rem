@@ -11,6 +11,7 @@
         { "properties": {
            "title": { "type": "string" },
            "note": { "type": "string" },
+           "pinned": {"type": "boolean"},
            "media": {
              "type": "array",
              "items": { "$ref": "common.json#/definitions/oid" }

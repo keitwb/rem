@@ -20,7 +20,7 @@ const COLLECTIONS_TO_SYNC = [
 export function syncBackendChangesToStore(dispatch: Dispatch<Action>) {
   const conf = Config.fromLocalStorage();
   for (const collection of COLLECTIONS_TO_SYNC) {
-    syncCollectionToStore(dispatch, collection, conf.changeStreamURL);
+    syncCollectionToStore(dispatch, collection, conf.dataStreamURL + "/changes");
   }
 }
 

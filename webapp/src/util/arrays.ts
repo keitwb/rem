@@ -35,3 +35,10 @@ export function arraysEqual(a: any[], b: any[]) {
 
   return true;
 }
+
+export function ensureArray<T>(inst: T | T[]): T[] {
+  if (inst instanceof Array) {
+    return inst;
+  }
+  return [inst];
+}

@@ -54,9 +54,10 @@ export class SearchClient {
       highlight: {
         fields: { "*": {} },
         type: "fvh",
+        require_field_match: false,
       },
       query: {
-        query_string: {
+        simple_query_string: {
           query: q,
         },
       },

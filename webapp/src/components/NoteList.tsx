@@ -19,9 +19,7 @@ const NoteList: React.SFC<{ notes: Note[] }> = ({ notes }) => {
   return (
     <div>
       {notes.sort(mongoDocModifiedDateSorter).map(note => (
-        <div className="card" key={note._id.toString()}>
-          <NoteItem note={note} />
-        </div>
+        <NoteItem key={note.note} note={note} />
       ))}
     </div>
   );

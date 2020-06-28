@@ -27,9 +27,9 @@ def merge_wkts(wkts):
     polygons = []
     for wkt in wkts:
         poly = loads(wkt)
-        if poly.type == 'Polygon':
+        if poly.type == "Polygon":
             polygons.append(poly)
-        elif poly.type == 'MultiPolygon':
-            polygons.extend(poly.geoms)
+        elif poly.type == "MultiPolygon":
+            polygons.extend(poly.geoms)  # pylint:disable=no-member
 
     return dumps(MultiPolygon(polygons))

@@ -38,8 +38,8 @@ async function init() {
 
   const authManager = new AuthManager(conf.authURL);
   const userLogin = await ensureLoggedIn(authManager);
-  const dataClientPromise = new DataClient(conf.dbStreamURL);
-  const searchClientPromise = new SearchClient(conf.searchStreamURL);
+  const dataClientPromise = new DataClient(conf.dataStreamURL + "/db");
+  const searchClientPromise = new SearchClient(conf.dataStreamURL + "/search");
 
   let dataClient: DataClient;
   try {

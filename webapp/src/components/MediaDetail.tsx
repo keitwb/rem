@@ -12,11 +12,12 @@ const MediaDetail: React.SFC<{ media: Media }> = ({ media }) => {
   }
 
   const conf = Config.fromLocalStorage();
+  const idAsHex = media._id.toHexString();
+
   return (
     <React.Fragment>
-      {media.filename ? <div>{media.filename}</div> : null}
+      <a href={`${conf.dataStreamURL.replace(/^ws/, "http")}/media-download/${idAsHex}`}>{media.filename}</a>
       <div>{media.metadata.description}</div>
-      <a href={`${conf.dbStreamURL}/media-download/${media._id.toHexString()}`}>Download</a>
     </React.Fragment>
   );
 };

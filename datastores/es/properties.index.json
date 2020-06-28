@@ -27,6 +27,7 @@
     }
   },
   "mappings": {
+      "dynamic": false,
       "properties": {
         "name": {
           "type": "text",
@@ -40,65 +41,58 @@
         },
         "description": {
           "type": "text",
-          "term_vector": "with_positions_offsets",
-          "fields": {
-            "keyword": {
-              "type":  "keyword",
-              "ignore_above": 256
-            }
-          }
+          "term_vector": "with_positions_offsets"
+        },
+        "propType": {
+          "type": "keyword"
+        },
+        "acreage": {
+          "type": "float"
         },
         "city": {
-          "type": "text",
-          "term_vector": "with_positions_offsets",
+          "type": "keyword",
           "fields": {
-            "keyword": {
-              "type":  "keyword",
-              "ignore_above": 256
-            },
             "suggest": {
-              "type": "completion"
+              "type": "search_as_you_type"
             }
           }
         },
         "state": {
-          "type": "text",
-          "term_vector": "with_positions_offsets",
+          "type": "keyword",
           "fields": {
-            "keyword": {
-              "type":  "keyword",
-              "ignore_above": 256
-            },
             "suggest": {
-              "type": "completion"
+              "type": "search_as_you_type"
             }
           }
         },
         "county": {
-          "type": "text",
-          "term_vector": "with_positions_offsets",
+          "type": "keyword",
+          "index_options": "offsets"
+        },
+        "tags": {
+          "type": "keyword",
           "fields": {
-            "keyword": {
-              "type":  "keyword",
-              "ignore_above": 256
-            },
             "suggest": {
-              "type": "completion"
+              "type": "search_as_you_type"
             }
           }
         },
-        "tags": {
-          "type": "text",
-          "term_vector": "with_positions_offsets",
-          "fields": {
-            "keyword": {
-              "type":  "keyword",
-              "ignore_above": 256
+        "parcelData": {
+          "type": "object",
+          "properties": {
+            "boundaryWKT": {
+              "type": "geo_shape"
             },
-            "suggest": {
-              "type": "completion"
+            "streetAddress": {
+              "type": "text"
+            },
+            "ownerName": {
+              "type": "text"
             }
           }
+        },
+        "pinNumbers": {
+          "type": "keyword"
         }
       }
   }
